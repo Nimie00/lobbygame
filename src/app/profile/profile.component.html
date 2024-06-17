@@ -1,0 +1,6 @@
+<div class="profile-container" *ngIf="user">
+  <h2>Profile</h2>
+  <p>Username: {{ user.displayName }}</p>
+  <input type="text" [(ngModel)]="newUsername" placeholder="New Username" />
+  <button (click)="updateUsername()">Update Username</button>
+</div>
