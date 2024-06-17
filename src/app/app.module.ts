@@ -1,19 +1,20 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule } from '@angular/forms';
 import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
-import { AppComponent } from './app.component';
+import { appRoutes } from './app-routing.module';
 import { firebaseConfig } from './environments/environments';
-import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
 
 @NgModule({
-  declarations: [],
   imports: [
     BrowserModule,
+    FormsModule,
     AngularFireModule.initializeApp(firebaseConfig),
     AngularFireAuthModule,
-    AppRoutingModule,
-    AppComponent
+    appRoutes,
+    AppComponent  // Importáld a standalone komponenst
   ],
   providers: [],
 })

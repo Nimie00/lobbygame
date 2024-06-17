@@ -1,6 +1,22 @@
-import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/app.config';
+import {bootstrapApplication, BrowserModule} from '@angular/platform-browser';
+import { provideRouter } from '@angular/router';
+import { importProvidersFrom } from '@angular/core';
+import { AngularFireModule } from '@angular/fire/compat';
+import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 import { AppComponent } from './app/app.component';
+import { firebaseConfig } from './app/environments/environments';
+import { appRoutes } from './app/app-routing.module';
+import { FormsModule } from "@angular/forms";
 
-bootstrapApplication(AppComponent, appConfig)
-  .catch((err) => console.error(err));
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideRouter(appRoutes),
+    importProvidersFrom(
+      BrowserModule,
+      AngularFireModule.initializeApp(firebaseConfig),
+      AngularFireAuthModule,
+      FormsModule
+    )
+  ]
+})
+  .catch(err => console.error(err));
