@@ -2,18 +2,14 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // Importáld a FormsModule-t
 import { ProfileComponent } from './profile.component';
-import { RouterModule, Routes } from '@angular/router';
-
-const routes: Routes = [
-  { path: '', component: ProfileComponent }
-];
+import {ProfileRoutingModule} from "./profile-routing.module";
 
 @NgModule({
   declarations: [ProfileComponent],
   imports: [
     CommonModule,
-    FormsModule, // Add hozzá a FormsModule-t
-    RouterModule.forChild(routes)
+    FormsModule,
+    ProfileRoutingModule
   ]
 })
 export class ProfileModule { }

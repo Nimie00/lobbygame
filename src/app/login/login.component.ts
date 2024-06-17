@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -7,17 +8,16 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
-  username: string | undefined;
+  username: string = '';
 
-  constructor(private afAuth: AngularFireAuth) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   login() {
-    this.afAuth.signInAnonymously().then(user => {
-      if (user.user) {
-        user.user.updateProfile({
-          displayName: this.username
-        });
-      }
+    const cleanUsername = this.username.trim().substring(0, 30);
+    this.authService.loginAnonymously(cleanUsername).then(() => {
+      this.router.navigate(['/profile']);
+    }).catch(error => {
+      console.error("Login error: ", error);
     });
   }
 }

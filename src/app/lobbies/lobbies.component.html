@@ -1,16 +1,11 @@
 <div class="lobbies-container">
-  <h2>Lobbies</h2>
-  <div *ngIf="lobbies.length === 0">No active lobbies.</div>
-  <div *ngIf="lobbies.length > 0">
-    <div class="lobby" *ngFor="let lobby of lobbies">
-      <img src="path-to-image" alt="{{ lobby.name }}" />
-      <p>{{ lobby.name }}</p>
-      <p>Owner: {{ lobby.owner }}</p>
-      <p>Players: {{ lobby.players }}</p>
-      <p *ngIf="lobby.started">Started</p>
-      <p *ngIf="!lobby.started">Not Started</p>
-      <button (click)="joinLobby(lobby.id)">Join Lobby</button>
-    </div>
+  <div *ngFor="let lobby of paginatedLobbies" class="lobby-card">
+    <h3>{{ lobby.name }}</h3>
+    <p>Owner: {{ lobby.owner }}</p>
+    <p>Players: {{ lobby.currentPlayers }} / {{ lobby.maxPlayers }}</p>
+    <p *ngIf="lobby.started">Game started: Round {{ lobby.currentRound }}</p>
+    <p *ngIf="!lobby.started">Game has not started yet.</p>
+    <button (click)="joinLobby(String(lobby.id))" *ngIf="!lobby.started">Join Lobby</button>
   </div>
-  <button (click)="createLobby()">Create Lobby</button>
 </div>
+<button (click)="createLobby()" >Create New Lobby</button>

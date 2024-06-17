@@ -1,28 +1,20 @@
-import { Component } from '@angular/core';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { Component, OnInit } from '@angular/core';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss']
 })
-export class ProfileComponent {
+export class ProfileComponent implements OnInit {
   user: any;
-  newUsername: string | undefined;
 
-  constructor(private afAuth: AngularFireAuth) {
-    this.afAuth.authState.subscribe(user => {
+  constructor(private authService: AuthService) {}
+
+  ngOnInit() {
+    this.authService.user$.subscribe(user => {
       this.user = user;
+      console.log('User data: ', user); // Debugging: Ellenőrizzük, hogy a felhasználói adatokat megfelelően lekérdezi-e
     });
-  }
-
-  updateUsername() {
-    if (this.user) {
-      this.user.updateProfile({
-        displayName: this.newUsername
-      }).then(() => {
-        this.newUsername = '';
-      });
-    }
   }
 }

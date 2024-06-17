@@ -9,11 +9,10 @@ export class ProfileService {
   constructor(private authService: AuthService) {}
 
   getUserProfile() {
-    return this.authService.getAuthState();
+    return this.authService.user$;
   }
 
   updateUsername(newUsername: string): Promise<void> {
     return this.authService.updateUsername(newUsername);
   }
 }
-

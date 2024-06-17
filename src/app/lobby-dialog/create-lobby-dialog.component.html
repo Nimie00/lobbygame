@@ -1,0 +1,21 @@
+<h2>Create New Lobby</h2>
+<form (ngSubmit)="createLobby()">
+  <label>
+    Game Name:
+    <input [(ngModel)]="lobby.name" name="name" required>
+  </label>
+  <label>
+    Owner:
+    <input [(ngModel)]="lobby.owner" name="owner" required>
+  </label>
+  <label>
+    Max Players:
+    <input type="number" [(ngModel)]="lobby.maxPlayers" name="maxPlayers" required>
+  </label>
+  <label>
+    Game Image URL:
+    <input [(ngModel)]="lobby.gameImage" name="gameImage">
+  </label>
+  <button type="submit">Create</button>
+  <button type="button" (click)="cancel()">Cancel</button>
+</form>

@@ -1,17 +1,16 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-import { LobbiesRoutingModule } from './lobbies-routing.module';
 import { LobbiesComponent } from './lobbies.component';
-
-
+import { FormsModule } from '@angular/forms';
+import { LobbiesRoutingModule } from "./lobbies-routing.module";
+import {MatDialogModule} from "@angular/material/dialog";
 @NgModule({
-  declarations: [
-    LobbiesComponent
-  ],
+  declarations: [LobbiesComponent],
   imports: [
     CommonModule,
-    LobbiesRoutingModule
+    FormsModule,
+    LobbiesRoutingModule,
+    MatDialogModule,
   ]
 })
 export class LobbiesModule { }

@@ -1,0 +1,32 @@
+.lobbies-container {
+  .lobby-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+
+    .lobby {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+
+      img {
+        width: 100%;
+        height: auto;
+      }
+
+      button {
+        margin-top: 10px;
+      }
+    }
+  }
+
+  .pagination {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+
+    button {
+      margin: 0 5px;
+    }
+  }
+}
