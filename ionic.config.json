@@ -1,0 +1,10 @@
+{
+  "defaultProject": "game-lobby-app",
+  "projects": {
+    "game-lobby-app": {
+      "name": "game-lobby-app",
+      "integrations": {},
+      "type": "angular"
+    }
+  }
+}

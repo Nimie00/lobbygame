@@ -1,0 +1,15 @@
+.choices {
+  display: flex;
+  justify-content: space-around;
+}
+
+.choices img {
+  width: 100px;
+  height: 100px;
+  cursor: pointer;
+}
+
+.choices img.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

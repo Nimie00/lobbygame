@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../services/auth.service';
+import {Subscription} from "rxjs";
+import {AngularFireAuth} from "@angular/fire/compat/auth";
 
 @Component({
   selector: 'app-profile',
@@ -8,13 +10,20 @@ import { AuthService } from '../services/auth.service';
 })
 export class ProfileComponent implements OnInit {
   user: any;
+  private dataSubscription: Subscription;
 
-  constructor(private authService: AuthService) {}
+  constructor(private afAuth: AngularFireAuth, private authService: AuthService) {}
 
+
+  ngOnDestroy() {
+    if(this.dataSubscription){
+      this.dataSubscription.unsubscribe();
+    }
+  }
   ngOnInit() {
-    this.authService.user$.subscribe(user => {
-      this.user = user;
-      console.log('User data: ', user); // Debugging: Ellenőrizzük, hogy a felhasználói adatokat megfelelően lekérdezi-e
+   this.dataSubscription = this.authService.getUserData().subscribe(data => {
+      this.user = data;
     });
+    // this.lobbyWatcher.subscribeToLobbyChanges();
   }
 }

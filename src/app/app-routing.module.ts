@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   { path: '',
@@ -19,9 +18,8 @@ export const routes: Routes = [
   { path: 'contact',
     loadChildren: () => import('./contact/contact.module').then(m => m.ContactModule),},
 
-  { path: 'dialog',
-    loadChildren: () => import('./lobby-dialog/create-lobby-dialog.module').then(m => m.CreateLobbyDialogModule),
-    canActivate: [AuthGuard] },
+  { path: 'game/:lobbyId',
+    loadChildren: () => import('./games/rps/rps.module').then(m => m.RpsModule),},
 
   { path: '**',
     redirectTo: '/profile' }];

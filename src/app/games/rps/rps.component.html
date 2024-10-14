@@ -1,0 +1,18 @@
+<div *ngIf="game && !gameEnded">
+  <h2>Válassz egy lehetőséget:</h2>
+  <div class="choices">
+    <img [src]="'assets/ko.png'" (click)="makeChoice('ko')" [class.disabled]="playerChoice">
+    <img [src]="'assets/papir.png'" (click)="makeChoice('papir')" [class.disabled]="playerChoice">
+    <img [src]="'assets/ollo.png'" (click)="makeChoice('ollo')" [class.disabled]="playerChoice">
+  </div>
+  <p *ngIf="playerChoice">Választásod: {{ playerChoice }}</p>
+</div>
+<div *ngIf="gameEnded">
+  <h2>Játék vége!</h2>
+  <p *ngIf="winner">A nyertes: {{ winner }}</p>
+  <h1 *ngIf="winner === currentUser.uid">Nyertél</h1>
+  <h1 *ngIf="winner !== currentUser.uid">Vesztettél</h1>
+  <h1 *ngIf="winner === currentUser.uid">Választásod: {{playerChoice}}</h1>
+  <h1 *ngIf="winner !== currentUser.uid">Választásod: {{playerChoice}}</h1>
+  <p *ngIf="!winner">Döntetlen!</p>
+</div>

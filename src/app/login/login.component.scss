@@ -1,16 +1,57 @@
-.login-container {
+ion-card {
+  margin: auto;
+  width: 100%;
+  max-width: 400px;
+  padding: 16px;
+  box-shadow: 0 4px 80px rgba(0, 0, 0, 0.3);
+  justify-content: center;
+  align-items: center;
+  border-radius: 25px;
+  background-color: #7EADEB;
+}
+
+ion-card-header {
+  text-align: center;
+}
+
+ion-card-content {
+  background-color: #7EADEB;
+}
+
+ion-img {
+  display: block;
+  margin: 0 auto 20px auto;
+  width: 100%;
+}
+
+ion-item {
+  background-color: #7EADEB;
+  --ion-item-background:#7EADEB;
+}
+
+
+ion-label {
+  display: block;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+ion-input {
+  width: 100%;
+  height: auto;
+}
+
+ion-button {
+  margin-top: 20px;
+}
+
+form {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  margin-top: 100px;
+}
 
-  input {
-    margin-bottom: 10px;
-    padding: 8px;
-    width: 200px;
-  }
-
-  button {
-    padding: 10px 20px;
-  }
+.Loginchange{
+  text-decoration: underline;
+  cursor: pointer;
+  color: #723234;
 }

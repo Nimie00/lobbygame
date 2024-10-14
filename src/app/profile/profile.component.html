@@ -1,4 +1,9 @@
-<div *ngIf="user">
+<div>
   <h2>Profile</h2>
-  <p>Username: {{ user.username }}</p>
+  <ion-item *ngFor="let item of user | keyvalue">
+    <ion-label>
+      <h2>{{ item.key }}</h2>
+      <p>{{ item.value | json }}</p>
+    </ion-label>
+  </ion-item>
 </div>

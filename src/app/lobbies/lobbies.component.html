@@ -1,11 +1,102 @@
-<div class="lobbies-container">
-  <div *ngFor="let lobby of paginatedLobbies" class="lobby-card">
-    <h3>{{ lobby.name }}</h3>
-    <p>Owner: {{ lobby.owner }}</p>
-    <p>Players: {{ lobby.currentPlayers }} / {{ lobby.maxPlayers }}</p>
-    <p *ngIf="lobby.started">Game started: Round {{ lobby.currentRound }}</p>
-    <p *ngIf="!lobby.started">Game has not started yet.</p>
-    <button (click)="joinLobby(String(lobby.id))" *ngIf="!lobby.started">Join Lobby</button>
-  </div>
-</div>
-<button (click)="createLobby()" >Create New Lobby</button>
+<ion-content>
+  <ion-modal #createLobbyModal>
+    <ng-template>
+      <h2>Create a Lobby</h2>
+      <ion-item class="custom-item">
+        <ion-label position="stacked">Lobby Name</ion-label>
+        <ion-input [(ngModel)]="lobbyName" placeholder="Enter lobby name" class="custom-input"></ion-input>
+      </ion-item>
+      <ion-item class="custom-item">
+        <ion-label position="stacked">Number of rounds to play</ion-label>
+        <ion-input [(ngModel)]="maxRounds" type="number" max="10" min="1" class="custom-input"></ion-input>
+      </ion-item>
+      <ion-item class="custom-item">
+        <ion-label position="stacked">Choose a game</ion-label>
+        <ion-select id="gameType" [(ngModel)]="selectedGame" class="custom-input">
+          <ion-select-option *ngFor="let game of games$ | async" [value]="game.id">
+            {{ game.name }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-button (click)="createLobby()" class="custom-button"> Create Lobby</ion-button>
+    </ng-template>
+  </ion-modal>
+  <ion-card class="container">
+    <ion-card-header>
+      <ion-button expand="block" class="create-lobby-button" (click)="toggleCreateLobby()"
+                  [disabled]=" hasLobby || joinedlobby!=null">
+        Create New Lobby
+      </ion-button>
+      <h2>Available Lobbies</h2>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-button (click)="openTagModal()">Search Tags</ion-button>
+      <ion-modal #tagModal>
+        <ng-template>
+          <ion-header>
+            <ion-toolbar>
+              <ion-title>Set Search Tags</ion-title>
+              <ion-buttons slot="end">
+                <ion-button (click)="dismissTagModal()">Close</ion-button>
+              </ion-buttons>
+            </ion-toolbar>
+          </ion-header>
+          <ion-content>
+          </ion-content>
+        </ng-template>
+      </ion-modal>
+      <ion-searchbar [(ngModel)]="searchTerm" (ionInput)="filterLobbies()"></ion-searchbar>
+      <ion-list class="lobby-list">
+        <ion-item *ngFor="let lobby of (lobbies | async)"
+                  [ngClass]="{ 'owner-lobby': isOwner(lobby), 'started-lobby': lobby.status === 'started' }">
+          <ion-card class="lobby-item"
+                    [style.background-color]="getLobbyBackgroundColor(lobby)">
+            <ion-card-content>
+              <h3>{{ lobby.name }}</h3>
+              <p>Game: {{ lobby.gameType }}</p>
+              <p>Owner: {{ lobby.owner }}</p>
+              <p>Players: {{ lobby.players.length }}</p>
+              <p>spectators: {{ lobby.spectators.length }}</p>
+              <div *ngIf="isOwner(lobby)">
+                <ion-button class="startbutton" (click)="startGame(lobby.id)" *ngIf="lobby.status !== 'started'">Start
+                  Game
+                </ion-button>
+                <ion-button class="destroybutton" (click)="destroyLobby(lobby.id)">Delete Lobby</ion-button>
+                <ion-button class="botbutton" (click)="addBot(lobby.id)" [disabled]="true">Add Bot</ion-button>
+                <ion-button class="kickbutton" (click)="kickUser(lobby.id)" [disabled]="true">Kick & Ban User
+                </ion-button>
+              </div>
+              <div *ngIf="!isOwner(lobby) && lobby.status !== 'started'">
+                <ion-button class="joinbutton" *ngIf="!isUserInLobby(lobby)" (click)="joinLobby(lobby.id)"
+                            [disabled]="hasLobby || joinedlobby!==null">Join
+                </ion-button>
+                <ion-button class="spectatebutton" *ngIf="!isUserInLobby(lobby)" (click)="joinAsSpectator(lobby.id)"
+                            [disabled]="hasLobby || joinedlobby!==null">Join as Spectator
+                </ion-button>
+                <ion-button class="leavebutton" *ngIf="isUserInLobby(lobby)" (click)="leaveLobby(lobby.id)">Leave
+                </ion-button>
+                <ion-button class="stopspectatebutton" *ngIf="isUserSpectatingLobby(lobby)"
+                            (click)="leaveAsSpectator(lobby.id)">Stop spectating
+                </ion-button>
+              </div>
+
+              <div *ngIf="lobby.status === 'started' && !isUserInLobby(lobby)">
+                <ion-button class="spectatebutton" (click)="joinAsSpectator(lobby.id)"
+                            [disabled]="hasLobby || joinedlobby!==null">Join as Spectator
+                </ion-button>
+                <ion-button class="stopspectatebutton" *ngIf="isUserSpectatingLobby(lobby)"
+                            (click)="leaveAsSpectator(lobby.id)">Stop spectating
+                </ion-button>
+              </div>
+
+              <div *ngIf="lobby.status === 'started' && (isUserInLobby(lobby) || isUserSpectatingLobby(lobby))">
+                <ion-button class="jumptogame" (click)="jumptogame(lobby.id)">Jump to game window</ion-button>
+              </div>
+
+            </ion-card-content>
+          </ion-card>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

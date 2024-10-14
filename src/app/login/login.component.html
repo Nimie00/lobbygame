@@ -1,7 +1,45 @@
-<form (ngSubmit)="login()">
-  <label>
-    Username:
-    <input [(ngModel)]="username" name="username" required>
-  </label>
-  <button type="submit">Login</button>
-</form>
+<ion-content>
+  <ion-card>
+    <ion-card-header>
+      <ion-img class="logo" src="assets/logo.png"></ion-img>
+      <ion-card-title><h1>{{ isLogin ? 'Bejelentkezés' : 'Regisztráció' }}</h1></ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <!-- Login form -->
+      <form *ngIf="isLogin" (ngSubmit)="login()">
+        <ion-item>
+          <ion-label position="stacked">Email cím</ion-label>
+          <ion-input type="text" [(ngModel)]="email" name="email"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Jelszó</ion-label>
+          <ion-input type="password" [(ngModel)]="password" name="password"></ion-input>
+        </ion-item>
+        <ion-button expand="full" type="submit">Bejelentkezés</ion-button>
+        <hr>
+        <ion-label class="Loginchange" (click)="forgotPassword()">Ha elfelejtetted a jelszavadat kattints ide!
+        </ion-label>
+        <ion-label class="Loginchange" (click)="toggleCard()">A regisztrációhoz kattints ide!</ion-label>
+      </form>
+
+      <!-- Register form -->
+      <form *ngIf="!isLogin" (ngSubmit)="register()">
+        <ion-item>
+          <ion-label position="stacked">Felhasználónév</ion-label>
+          <ion-input [(ngModel)]="regUsername" name="regUsername"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Email</ion-label>
+          <ion-input type="email" [(ngModel)]="regEmail" name="regEmail"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Jelszó</ion-label>
+          <ion-input type="password" [(ngModel)]="regPassword" name="regPassword"></ion-input>
+        </ion-item>
+        <ion-button expand="full" type="submit">Regisztráció</ion-button>
+        <hr>
+        <ion-label class="Loginchange" (click)="toggleCard()">A Bejelentkezéshez kattints ide!</ion-label>
+      </form>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

@@ -1,32 +1,99 @@
-.lobbies-container {
-  .lobby-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center; // Center-align the content
+  background-color: #dddddd;
 
-    .lobby {
-      border: 1px solid #ccc;
-      padding: 10px;
-      text-align: center;
-
-      img {
-        width: 100%;
-        height: auto;
-      }
-
-      button {
-        margin-top: 10px;
-      }
-    }
+  h2 {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    color: black;
   }
 
-  .pagination {
-    margin-top: 20px;
-    display: flex;
-    justify-content: center;
+  .create-lobby-button {
+    background-color: #1e90ff;
+    color: black;
+    margin-bottom: 200px;
+    border-radius: 5px;
+    padding: 10px 20px;
+    text-transform: uppercase;
+    font-weight: bold;
+    cursor: pointer;
+  }
 
-    button {
-      margin: 0 5px;
-    }
+  .lobby-list {
+    margin-top: 20px;
+  }
+
+  .lobby-item {
+    background-color: #00ff00;
+    border-radius: 10px;
+    padding: 40px;
+    color: black;
+    width: 70%;
+    height: fit-content;
+    margin: 15px auto; /* Centers the lobby items */
+    text-align: left;
+    display: block; /* Ensures each item takes up its own line */
+    box-sizing: border-box; /* Includes padding in the width calculation */
+  }
+
+  .lobby-owner {
+    background-color: #ff0000;
+  }
+
+  ion-card-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .joinbutton {
+    color: black;
+  }
+
+  ion-card {
+    background-color: red;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 1.2em;
+  }
+
+  p {
+    margin: 5px 0;
+    font-size: 0.9em;
+  }
+
+  button {
+    margin-top: 10px;
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-weight: bold;
   }
 }
+.lobby-item {
+  &.owner-lobby {
+    background-color: blue;
+  }
+
+  &.started-lobby {
+    background-color: gray;
+  }
+
+  .joinbutton,
+  .startbutton,
+  .destroybutton,
+  .botbutton,
+  .kickbutton,
+  .leavebutton,
+  .spectatebutton {
+    // Style buttons as needed
+  }
+}
+
