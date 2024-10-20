@@ -19,15 +19,18 @@ export class LobbyService {
         const lobbies = actions.map(a => {
           const data = a.payload.doc.data() as Lobby;
           const id = a.payload.doc.id;
-          return {id, ...data};
-        }).filter(lobby => lobby.status !== 'ended');  // Filter out lobbies with status 'ended'
 
-        // Sort lobbies: user's lobby first, then the rest
-        return lobbies.sort((a, b) => {
-          if (a.ownerId === userId) return -1;
-          if (b.ownerId === userId) return 1;
-          return 0;
-        });
+          return {id, ...data};
+        }).filter(lobby => lobby.status !== 'ended');
+
+        // Szétválasztjuk a felhasználó lobbyját és a többi lobbyt
+        lobbies.find(lobby => console.log(lobby.ownerId));
+        console.log("userid: "+ userId);
+        const userLobby = lobbies.find(lobby => lobby.ownerId === userId);
+        const otherLobbies = lobbies.filter(lobby => lobby.ownerId !== userId);
+
+        // Ha van a felhasználónak lobbyja, azt tesszük az elejére, utána jön a többi
+        return userLobby ? [userLobby, ...otherLobbies] : otherLobbies;
       })
     );
   }
@@ -153,7 +156,6 @@ export class LobbyService {
     });
 
     return this.firestore.firestore.runTransaction(async (transaction) => {
-      const lobbyDoc = await transaction.get(lobbyRef.ref);
       const doc = await transaction.get(docRef.ref);
 
       if (doc.exists) {
@@ -176,9 +178,7 @@ export class LobbyService {
   getLobbyPlayersAndSpectators(lobbyId: string): Observable<any[]> {
     return this.firestore.collection('lobbies').doc(lobbyId).valueChanges().pipe(
       map((lobby: any) => {
-        // Feltételezzük, hogy a lobby tartalmazza a spectátorokat is, vagy külön kollekcióban tárolódnak
-        const users = [...lobby.players, ...lobby.spectators]; // Spectatorokat is hozzáadjuk
-        return users;
+        return [...lobby.players, ...lobby.spectators];
       })
     );
   }
@@ -188,8 +188,7 @@ export class LobbyService {
   }
 
   getGames() {
-    let games$ = this.firestore.collection('games').valueChanges()
-    return games$;
+    return this.firestore.collection('games').valueChanges();
   }
 
   getUserLobby(userId: string): Observable<Lobby | null> {

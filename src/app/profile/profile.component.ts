@@ -24,6 +24,5 @@ export class ProfileComponent implements OnInit {
    this.dataSubscription = this.authService.getUserData().subscribe(data => {
       this.user = data;
     });
-    // this.lobbyWatcher.subscribeToLobbyChanges();
   }
 }

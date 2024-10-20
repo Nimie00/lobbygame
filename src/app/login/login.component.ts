@@ -34,7 +34,7 @@ export class LoginComponent {
     this.authService.login(this.email, this.password)
       .then(() => {
         console.log('Bejelentkezve');
-        this.router.navigate(['/home']);
+        this.router.navigate(['/profile']);
       })
       .catch(error => {
         console.error('Bejelentkezési hiba:', error);
@@ -53,6 +53,7 @@ export class LoginComponent {
         console.log('Regisztráció sikeres');
         this.showAlert('Sikeres', 'Regisztráció sikeres!');
         this.toggleCard();
+        this.router.navigate(['/profile']);
       })
       .catch(error => {
         console.error('Regisztrációs hiba:', error);

@@ -21,7 +21,7 @@ export class RpsService {
   }
 
   makeChoice(lobbyId: string, choice: string): Observable<void> {
-    return this.authService.getUser().pipe(
+    return this.authService.getUserObservable().pipe(
       switchMap(user => {
         if (!user) throw new Error('No authenticated user');
         return from(this.firestore.collection('gameplay').doc(lobbyId).update({

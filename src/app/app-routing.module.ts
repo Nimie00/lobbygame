@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import {AuthGuard} from "./guards/auth.guard";
 
 export const routes: Routes = [
   { path: '',
@@ -10,16 +11,16 @@ export const routes: Routes = [
     loadChildren: () => import('./login/login.module').then(m => m.LoginModule) },
 
   { path: 'profile',
-    loadChildren: () => import('./profile/profile.module').then(m => m.ProfileModule),},
+    loadChildren: () => import('./profile/profile.module').then(m => m.ProfileModule), canActivate: [AuthGuard]},
 
   { path: 'lobbies',
-    loadChildren: () => import('./lobbies/lobbies.module').then(m => m.LobbiesModule),},
+    loadChildren: () => import('./lobbies/lobbies.module').then(m => m.LobbiesModule),canActivate: [AuthGuard]},
 
   { path: 'contact',
-    loadChildren: () => import('./contact/contact.module').then(m => m.ContactModule),},
+    loadChildren: () => import('./contact/contact.module').then(m => m.ContactModule),canActivate: [AuthGuard]},
 
   { path: 'game/:lobbyId',
-    loadChildren: () => import('./games/rps/rps.module').then(m => m.RpsModule),},
+    loadChildren: () => import('./games/rps/rps.module').then(m => m.RpsModule),canActivate: [AuthGuard]},
 
   { path: '**',
     redirectTo: '/profile' }];

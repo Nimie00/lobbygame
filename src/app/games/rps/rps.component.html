@@ -1,9 +1,9 @@
 <div *ngIf="game && !gameEnded">
   <h2>Válassz egy lehetőséget:</h2>
   <div class="choices">
-    <img [src]="'assets/ko.png'" (click)="makeChoice('ko')" [class.disabled]="playerChoice">
-    <img [src]="'assets/papir.png'" (click)="makeChoice('papir')" [class.disabled]="playerChoice">
-    <img [src]="'assets/ollo.png'" (click)="makeChoice('ollo')" [class.disabled]="playerChoice">
+    <img [src]="'assets/ko.png'" (click)="makeChoice('ko')" [alt]="'Ko'" [class.disabled]="playerChoice">
+    <img [src]="'assets/papir.png'" (click)="makeChoice('papir')" [alt]="'Papir'"  [class.disabled]="playerChoice">
+    <img [src]="'assets/ollo.png'" (click)="makeChoice('ollo')"[alt]="'Ollo'"   [class.disabled]="playerChoice">
   </div>
   <p *ngIf="playerChoice">Választásod: {{ playerChoice }}</p>
 </div>

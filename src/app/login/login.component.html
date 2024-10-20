@@ -5,6 +5,7 @@
       <ion-card-title><h1>{{ isLogin ? 'Bejelentkezés' : 'Regisztráció' }}</h1></ion-card-title>
     </ion-card-header>
     <ion-card-content>
+
       <!-- Login form -->
       <form *ngIf="isLogin" (ngSubmit)="login()">
         <ion-item>

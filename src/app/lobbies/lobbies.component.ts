@@ -1,10 +1,10 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {Observable, Subscription, take} from 'rxjs';
+import {BehaviorSubject, combineLatest, Observable, of, Subject, Subscription, take, takeUntil} from 'rxjs';
 import {LobbyService} from '../services/lobby.service';
 import {AuthService} from '../services/auth.service';
 import {Lobby} from '../models/lobby.model';
 import {IonModal} from "@ionic/angular";
-import {map} from "rxjs/operators";
+import {map, switchMap} from "rxjs/operators";
 import {Router} from "@angular/router";
 import {AngularFireAuth} from "@angular/fire/compat/auth";
 
@@ -17,6 +17,8 @@ import {AngularFireAuth} from "@angular/fire/compat/auth";
 export class LobbiesComponent implements OnInit {
   @ViewChild('createLobbyModal') modal: IonModal;
   @ViewChild('tagModal') tagModal: IonModal;
+  private destroy$ = new Subject<void>();
+  private userSubject$ = new BehaviorSubject<any>(null);
   lobbies: Observable<Lobby[]>;
   userId: string;
   games$: Observable<any[]>;
@@ -28,6 +30,8 @@ export class LobbiesComponent implements OnInit {
   joinedlobby: any;
   currentuser: any;
   userslobby: Lobby;
+  userData$: Observable<any>;
+
 
 
   private userLobbySubscription: Subscription;
@@ -39,7 +43,8 @@ export class LobbiesComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
   ) {
-    this.lobbies = this.lobbyService.getLobbies(this.userId);
+    // this.lobbies = this.lobbyService.getLobbies(this.userId);
+    this.filterLobbies()
   }
 
 
@@ -52,7 +57,7 @@ export class LobbiesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.getuserSub = this.authService.getUser().pipe(take(1)).subscribe(user => {
+    this.getuserSub = this.authService.getUserData().pipe(take(1)).subscribe(user => {
       if (user) {
         this.currentuser = user;
         this.userId = this.currentuser.uid;
@@ -73,7 +78,6 @@ export class LobbiesComponent implements OnInit {
     this.games$ = this.lobbyService.getGames();
   }
 
-
   ngOnDestroy(): void {
     if (this.userLobbySubscription) {
       this.userLobbySubscription.unsubscribe();
@@ -82,10 +86,12 @@ export class LobbiesComponent implements OnInit {
     if (this.getuserSub) {
       this.getuserSub.unsubscribe();
     }
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  filterLobbies() {
-    this.lobbies = this.lobbyService.getLobbies(this.userId).pipe(
+  async filterLobbies() {
+   this.lobbies = this.lobbyService.getLobbies(this.userId).pipe(
       map(lobbies => lobbies.filter(lobby => this.applyFilters(lobby)))
     );
   }
@@ -98,7 +104,7 @@ export class LobbiesComponent implements OnInit {
         return lobby[key]?.toLowerCase().includes(value);
       }
     }
-    return true; // If no search term, return all lobbies
+    return true;
   }
 
 
@@ -124,7 +130,7 @@ export class LobbiesComponent implements OnInit {
         currentRound: 0,
       };
 
-      this.lobbyService.createLobby(newLobby, this.currentuser.uid).then(docRef => {
+      this.lobbyService.createLobby(newLobby, this.userId).then(docRef => {
         console.log('Lobby created with ID:', docRef.id);
       });
     }
