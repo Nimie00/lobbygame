@@ -24,8 +24,6 @@ export class LobbyService {
         }).filter(lobby => lobby.status !== 'ended');
 
         // Szétválasztjuk a felhasználó lobbyját és a többi lobbyt
-        lobbies.find(lobby => console.log(lobby.ownerId));
-        console.log("userid: "+ userId);
         const userLobby = lobbies.find(lobby => lobby.ownerId === userId);
         const otherLobbies = lobbies.filter(lobby => lobby.ownerId !== userId);
 

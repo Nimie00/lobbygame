@@ -7,6 +7,7 @@ import {IonModal} from "@ionic/angular";
 import {map, switchMap} from "rxjs/operators";
 import {Router} from "@angular/router";
 import {AngularFireAuth} from "@angular/fire/compat/auth";
+import {User} from "../models/user.model";
 
 
 @Component({
@@ -17,10 +18,8 @@ import {AngularFireAuth} from "@angular/fire/compat/auth";
 export class LobbiesComponent implements OnInit {
   @ViewChild('createLobbyModal') modal: IonModal;
   @ViewChild('tagModal') tagModal: IonModal;
-  private destroy$ = new Subject<void>();
-  private userSubject$ = new BehaviorSubject<any>(null);
   lobbies: Observable<Lobby[]>;
-  userId: string;
+  userId: string = "1123";
   games$: Observable<any[]>;
   selectedGame: any = "rps";
   lobbyName: string;
@@ -28,23 +27,17 @@ export class LobbiesComponent implements OnInit {
   searchTerm: string = '';
   hasLobby: boolean = false;
   joinedlobby: any;
-  currentuser: any;
+  currentuser: User;
   userslobby: Lobby;
-  userData$: Observable<any>;
-
-
 
   private userLobbySubscription: Subscription;
   private getuserSub: Subscription;
 
   constructor(
     private lobbyService: LobbyService,
-    private afAuth: AngularFireAuth,
     private authService: AuthService,
     private router: Router,
   ) {
-    // this.lobbies = this.lobbyService.getLobbies(this.userId);
-    this.filterLobbies()
   }
 
 
@@ -60,12 +53,12 @@ export class LobbiesComponent implements OnInit {
     this.getuserSub = this.authService.getUserData().pipe(take(1)).subscribe(user => {
       if (user) {
         this.currentuser = user;
-        this.userId = this.currentuser.uid;
+        this.userId = user.uid;
         this.joinedlobby = user.inLobby;
         if(this.joinedlobby === "" || this.joinedlobby === null){
           this.joinedlobby = null;
         }
-        this.userLobbySubscription = this.lobbyService.getUserLobby(user.uid).subscribe(userLobby => {
+        this.userLobbySubscription = this.lobbyService.getUserLobby(this.currentuser.uid).subscribe(userLobby => {
           this.userslobby = userLobby;
           if (userLobby) {
             this.hasLobby = userLobby.status !== 'ended';
@@ -73,6 +66,7 @@ export class LobbiesComponent implements OnInit {
             this.hasLobby = false;
           }
         });
+        this.filterLobbies(this.userId);
       }
     });
     this.games$ = this.lobbyService.getGames();
@@ -86,12 +80,10 @@ export class LobbiesComponent implements OnInit {
     if (this.getuserSub) {
       this.getuserSub.unsubscribe();
     }
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
-  async filterLobbies() {
-   this.lobbies = this.lobbyService.getLobbies(this.userId).pipe(
+  async filterLobbies(userId) {
+    this.lobbies = this.lobbyService.getLobbies(userId).pipe(
       map(lobbies => lobbies.filter(lobby => this.applyFilters(lobby)))
     );
   }
@@ -154,6 +146,8 @@ export class LobbiesComponent implements OnInit {
       return 'lightblue';
     } else if (lobby.status === 'started') {
       return 'lightgray';
+    }  else if (lobby.status === 'private') {
+      return 'red';
     } else {
       return 'green';
     }

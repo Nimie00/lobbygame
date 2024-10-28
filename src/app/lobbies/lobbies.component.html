@@ -45,7 +45,7 @@
           </ion-content>
         </ng-template>
       </ion-modal>
-      <ion-searchbar [(ngModel)]="searchTerm" (ionInput)="filterLobbies()"></ion-searchbar>
+      <ion-searchbar [(ngModel)]="searchTerm" (ionInput)="filterLobbies(this.userId)"></ion-searchbar>
       <ion-list class="lobby-list">
         <ion-item *ngFor="let lobby of (lobbies | async)"
                   [ngClass]="{ 'owner-lobby': isOwner(lobby), 'started-lobby': lobby.status === 'started' }">
@@ -58,7 +58,7 @@
               <p>Players: {{ lobby.players.length }}</p>
               <p>spectators: {{ lobby.spectators.length }}</p>
               <div *ngIf="isOwner(lobby)">
-                <ion-button class="startbutton" (click)="startGame(lobby.id)" *ngIf="lobby.status !== 'started'">Start
+                <ion-button class="startbutton" (click)="startGame(lobby.id)" *ngIf="lobby.status !== 'started'  && lobby.status !== 'private'">Start
                   Game
                 </ion-button>
                 <ion-button class="destroybutton" (click)="destroyLobby(lobby.id)">Delete Lobby</ion-button>
@@ -66,13 +66,27 @@
                 <ion-button class="kickbutton" (click)="kickUser(lobby.id)" [disabled]="true">Kick & Ban User
                 </ion-button>
               </div>
-              <div *ngIf="!isOwner(lobby) && lobby.status !== 'started'">
+              <div *ngIf="!isOwner(lobby) && lobby.status !== 'started'  && lobby.status !== 'private'">
                 <ion-button class="joinbutton" *ngIf="!isUserInLobby(lobby)" (click)="joinLobby(lobby.id)"
                             [disabled]="hasLobby || joinedlobby!==null">Join
                 </ion-button>
                 <ion-button class="spectatebutton" *ngIf="!isUserInLobby(lobby)" (click)="joinAsSpectator(lobby.id)"
                             [disabled]="hasLobby || joinedlobby!==null">Join as Spectator
                 </ion-button>
+                <ion-button class="leavebutton" *ngIf="isUserInLobby(lobby)" (click)="leaveLobby(lobby.id)">Leave
+                </ion-button>
+                <ion-button class="stopspectatebutton" *ngIf="isUserSpectatingLobby(lobby)"
+                            (click)="leaveAsSpectator(lobby.id)">Stop spectating
+                </ion-button>
+              </div>
+
+              <div *ngIf="!isOwner(lobby) && lobby.status === 'private'">
+                <ion-button class="joinbutton" *ngIf="!isUserInLobby(lobby)" (click)="joinLobby(lobby.id)"
+                            [disabled]="hasLobby || joinedlobby!==null">Join with password
+                </ion-button>
+<!--                <ion-button class="spectatebutton" *ngIf="!isUserInLobby(lobby)" (click)="joinAsSpectator(lobby.id)"-->
+<!--                            [disabled]="hasLobby || joinedlobby!==null">Join as Spectator-->
+<!--                </ion-button>-->
                 <ion-button class="leavebutton" *ngIf="isUserInLobby(lobby)" (click)="leaveLobby(lobby.id)">Leave
                 </ion-button>
                 <ion-button class="stopspectatebutton" *ngIf="isUserSpectatingLobby(lobby)"
