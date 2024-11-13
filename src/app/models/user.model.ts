@@ -3,12 +3,16 @@ import Timestamp = firebase.firestore.Timestamp;
 
 export interface User {
   email: string;
-  inlobby: string;
+  inLobby: string;
   lastLoginAt: Timestamp;
   registeredAt: Timestamp;
   roles: string[];
-  uid: string;
+  id: string;
   username: string;
+  xp:number;
+  level: number;
+  badges: string[];
+
 }
 
 

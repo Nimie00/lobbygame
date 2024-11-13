@@ -25,7 +25,7 @@ export class RpsService {
       switchMap(user => {
         if (!user) throw new Error('No authenticated user');
         return from(this.firestore.collection('gameplay').doc(lobbyId).update({
-          [`choices.${user.uid}`]: choice
+          [`choices.${user.id}`]: choice
         }));
       }),
       map(() => void 0)

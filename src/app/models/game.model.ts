@@ -1,8 +1,11 @@
 export interface Game {
+  id: string;
   name: string;
-  maxPlayers: number;
   recommendedPlayers: number;
   hasBots: boolean;
   minPlayers?: number;
-  otherSettings?: { [key: string]: any };
+  maxPlayers: number;
+  gameModifiers?: { [key: string]: any };
+  description: string;
+
 }

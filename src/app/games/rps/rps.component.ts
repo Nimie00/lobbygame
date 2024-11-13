@@ -36,7 +36,7 @@ export class RpsComponent implements OnInit, OnDestroy {
         this.currentUser = user;
         this.game = game;
         if (game && game.choices) {
-          this.playerChoice = game.choices[user.uid] || null;
+          this.playerChoice = game.choices[user.id] || null;
           if (Object.keys(game.choices).length === 2) {
             this.determineWinner(game.choices);
           }

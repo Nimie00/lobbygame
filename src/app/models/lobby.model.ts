@@ -1,7 +1,7 @@
 export interface Lobby {
-  id?: string;
+  id: string;
   name: string;
-  owner: string;
+  ownerName: string;
   ownerId: string;
   players: string[];
   spectators: string[];
@@ -12,5 +12,11 @@ export interface Lobby {
   currentRound: number;
   gameType: string;
   hasBots: boolean;
-  otherSettings: any;
+  gameModifiers?: { [key: string]: any };
+  password?:string;
+  private:boolean;
+  allowSpectators: boolean;
+  playerNames: string[];
+  spectatorNames: string[];
+
 }

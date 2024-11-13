@@ -1,13 +1,13 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {BehaviorSubject, combineLatest, Observable, of, Subject, Subscription, take, takeUntil} from 'rxjs';
+import {catchError, Observable, of, Subscription} from 'rxjs';
 import {LobbyService} from '../services/lobby.service';
 import {AuthService} from '../services/auth.service';
 import {Lobby} from '../models/lobby.model';
 import {IonModal} from "@ionic/angular";
-import {map, switchMap} from "rxjs/operators";
+import {map} from "rxjs/operators";
 import {Router} from "@angular/router";
-import {AngularFireAuth} from "@angular/fire/compat/auth";
 import {User} from "../models/user.model";
+import {Game} from "../models/game.model";
 
 
 @Component({
@@ -21,17 +21,28 @@ export class LobbiesComponent implements OnInit {
   lobbies: Observable<Lobby[]>;
   userId: string = "1123";
   games$: Observable<any[]>;
-  selectedGame: any = "rps";
+  selectedGame: Game;
   lobbyName: string;
-  maxRounds: number;
+  maxRounds: number = 1;
   searchTerm: string = '';
   hasLobby: boolean = false;
-  joinedlobby: any;
-  currentuser: User;
-  userslobby: Lobby;
+  joinedLobby: any;
+  currentUser: User;
+  usersLobby: Lobby;
+  enablePassword: boolean = false;
+  password: string = '';
+  private: boolean = false;
+  allowSpectators: boolean = true;
+  enablePlayerNumbers: boolean = false;
+
+  minPlayers: number = 0;
+  maxPlayers: number = 0;
 
   private userLobbySubscription: Subscription;
   private getuserSub: Subscription;
+
+
+
 
   constructor(
     private lobbyService: LobbyService,
@@ -50,27 +61,38 @@ export class LobbiesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.getuserSub = this.authService.getUserData().pipe(take(1)).subscribe(user => {
+    // Beállítjuk a currentUser-t
+    this.authService.getUserData().pipe(
+      map(user => {
+        console.log('Beérkező felhasználói adat:', user);
+        return user || null;
+      }),
+      catchError(error => {
+        console.error("Hiba történt az adatok lekérése során:", error);
+        return of(null);
+      })
+    ).subscribe(user => {
+      this.currentUser = user;
+      this.userId = user?.id || "nincs";
+      this.joinedLobby = user?.inLobby || null;
+
+      if (this.joinedLobby === "" || this.joinedLobby === null) {
+        this.joinedLobby = null;
+      }
+
+      // Ha van user, beállítjuk a lobby adatait
       if (user) {
-        this.currentuser = user;
-        this.userId = user.uid;
-        this.joinedlobby = user.inLobby;
-        if(this.joinedlobby === "" || this.joinedlobby === null){
-          this.joinedlobby = null;
-        }
-        this.userLobbySubscription = this.lobbyService.getUserLobby(this.currentuser.uid).subscribe(userLobby => {
-          this.userslobby = userLobby;
-          if (userLobby) {
-            this.hasLobby = userLobby.status !== 'ended';
-          } else {
-            this.hasLobby = false;
-          }
+        this.lobbyService.getUserLobby(user.id).subscribe(userLobby => {
+          this.usersLobby = userLobby;
+          console.log('User Lobby:', userLobby);
         });
-        this.filterLobbies(this.userId);
       }
     });
+    this.filterLobbies(this.userId);
+    console.log(this.lobbies);
     this.games$ = this.lobbyService.getGames();
   }
+
 
   ngOnDestroy(): void {
     if (this.userLobbySubscription) {
@@ -105,21 +127,37 @@ export class LobbiesComponent implements OnInit {
   }
 
   createLobby() {
-    if (this.currentuser) {
+    if (this.currentUser) {
+      if(this.maxRounds > 10){
+        this.maxRounds = 10;
+      }
+      let minNumber = this.selectedGame.minPlayers;
+      let maxNumber = this.selectedGame.maxPlayers;
+      if(this.maxPlayers != 0){
+        maxNumber = this.maxPlayers;
+      }
+      if(this.minPlayers != 0){
+        minNumber = this.minPlayers;
+      }
       const newLobby: Omit<Lobby, 'id'> = {
         name: this.lobbyName,
-        owner: this.currentuser.username,
-        ownerId: this.currentuser.uid,
-        players: [this.currentuser.uid],
+        ownerName: this.currentUser.username,
+        ownerId: this.currentUser.id,
+        players: [this.currentUser.id],
         status: "setup",
         maxRounds: this.maxRounds,
-        gameType: this.selectedGame,
-        minPlayers: 2,
-        maxPlayers: 8,
+        gameType: this.selectedGame.name,
+        minPlayers: minNumber,
+        maxPlayers: maxNumber,
         hasBots: false,
-        otherSettings: this.selectedGame.otherSettings || {},
+        gameModifiers: this.selectedGame.gameModifiers || {},
         spectators: [],
         currentRound: 0,
+        password: this.password,
+        private: this.private,
+        allowSpectators: this.allowSpectators,
+        playerNames: [this.currentUser.username],
+        spectatorNames: [],
       };
 
       this.lobbyService.createLobby(newLobby, this.userId).then(docRef => {
@@ -136,6 +174,7 @@ export class LobbiesComponent implements OnInit {
   isUserInLobby(lobby: Lobby): boolean {
     return lobby.players.includes(this.userId);
   }
+
   isUserSpectatingLobby(lobby: Lobby): boolean {
     return lobby.spectators.includes(this.userId);
   }
@@ -146,7 +185,7 @@ export class LobbiesComponent implements OnInit {
       return 'lightblue';
     } else if (lobby.status === 'started') {
       return 'lightgray';
-    }  else if (lobby.status === 'private') {
+    } else if (lobby.private) {
       return 'red';
     } else {
       return 'green';
@@ -155,19 +194,19 @@ export class LobbiesComponent implements OnInit {
 
   startGame(lobbyId: string) {
     let players;
-    if (this.userslobby) {
-      if (this.userslobby && this.userslobby.players) {
-        players = this.userslobby.players;
+    if (this.usersLobby) {
+      if (this.usersLobby && this.usersLobby.players) {
+        players = this.usersLobby.players;
         console.log('Játékosok:', players);
-        if (players.length < this.userslobby.minPlayers) {
+        if (players.length < this.usersLobby.minPlayers) {
           console.log('Nincs elég játékos a játék indításához. Minimum 2 játékos szükséges.');
           return;
         }
-        if (players.length > this.userslobby.maxPlayers) {
+        if (players.length > this.usersLobby.maxPlayers) {
           console.log('Túl sok játékos van a váróban ahhoz hogy elinduljon a játék.');
           return;
         }
-        this.userslobby.status = "started";
+        this.usersLobby.status = "started";
 
         this.lobbyService.startGame(lobbyId, players).then(() => {
           this.initiateCountdown(lobbyId);
@@ -210,11 +249,11 @@ export class LobbiesComponent implements OnInit {
   }
 
   redirectToGameScreen(lobbyId: string) {
-    this.router.navigate(['/game/'+ lobbyId ]);
+    this.router.navigate(['/game/' + lobbyId]);
   }
 
   destroyLobby(lobbyId: string) {
-    this.joinedlobby = null;
+    this.joinedLobby = null;
     this.lobbyService.destroyLobby(lobbyId).then(() => {
       console.log('Lobby destroyed');
     });
@@ -232,35 +271,35 @@ export class LobbiesComponent implements OnInit {
   }
 
   joinLobby(lobbyId: string) {
-    this.joinedlobby = lobbyId;
+    this.joinedLobby = lobbyId;
     this.lobbyService.joinLobby(lobbyId, this.userId).then(() => {
       console.log('Joined lobby');
     });
   }
 
   joinAsSpectator(lobbyId: string) {
-    this.joinedlobby = lobbyId;
+    this.joinedLobby = lobbyId;
     this.lobbyService.addSpectator(lobbyId, this.userId).then(() => {
       console.log('Joined as spectator');
     });
   }
 
   leaveAsSpectator(lobbyId: string) {
-    this.joinedlobby = null;
+    this.joinedLobby = null;
     this.lobbyService.removeSpectator(lobbyId, this.userId).then(() => {
       console.log('stopped spectating');
     });
   }
 
   leaveLobby(lobbyId: string) {
-    this.joinedlobby = null;
+    this.joinedLobby = null;
     this.lobbyService.leaveLobby(lobbyId, this.userId).then(() => {
       console.log('Left lobby');
     });
   }
 
   jumptogame(lobbyId: string) {
-    console.log(['/game/'+ lobbyId ])
-    this.router.navigate(['/game/'+ lobbyId ]);
+    console.log(['/game/' + lobbyId])
+    this.router.navigate(['/game/' + lobbyId]);
   }
 }

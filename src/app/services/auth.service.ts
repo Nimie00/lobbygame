@@ -12,15 +12,7 @@ export class AuthService {
   private isLoggedIn = false;
 
   constructor(private afAuth: AngularFireAuth, private afs: AngularFirestore) {
-    this.user$ = this.afAuth.authState.pipe(
-      switchMap(user => {
-        if (user) {
-          return this.afs.doc<any>(`users/${user.uid}`).valueChanges();
-        } else {
-          return of(null);
-        }
-      })
-    );
+    this.user$ = this.getUserData();
   }
 
 
@@ -28,11 +20,23 @@ export class AuthService {
     return this.afAuth.authState.pipe(
       switchMap(user => {
         if (user) {
-          return this.afs.doc(`users/${user.uid}`).valueChanges();
+          return this.afs.doc<{ [key: string]: any }>(`users/${user.uid}`).valueChanges().pipe(
+            map(userData => {
+              if (userData) {
+                // `id` mezőt hozzáadjuk egy új objektumban
+                return { ...userData, id: user.uid };
+              } else {
+                return null;
+              }
+            })
+          );
+        } else {
+          return of(null);
         }
       })
     );
   }
+
 
   isUserLoggedIn(): Observable<boolean> {
     return this.afAuth.authState.pipe(map(user => !!user));
@@ -56,9 +60,9 @@ export class AuthService {
     try {
       const userCredential = await this.afAuth.signInWithEmailAndPassword(email, password);
       if (userCredential.user) {
-        const uid = userCredential.user.uid;
+        const id = userCredential.user.uid;
         const now = new Date();
-        await this.afs.collection('users').doc(uid).update({
+        await this.afs.collection('users').doc(id).update({
           lastLoginAt: now
         });
         this.isLoggedIn = true;
@@ -75,16 +79,19 @@ export class AuthService {
       const userCredential = await this.afAuth.createUserWithEmailAndPassword(email, password);
       if (userCredential.user) {
         const user = userCredential.user;
-        const uid = user.uid;
+        const id = user.uid;
         const now = new Date();
-        await this.afs.collection('users').doc(uid).set({
-          uid: uid,
+        await this.afs.collection('users').doc(id).set({
+          id: id,
           username: username,
           email: email,
           registeredAt: now,
           lastLoginAt: now,
-          inlobby: "",
-          roles: ['user']
+          inLobby: "",
+          roles: ['user'],
+          xp: 0,
+          level: 0,
+          badges: ['registered'],
         });
         return userCredential;
       } else {
