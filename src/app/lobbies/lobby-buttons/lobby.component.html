@@ -1,0 +1,51 @@
+<ion-item class="lobby-item">
+  <ion-card class="lobby-card" [style.background-color]="getLobbyBackgroundColor(lobby)">
+    <ion-card-header>
+      <ion-card-title>{{ lobby.name }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="lobby-info">
+        <p>Game: {{ lobby.gameType }}</p>
+        <p>Owner: {{ lobby.ownerName }}</p>
+        <p>Players: {{ lobby.players.length }}</p>
+        <p>Spectators: {{ lobby.spectators.length }}</p>
+      </div>
+
+      <span class="lobby-actions" *ngIf="actions && actions.length > 0">
+        <ng-container *ngFor="let action of actions">
+          <ion-button *ngIf="action.condition"
+                      [class]="action.class"
+                      (click)="action.command()"
+                      [disabled]="action.disabled">
+            {{ action.label }}
+          </ion-button>
+        </ng-container>
+      </span>
+    </ion-card-content>
+  </ion-card>
+</ion-item>
+
+<ion-modal #modal>
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Enter Password</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closePasswordModal()">Close</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <ion-item>
+        <ion-label position="floating">Password</ion-label>
+        <ion-input type="password" [(ngModel)]="password"></ion-input>
+      </ion-item>
+      <ion-button (click)="joinWithPassword(this.lobby.id)">Join</ion-button>
+      <ion-button (click)="joinWithPasswordAsSpectator(this.lobby.id)">Join as Spectator</ion-button>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<app-create-lobby-modal #createLobbyModal [currentUser]="currentUser" [lobby] = "lobby"></app-create-lobby-modal>
+
+<app-lobby-players-managing #lobbyPlayersModal [lobby] = "lobby"> </app-lobby-players-managing>

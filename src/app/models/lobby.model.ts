@@ -18,5 +18,7 @@ export interface Lobby {
   allowSpectators: boolean;
   playerNames: string[];
   spectatorNames: string[];
+  bannedPlayers: string[];
+  bannedPlayerNames: string[];
 
 }

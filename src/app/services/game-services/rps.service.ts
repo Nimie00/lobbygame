@@ -43,7 +43,7 @@ export class RpsService {
   }
 
   async updateGameResult(lobbyId: string, winner: string | null) {
-    const gameRef = this.firestore.doc('games/' + lobbyId);
+    const gameRef = this.firestore.doc('gameplay/' + lobbyId);
     return gameRef.update({ winner, status: 'ended' });
   }
 }

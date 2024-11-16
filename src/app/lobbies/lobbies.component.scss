@@ -23,36 +23,15 @@
   }
 
   .lobby-list {
-    margin-top: 20px;
-  }
-
-  .lobby-item {
-    background-color: #00ff00;
     border-radius: 10px;
     padding: 40px;
     color: black;
-    width: 70%;
+    width: 100%;
     height: fit-content;
     margin: 15px auto; /* Centers the lobby items */
     text-align: left;
     display: block; /* Ensures each item takes up its own line */
     box-sizing: border-box; /* Includes padding in the width calculation */
-  }
-
-  .lobby-owner {
-    background-color: #ff0000;
-  }
-
-  ion-card-content {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .joinbutton {
-    color: black;
-  }
-
-  ion-card {
-    background-color: red;
   }
 
   h3 {
@@ -77,23 +56,3 @@
     font-weight: bold;
   }
 }
-.lobby-item {
-  &.owner-lobby {
-    background-color: blue;
-  }
-
-  &.started-lobby {
-    background-color: gray;
-  }
-
-  .joinbutton,
-  .startbutton,
-  .destroybutton,
-  .botbutton,
-  .kickbutton,
-  .leavebutton,
-  .spectatebutton {
-    // Style buttons as needed
-  }
-}
-

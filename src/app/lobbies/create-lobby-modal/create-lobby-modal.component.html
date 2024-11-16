@@ -1,0 +1,98 @@
+<ion-modal #createLobbyModal>
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Create a Lobby</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="close()">Close</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content>
+      <form (ngSubmit)="createLobby()" #createLobbyForm="ngForm">
+        <ion-list>
+          <!-- Game Selection -->
+          <ion-item>
+            <ion-label position="stacked">Select Game</ion-label>
+            <ion-select [(ngModel)]="selectedGame" name="gameType" required>
+              <ion-select-option *ngFor="let game of games$ | async" [value]="game">
+                {{game.name}}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <!-- Lobby Name -->
+          <ion-item>
+            <ion-label position="stacked">Lobby Name</ion-label>
+            <ion-input [(ngModel)]="lobbyName" name="lobbyName" required></ion-input>
+          </ion-item>
+
+          <!-- Rounds Input -->
+          <ion-item>
+            <ion-label position="stacked">Max Rounds</ion-label>
+            <ion-input type="number" [(ngModel)]="maxRounds" name="maxRounds" min="1"></ion-input>
+          </ion-item>
+
+          <!-- Settings Toggles -->
+          <ion-item>
+            <ion-label>Allow Spectators</ion-label>
+            <ion-toggle [(ngModel)]="allowSpectators" name="allowSpectators"></ion-toggle>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>Private lobby</ion-label>
+            <ion-toggle [(ngModel)]="private" name="private"></ion-toggle>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>Enable Password</ion-label>
+            <ion-toggle [(ngModel)]="enablePassword" name="enablePassword"></ion-toggle>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>Change the lobby capacity</ion-label>
+            <ion-toggle [(ngModel)]="enablePlayerNumbers" name="enablePlayerNumbers"></ion-toggle>
+          </ion-item>
+
+          <!-- Conditional Password Input -->
+          <ion-item *ngIf="enablePassword">
+            <ion-label position="stacked">Password</ion-label>
+            <ion-input type="password" [(ngModel)]="password" name="password"></ion-input>
+          </ion-item>
+
+          <!-- Conditional Player Limits -->
+          <ng-container *ngIf="enablePlayerNumbers">
+            <ion-item>
+              <ion-label position="stacked">Min Players</ion-label>
+              <ion-input
+                type="number"
+                [(ngModel)]="minPlayers"
+                name="minPlayers"
+                min="2">
+              </ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-label position="stacked">Max Players</ion-label>
+              <ion-input
+                type="number"
+                [(ngModel)]="maxPlayers"
+                name="maxPlayers"
+                [min]="minPlayers">
+              </ion-input>
+            </ion-item>
+          </ng-container>
+        </ion-list>
+
+        <ion-button
+          type="submit"
+          expand="block"
+          [disabled]="!createLobbyForm.valid"
+          class="create-button">
+          Create Lobby
+        </ion-button>
+      </form>
+    </ion-content>
+  </ng-template>
+</ion-modal>

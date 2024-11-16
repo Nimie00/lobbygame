@@ -41,3 +41,12 @@ testem.log
 .DS_Store
 Thumbs.db
 /src/app/environments/
+
+# Firebase files
+.firebaserc
+database.rules.json
+firestore.indexes.json
+firestore.rules
+package-lock.json
+tsconfig.spec.json
+
