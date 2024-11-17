@@ -10,20 +10,16 @@ import {AlertController} from "@ionic/angular";
 })
 export class LoginComponent {
   isLogin = true;
-  rememberMe = false;
-
-  // Bejelentkezés változók
   email: string;
   password: string;
-
-  // Regisztráció változók
   regUsername: string;
   regEmail: string;
   regPassword: string;
 
   constructor(private authService: AuthService,
               private router: Router,
-              private alertController: AlertController) {
+              private alertController: AlertController,
+              ) {
   }
 
   toggleCard() {
@@ -34,7 +30,7 @@ export class LoginComponent {
     this.authService.login(this.email, this.password)
       .then(() => {
         console.log('Bejelentkezve');
-        this.router.navigate(['/profile']);
+        this.router.navigate(['/profile'], { queryParams: { reload: Date.now() } });
       })
       .catch(error => {
         console.error('Bejelentkezési hiba:', error);

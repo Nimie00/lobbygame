@@ -4,6 +4,7 @@ import {LobbyService} from "../../services/lobby.service";
 import {User} from "../../models/user.model";
 import {Lobby} from "../../models/lobby.model";
 import {Router} from "@angular/router";
+import {SubscriptionTrackerService} from "../../services/subscriptionTracker.service";
 
 interface Player {
   id: string;
@@ -17,6 +18,7 @@ interface Player {
   styleUrls: ['./lobby-players-managing.component.scss']
 })
 export class LobbyPlayersManagingComponent {
+  private CATEGORY = "lobby-player-managing-modal"
   @ViewChild('lobbyPlayersModal') modal!: IonModal;
   @Input() lobby: Lobby;
   @Input() currentUser: User = null;
@@ -27,14 +29,24 @@ export class LobbyPlayersManagingComponent {
   routertext: string = "";
 
   constructor(private lobbyService: LobbyService,
-              private router: Router  ) {
+              private router: Router,
+              private tracker: SubscriptionTrackerService,
+              ) {
   }
 
   ngOnInit() {
     if (this.lobby) {
       this.initializePlayers();
-      // this.routertext = this.router.url;
+      this.routertext = window.location.pathname+'/';
+      if(this.routertext.includes(this.lobby.id)) {
+        this.routertext = this.routertext.split(this.lobby.id)[0];
+      }
+      this.routertext = window.location.host+this.routertext
     }
+  }
+
+  ngOnDestroy(): void {
+    this.tracker.unsubscribeCategory(this.CATEGORY);
   }
 
 
@@ -55,8 +67,6 @@ export class LobbyPlayersManagingComponent {
     }
     this.modal.present();
   }
-
-  // Player management methods
 
   async renamePlayer(playerId: string, playerName: string) {
     console.log(playerId + " renameplayer")
@@ -81,5 +91,13 @@ export class LobbyPlayersManagingComponent {
   async promotePlayer(playerId: string, playerName: string) {
     console.log(playerId + " promoteplayer")
     await this.lobbyService.promotePlayer(this.lobby.id, playerId, playerName);
+  }
+
+  copyToClipboard(text: string): void {
+    navigator.clipboard.writeText(text).then(() => {
+      console.log('Text copied to clipboard:', text);
+    }).catch(err => {
+      console.error('Failed to copy text:', err);
+    });
   }
 }

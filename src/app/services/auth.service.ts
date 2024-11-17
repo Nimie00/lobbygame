@@ -11,7 +11,9 @@ export class AuthService {
   user$: Observable<any>;
   private isLoggedIn = false;
 
-  constructor(private afAuth: AngularFireAuth, private afs: AngularFirestore) {
+  constructor(private afAuth: AngularFireAuth,
+              private afs: AngularFirestore,
+  ) {
     this.user$ = this.getUserData();
   }
 

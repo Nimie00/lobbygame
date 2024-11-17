@@ -1,4 +1,4 @@
-import {Component, Input, ViewChild} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Lobby} from "../../models/lobby.model";
 import {User} from "../../models/user.model";
 import {LobbyService} from "../../services/lobby.service";
@@ -6,13 +6,16 @@ import {Router} from "@angular/router";
 import {IonModal} from "@ionic/angular";
 import {CreateLobbyModalComponent} from "../create-lobby-modal/create-lobby-modal.component";
 import {LobbyPlayersManagingComponent} from "../lobby-players-managing-modal/lobby-players-managing.component";
+import {SubscriptionTrackerService} from "../../services/subscriptionTracker.service";
+import {GameStartService} from "../../services/game-services/gameStart.service";
 
 @Component({
   selector: 'app-lobby',
   templateUrl: './lobby.component.html',
   styleUrls: ['./lobby.component.scss'],
 })
-export class LobbyComponent {
+export class LobbyComponent implements OnInit, OnDestroy{
+  private CATEGORY = "lobby"
   @ViewChild('modal') passwrodModal: IonModal;
 
   @Input() lobby: any;
@@ -23,18 +26,25 @@ export class LobbyComponent {
   @Input() usersLobby!: Lobby;
   @ViewChild(CreateLobbyModalComponent) createLobbyModal: CreateLobbyModalComponent;
   @ViewChild(LobbyPlayersManagingComponent) lobbyPlayersModal: LobbyPlayersManagingComponent;
-
-  protected showPasswordModal: boolean;
-  protected password ="";
+  protected password = "";
   protected actions = [];
 
 
   constructor(private lobbyService: LobbyService,
-              private router: Router,) {}
+              private router: Router,
+              private tracker: SubscriptionTrackerService,
+              private gameStartService: GameStartService,
+  ) {
+  }
 
   ngOnInit() {
     this.generateActions();
   }
+
+  ngOnDestroy(): void {
+    this.tracker.unsubscribeCategory(this.CATEGORY);
+  }
+
   generateActions() {
     // Owner actions
     if (this.isOwner(this.lobby)) {
@@ -53,8 +63,8 @@ export class LobbyComponent {
       this.actions.push({
         label: 'Manage the players in the lobby',
         class: 'botbutton',
-        command: () => this.managePlayers(this.lobby.id),
-        condition: this.lobby.status !== 'started'  || this.lobby.status === 'started'
+        command: () => this.managePlayers(),
+        condition: this.lobby.status !== 'started' || this.lobby.status === 'started'
       });
       this.actions.push({
         label: 'Modify lobby settings',
@@ -65,13 +75,12 @@ export class LobbyComponent {
       this.actions.push({
         label: 'Jump to Game Window',
         class: 'jumptogame',
-        command: () => this.jumpToGame(this.lobby.id),
+        command: () => this.gameStartService.jumpToGame(this.lobby.id),
         condition: this.lobby.status === 'started',
       });
     }
 
-    // Non-owner actions no password
-    if (!this.isOwner(this.lobby)&& this.lobby.password == null) {
+    if (!this.isOwner(this.lobby) && this.lobby.password == null) {
       this.actions.push({
         label: 'Join',
         class: 'joinbutton',
@@ -99,7 +108,7 @@ export class LobbyComponent {
       this.actions.push({
         label: 'Jump to Game Window',
         class: 'jumptogame',
-        command: () => this.jumpToGame(this.lobby.id),
+        command: () => this.gameStartService.jumpToGame(this.lobby.id),
         condition: this.lobby.status === 'started'
       });
     }
@@ -127,7 +136,7 @@ export class LobbyComponent {
       this.actions.push({
         label: 'Jump to Game Window',
         class: 'jumptogame',
-        command: () => this.jumpToGame(this.lobby.id),
+        command: () => this.gameStartService.jumpToGame(this.lobby.id),
         condition: this.lobby.status === 'started'
       });
     }
@@ -158,57 +167,21 @@ export class LobbyComponent {
         console.log('Játékosok:', players);
         console.log(this.usersLobby.minPlayers)
         if (players.length < this.usersLobby.minPlayers) {
-          console.log('Nincs elég játékos a játék indításához. Minimum '+this.usersLobby.minPlayers+' játékos szükséges.');
+          console.log('Nincs elég játékos a játék indításához. Minimum ' + this.usersLobby.minPlayers + ' játékos szükséges.');
           return;
         }
         if (players.length > this.usersLobby.maxPlayers) {
-          console.log('Maximum '+this.usersLobby.minPlayers+' játékos lehet a váróban, hogy elinduljon a játék.');
+          console.log('Maximum ' + this.usersLobby.minPlayers + ' játékos lehet a váróban, hogy elinduljon a játék.');
           return;
         }
-        this.usersLobby.status = "started";
+        this.usersLobby.status = "starting";
 
-        this.lobbyService.startGame(lobbyId, players).then(() => {
-          this.initiateCountdown(lobbyId);
-        });
+
+        this.lobbyService.lobbyCooldown(this.lobby.id);
+        this.gameStartService.handleCountdown(() => this.lobbyService.startGame(lobbyId, players), lobbyId);
       }
     }
   }
-
-
-
-  initiateCountdown(lobbyId: string) {
-    let countdown = 3;
-    const interval = setInterval(() => {
-      if (countdown > 0) {
-        this.showCountdownMessage(`A játék hamarosan kezdődik... ${countdown}`);
-        countdown--;
-      } else {
-        clearInterval(interval);
-        this.jumpToGame(lobbyId);
-      }
-    }, 1000);
-  }
-
-  showCountdownMessage(message: string) {
-    const countdownElement = document.createElement('div');
-    countdownElement.innerText = message;
-    countdownElement.style.position = 'fixed';
-    countdownElement.style.top = '50%';
-    countdownElement.style.left = '50%';
-    countdownElement.style.transform = 'translate(-50%, -50%)';
-    countdownElement.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-    countdownElement.style.color = 'white';
-    countdownElement.style.padding = '20px';
-    countdownElement.style.zIndex = '1000';
-    countdownElement.style.borderRadius = '10px';
-    countdownElement.style.fontSize = '24px';
-    document.body.appendChild(countdownElement);
-
-    setTimeout(() => {
-      document.body.removeChild(countdownElement);
-    }, 3000); // Az üzenet 3 másodperc után eltűnik
-  }
-
 
 
   destroyLobby(lobbyId: string) {
@@ -232,6 +205,9 @@ export class LobbyComponent {
   joinLobby(lobbyId: string) {
     this.joinedLobby = lobbyId;
     this.lobbyService.joinLobby(lobbyId, this.currentUser).then(() => {
+
+      this.gameStartService.watchLobbyAsPlayer(lobbyId);
+
       console.log('Joined lobby');
     });
   }
@@ -239,6 +215,9 @@ export class LobbyComponent {
   joinAsSpectator(lobbyId: string) {
     this.joinedLobby = lobbyId;
     this.lobbyService.addSpectator(lobbyId, this.currentUser).then(() => {
+
+      this.gameStartService.watchLobbyAsPlayer(lobbyId);
+
       console.log('Joined as spectator');
     });
   }
@@ -246,6 +225,9 @@ export class LobbyComponent {
   leaveAsSpectator(lobbyId: string) {
     this.joinedLobby = null;
     this.lobbyService.removeSpectator(lobbyId, this.currentUser).then(() => {
+
+      this.gameStartService.stopWatchingLobby(lobbyId);
+
       console.log('stopped spectating');
     });
   }
@@ -253,13 +235,11 @@ export class LobbyComponent {
   leaveLobby(lobbyId: string) {
     this.joinedLobby = null;
     this.lobbyService.leaveLobby(lobbyId, this.currentUser).then(() => {
+
+      this.gameStartService.stopWatchingLobby(lobbyId);
+
       console.log('Left lobby');
     });
-  }
-
-  jumpToGame(lobbyId: string) {
-    console.log(['/game/' + lobbyId])
-    this.router.navigate(['/game/' + lobbyId]);
   }
 
   getLobbyBackgroundColor(lobby: Lobby): string {
@@ -276,7 +256,7 @@ export class LobbyComponent {
 
 
   joinWithPassword(lobbyId: string) {
-    if (this.isPasswordCorrect(lobbyId, this.password)) {
+    if (this.isPasswordCorrect(this.password)) {
       this.joinLobby(lobbyId);
       this.closePasswordModal();
     } else {
@@ -285,7 +265,7 @@ export class LobbyComponent {
   }
 
   joinWithPasswordAsSpectator(lobbyId: string) {
-    if (this.isPasswordCorrect(lobbyId, this.password)) {
+    if (this.isPasswordCorrect(this.password)) {
       this.joinAsSpectator(lobbyId);
       this.closePasswordModal();
     } else {
@@ -302,17 +282,15 @@ export class LobbyComponent {
   }
 
 
-  private isPasswordCorrect(lobbyId: string, password: string): boolean {
-    console.log(password)
-    console.log(this.getLobbyPassword(lobbyId))
-    return password === this.getLobbyPassword(lobbyId);
+  private isPasswordCorrect(password: string): boolean {
+    return password === this.getLobbyPassword();
   }
 
-  private getLobbyPassword(lobbyId: string): string {
+  private getLobbyPassword(): string {
     return this.lobby.password;
   }
 
-  private managePlayers(lobbyId: string) {
+  private managePlayers() {
     this.lobbyPlayersModal.open();
   }
 

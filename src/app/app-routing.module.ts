@@ -22,6 +22,9 @@ export const routes: Routes = [
   { path: 'game/:lobbyId',
     loadChildren: () => import('./games/rps/rps.module').then(m => m.RpsModule),canActivate: [AuthGuard]},
 
+  { path: 'lobbies/:lobbyId',
+    loadChildren: () => import('./lobbies/lobbies.module').then(m => m.LobbiesModule),canActivate: [AuthGuard]},
+
   { path: '**',
     redirectTo: '/profile' }];
 

@@ -1,9 +1,8 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Subject, Subscription, takeUntil} from "rxjs";
 import {RpsService} from "../../services/game-services/rps.service";
 import {ActivatedRoute} from "@angular/router";
 import {LobbyService} from "../../services/lobby.service";
-
+import {SubscriptionTrackerService} from "../../services/subscriptionTracker.service";
 
 @Component({
   selector: 'app-rps',
@@ -11,27 +10,25 @@ import {LobbyService} from "../../services/lobby.service";
   styleUrls: ['./rps.component.scss']
 })
 export class RpsComponent implements OnInit, OnDestroy {
+  private CATEGORY = "rps"
   lobbyId: string;
   game: any;
   currentUser: any;
   playerChoice: string | null = null;
   gameEnded: boolean = false;
   winner: string | null = null;
-  private gameSubscription: Subscription;
-  private rpsSubscription: Subscription;
-  private unsubscribe$ = new Subject<void>();
 
   constructor(
     private route: ActivatedRoute,
     private rpsService: RpsService,
     private lobbyService: LobbyService,
+    private tracker: SubscriptionTrackerService,
   ) {
     this.lobbyId = this.route.snapshot.paramMap.get('lobbyId') || '';
   }
 
   ngOnInit() {
-    this.rpsSubscription = this.rpsService.getCurrentUserAndGame(this.lobbyId)
-      .pipe(takeUntil(this.unsubscribe$))
+    const rpsSubscription = this.rpsService.getCurrentUserAndGame(this.lobbyId)
       .subscribe(({ user, game }) => {
         this.currentUser = user;
         this.game = game;
@@ -42,18 +39,15 @@ export class RpsComponent implements OnInit, OnDestroy {
           }
         }
       });
+    this.tracker.add(this.CATEGORY, "getGameAndUserSub",rpsSubscription);
   }
-
-  ngOnDestroy() {
-    this.unsubscribe$.next();
-    this.unsubscribe$.complete();
+  ngOnDestroy(): void {
+    this.tracker.unsubscribeCategory(this.CATEGORY);
   }
 
   makeChoice(choice: string) {
-
     if (!this.playerChoice && this.currentUser) {
-      this.rpsService.makeChoice(this.lobbyId, choice)
-        .pipe(takeUntil(this.unsubscribe$))
+      const rpsSub = this.rpsService.makeChoice(this.lobbyId, choice)
         .subscribe({
           next: () => {
             this.playerChoice = choice;
@@ -62,6 +56,7 @@ export class RpsComponent implements OnInit, OnDestroy {
             console.error('Error making choice:', error);
           }
         });
+      this.tracker.add(this.CATEGORY,"makeChoiceSub", rpsSub);
     }
   }
 
@@ -69,7 +64,6 @@ export class RpsComponent implements OnInit, OnDestroy {
     const players = Object.keys(choices);
     const [choice1, choice2] = [choices[players[0]], choices[players[1]]];
 
-    console.log([choices[players[0]], choices[players[1]]])
     if (choice1 === choice2) {
       this.winner = null;
     } else if (
@@ -82,14 +76,10 @@ export class RpsComponent implements OnInit, OnDestroy {
       this.winner = this.game.players[1];
     }
 
-    console.log(this.winner);
-    console.log(this.game.players);
     if( this.gameEnded==false){
       this.endGame();
       this.gameEnded = true;
     }
-
-
   }
 
   private async endGame() {

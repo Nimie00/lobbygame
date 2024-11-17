@@ -16,6 +16,7 @@ export class RpsService {
   ) {
   }
 
+
   getGameState(lobbyId: string): Observable<any> {
     return this.firestore.collection('gameplay').doc(lobbyId).valueChanges();
   }

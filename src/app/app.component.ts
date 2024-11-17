@@ -1,10 +1,13 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {AuthService} from './services/auth.service';
 import {Router, RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
 import {NgIf} from "@angular/common";
-import {Observable, Subscription} from "rxjs";
-import {LobbyService} from "./services/lobby.service";
+import {SubscriptionTrackerService} from "./services/subscriptionTracker.service";
+import {User} from "./models/user.model";
+import {Game} from "./models/game.model";
 import {Lobby} from "./models/lobby.model";
+import {LobbyService} from "./services/lobby.service";
+import {Observable} from "rxjs";
 
 @Component({
   selector: 'app-root',
@@ -13,59 +16,36 @@ import {Lobby} from "./models/lobby.model";
   imports: [RouterOutlet, RouterLink, RouterLinkActive, NgIf],
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
+  private CATEGORY = "app"
   isLoggedIn: boolean = false;
-  user: any;
+  user: User = null;
+  activegame: boolean = false;
   lobbyId: string;
   lobby: Observable<Lobby>;
-  activeGame: boolean = null;
-  lobbysub: Subscription;
-  private userSubscription: Subscription;
 
-  constructor(private authService: AuthService, private router: Router, private lobbyService: LobbyService) {}
+  constructor(private authService: AuthService,
+              private router: Router,
+              private lobbyService: LobbyService,
+              private tracker: SubscriptionTrackerService,
+              ) {}
 
-  ngOnDestroy() {
-    if (this.userSubscription) {
-      this.userSubscription.unsubscribe();
-    }
-    if (this.lobbysub) {
-      this.lobbysub.unsubscribe();
-    }
+  ngOnDestroy(): void {
+    this.tracker.unsubscribeAll()
   }
 
   ngOnInit() {
-    this.userSubscription = this.authService.getAuthStateObservable().subscribe(user => {
+   const userSubscription = this.authService.getAuthStateObservable().subscribe(user => {
       this.isLoggedIn = !!user;
       this.user = user;
-      if (this.isLoggedIn) {
-        this.checkActiveGame();
-      }
     });
+    this.tracker.add(this.CATEGORY, "getAuthState", userSubscription);
   }
-
-  async checkActiveGame() {
-    this.authService.getUserData().subscribe(user => {
-      if (user.inLobby && user.inLobby !== "" && user.inLobby != null) {
-        this.lobbyId = user.inLobby;
-        this.lobby = this.lobbyService.getLobby(user.inLobby);
-        if (this.activeGame == null) {
-          this.lobbysub = this.lobby.subscribe(lobby =>
-            this.activeGame = lobby.status === "started");
-        }
-      } else {
-        this.lobbyId = null;
-        this.activeGame = false;
-      }
-    });
-
-    if (this.lobbysub) {
-      this.lobbysub.unsubscribe();
-    }
-  }
-
 
   logout() {
     this.authService.logout().then(() => {
+      this.isLoggedIn = false;
+      this.user = null;
       this.router.navigate(['/login']);
     });
   }

@@ -11,7 +11,8 @@ import DocumentReference = firebase.firestore.DocumentReference;
   providedIn: 'root'
 })
 export class LobbyService {
-  constructor(private firestore: AngularFirestore) {
+  constructor(private firestore: AngularFirestore,
+  ) {
   }
 
   getLobbies(userId: string): Observable<Lobby[]> {
@@ -63,7 +64,6 @@ export class LobbyService {
       players: firebase.firestore.FieldValue.arrayUnion(user.id),
       playerNames: firebase.firestore.FieldValue.arrayUnion(user.username),
     });
-
     return batch.commit();
   }
 
@@ -318,7 +318,6 @@ export class LobbyService {
 
   }
 
-
   async kickUser(lobbyId: string, userId: string, userName: string): Promise<void> {
     const batch = this.firestore.firestore.batch();
     const userRef = this.firestore.collection('users').doc(userId).ref;
@@ -345,10 +344,17 @@ export class LobbyService {
     });
     await batch.commit();
 
-    console.log('Player Kicked');
+    console.log('Player Promoted');
   }
 
   async renameUser(id: string, playerId: string, playerName: string) {
+
+  }
+
+  lobbyCooldown(lobbyId: string) {
+    this.firestore.collection('lobbies').doc(lobbyId).update({
+      status: 'starting'
+    });
 
   }
 }

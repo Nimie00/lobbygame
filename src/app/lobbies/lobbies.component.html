@@ -1,8 +1,7 @@
 <ion-content>
 
   <app-create-lobby-modal
-    [currentUser]="currentUser"
-    (createLobbyEvent)="onLobbyCreated($event)">
+    [currentUser]="currentUser">
   </app-create-lobby-modal>
 
   <ion-card class="container">
@@ -11,7 +10,7 @@
                   [disabled]=" hasLobby || joinedLobby!=null">
         Create New Lobby
       </ion-button>
-      <h2>Available Lobbies</h2>
+      <h2>Available Lobbies:</h2>
     </ion-card-header>
 
     <ion-card-content>
@@ -31,19 +30,3 @@
     </ion-card-content>
   </ion-card>
 </ion-content>
-
-<!--      <ion-button (click)="openTagModal()">Search Tags</ion-button>-->
-<!--      <ion-modal #tagModal>-->
-<!--        <ng-template>-->
-<!--          <ion-header>-->
-<!--            <ion-toolbar>-->
-<!--              <ion-title>Set Search Tags</ion-title>-->
-<!--              <ion-buttons slot="end">-->
-<!--                <ion-button (click)="dismissTagModal()">Close</ion-button>-->
-<!--              </ion-buttons>-->
-<!--            </ion-toolbar>-->
-<!--          </ion-header>-->
-<!--          <ion-content>-->
-<!--          </ion-content>-->
-<!--        </ng-template>-->
-<!--      </ion-modal>-->

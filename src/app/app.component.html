@@ -2,9 +2,9 @@
   <ul>
     <li *ngIf="!isLoggedIn"><a routerLink="/login" routerLinkActive="active">Login</a></li>
     <li *ngIf="isLoggedIn"><a (click)="logout()">Logout</a></li>
-    <li *ngIf="activeGame && isLoggedIn">
-    <a [routerLink]="['/game', lobbyId]" routerLinkActive="active">Your Active Game</a>
-    </li>
+<!--    <li *ngIf="activeGame && isLoggedIn">-->
+<!--    <a [routerLink]="['/game', lobbyId]" routerLinkActive="active">Your Active Game</a>-->
+<!--    </li>-->
     <li *ngIf="isLoggedIn"><a routerLink="/profile" routerLinkActive="active">Profile</a></li>
     <li *ngIf="isLoggedIn"><a routerLink="/lobbies" routerLinkActive="active">Lobbies</a></li>
     <li *ngIf="isLoggedIn"><a routerLink="/contact" routerLinkActive="active">Contact</a></li>

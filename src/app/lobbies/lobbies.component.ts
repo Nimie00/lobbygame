@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {catchError, Observable, of, Subscription, take} from 'rxjs';
 import {LobbyService} from '../services/lobby.service';
 import {AuthService} from '../services/auth.service';
@@ -7,8 +7,8 @@ import {IonModal} from "@ionic/angular";
 import {map} from "rxjs/operators";
 import {Router} from "@angular/router";
 import {User} from "../models/user.model";
-import {CreateLobbyData} from "../models/create-lobby.interface";
 import {CreateLobbyModalComponent} from "./create-lobby-modal/create-lobby-modal.component";
+import {SubscriptionTrackerService} from "../services/subscriptionTracker.service";
 
 
 @Component({
@@ -16,7 +16,8 @@ import {CreateLobbyModalComponent} from "./create-lobby-modal/create-lobby-modal
   templateUrl: './lobbies.component.html',
   styleUrls: ['./lobbies.component.scss']
 })
-export class LobbiesComponent implements OnInit {
+export class LobbiesComponent implements OnInit, OnDestroy {
+  private CATEGORY = "lobbies"
   @ViewChild(CreateLobbyModalComponent) createLobbyModal!: CreateLobbyModalComponent;
   @ViewChild('tagModal') tagModal: IonModal;
   lobbies: Observable<Lobby[]>;
@@ -27,36 +28,20 @@ export class LobbiesComponent implements OnInit {
   joinedLobby: any;
   currentUser: User;
   usersLobby: Lobby;
-
   minPlayers: number = 0;
   maxPlayers: number = 0;
-
-  private userLobbySubscription: Subscription;
-  private getuserSub: Subscription;
-
 
   constructor(
     private lobbyService: LobbyService,
     private authService: AuthService,
     private router: Router,
+    private tracker: SubscriptionTrackerService,
   ) {
   }
 
-  onLobbyCreated(lobbyData: CreateLobbyData) {
-    console.log('New lobby created:', lobbyData);
-    // Itt kezelheted az új lobby létrehozását
-  }
-
-  openTagModal() {
-    this.tagModal.present();
-  }
-
-  dismissTagModal() {
-    this.tagModal.dismiss();
-  }
-
   ngOnInit() {
-    this.authService.getUserData().pipe(
+    this.searchTerm = window.location.pathname.split('/lobbies/')[1] || '';
+    let authSub = this.authService.getUserData().pipe(
       map(user => {
         // console.log('Beérkező felhasználói adat:', user);
         return user || null;
@@ -75,30 +60,23 @@ export class LobbiesComponent implements OnInit {
       }
 
       if (user) {
-        //take(1)
-        this.lobbyService.getUserLobby(user.id).pipe().subscribe(userLobby => {
+        let lobbySub = this.lobbyService.getUserLobby(user.id).subscribe(userLobby => {
           this.usersLobby = userLobby;
           this.hasLobby = this.usersLobby != null && user.inLobby !== '';
           if (this.usersLobby != null && this.usersLobby.status === "ended") {
             this.hasLobby = false;
           }
         });
+        this.tracker.add(this.CATEGORY, "userLobbySub", lobbySub);
         this.filterLobbies(this.userId);
       }
     });
+    this.tracker.add(this.CATEGORY, "getUserDataSub", authSub);
     this.games$ = this.lobbyService.getGames();
   }
 
-
   ngOnDestroy(): void {
-    console.log('Component destroyed');
-    if (this.userLobbySubscription) {
-      this.userLobbySubscription.unsubscribe();
-    }
-
-    if (this.getuserSub) {
-      this.getuserSub.unsubscribe();
-    }
+    this.tracker.unsubscribeCategory(this.CATEGORY);
   }
 
   async filterLobbies(userId) {

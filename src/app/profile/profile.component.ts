@@ -1,28 +1,31 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import {Subscription} from "rxjs";
 import {AngularFireAuth} from "@angular/fire/compat/auth";
+import {SubscriptionTrackerService} from "../services/subscriptionTracker.service";
 
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss']
 })
-export class ProfileComponent implements OnInit {
+export class ProfileComponent implements OnInit, OnDestroy {
+  private CATEGORY = "profile"
   user: any;
-  private dataSubscription: Subscription;
 
-  constructor(private afAuth: AngularFireAuth, private authService: AuthService) {}
+  constructor(private afAuth: AngularFireAuth,
+              private authService: AuthService,
+              private tracker: SubscriptionTrackerService,
+              ) {}
 
-
-  ngOnDestroy() {
-    if(this.dataSubscription){
-      this.dataSubscription.unsubscribe();
-    }
+  ngOnDestroy(): void {
+    this.tracker.unsubscribeCategory(this.CATEGORY);
   }
+
   ngOnInit() {
-   this.dataSubscription = this.authService.getUserData().subscribe(data => {
+   const dataSubscription = this.authService.getUserData().subscribe(data => {
       this.user = data;
     });
+    this.tracker.add(this.CATEGORY, "getUserDataSub", dataSubscription);
   }
 }

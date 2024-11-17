@@ -43,6 +43,9 @@
       <ion-item>
         <ion-label>invite link</ion-label>
         <ion-text>{{routertext+lobby.id}}</ion-text>
+        <ion-button (click)="copyToClipboard(routertext + lobby.id)">
+          <ion-icon name="copy-outline"></ion-icon>
+        </ion-button>
       </ion-item>
 
       <!-- Banned Players Section -->

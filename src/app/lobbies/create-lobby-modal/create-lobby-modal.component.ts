@@ -1,10 +1,11 @@
 import {Component, ViewChild, Output, EventEmitter, Input} from '@angular/core';
 import {IonModal} from '@ionic/angular';
-import {isEmpty, Observable} from 'rxjs';
+import {Observable} from 'rxjs';
 import {CreateLobbyData} from '../../models/create-lobby.interface';
 import {LobbyService} from "../../services/lobby.service";
 import {Lobby} from "../../models/lobby.model";
 import {User} from "../../models/user.model";
+import {SubscriptionTrackerService} from "../../services/subscriptionTracker.service";
 
 @Component({
   selector: 'app-create-lobby-modal',
@@ -12,6 +13,7 @@ import {User} from "../../models/user.model";
   styleUrls: ['./create-lobby-modal.component.scss']
 })
 export class CreateLobbyModalComponent {
+  private CATEGORY = "create-lobby-modal"
   @Input() currentUser: User; // Adat fogadása
   @Input() lobby: Lobby | null; // Adat fogadása
   @ViewChild('createLobbyModal') modal!: IonModal;
@@ -47,8 +49,14 @@ export class CreateLobbyModalComponent {
   bannedPlayerNames: string[];
 
 
-  constructor(private lobbyService: LobbyService) {
+  constructor(private lobbyService: LobbyService,
+              private tracker: SubscriptionTrackerService,
+              ) {
     this.games$ = this.lobbyService.getGames();
+  }
+
+  ngOnDestroy(): void {
+    this.tracker.unsubscribeCategory(this.CATEGORY);
   }
 
   close() {
