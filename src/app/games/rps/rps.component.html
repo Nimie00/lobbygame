@@ -1,18 +1,40 @@
-<div *ngIf="game && !gameEnded">
+<div *ngIf="game && !gameEnded && !isSpectator">
   <h2>Válassz egy lehetőséget:</h2>
+  <h3>Jelenlegi kör: {{ game.currentRound }} / {{ game.maxRounds }}</h3>
+
   <div class="choices">
-    <img [ngSrc]="'assets/ko.png'"  [width]="400" [height]="400" (click)="makeChoice('ko')" [alt]="'Ko'" [class.disabled]="playerChoice">
-    <img [ngSrc]="'assets/papir.png'" [width]="400" [height]="400" (click)="makeChoice('papir')" [alt]="'Papir'"  [class.disabled]="playerChoice">
-    <img [ngSrc]="'assets/ollo.png'"  [width]="400" [height]="400" (click)="makeChoice('ollo')" [alt]="'Ollo'"   [class.disabled]="playerChoice">
+    <img [ngSrc]="'assets/ko.png'" [width]="400" [height]="400" (click)="makeChoice('ko')" [alt]="'Ko'" [class.disabled]="playerChoice">
+    <img [ngSrc]="'assets/papir.png'" [width]="400" [height]="400" (click)="makeChoice('papir')" [alt]="'Papir'" [class.disabled]="playerChoice">
+    <img [ngSrc]="'assets/ollo.png'" [width]="400" [height]="400" (click)="makeChoice('ollo')" [alt]="'Ollo'" [class.disabled]="playerChoice">
   </div>
   <p *ngIf="playerChoice">Választásod: {{ playerChoice }}</p>
 </div>
+<div *ngIf="game">
+
+  <div class="round-details">
+    <h3>Korábbi körök:</h3>
+    <div *ngFor="let round of getRounds()">
+      <p>{{ round.roundNumber + 1 }}. Kör:</p>
+      <p *ngFor="let playerId of game.players">
+        {{ getPlayerName(playerId) }} választása: {{ round.choices[playerId]?.choice || 'Nem választott' }}
+      </p>
+      <p>Kör győztese: {{ getPlayerName(round.winner) || 'Döntetlen' }}</p>
+    </div>
+  </div>
+
+  <div class="remaining-wins">
+    <h3>Még szükséges győzelmek:</h3>
+    <div *ngFor="let playerId of game.players">
+      <p>{{ getPlayerName(playerId) }}: {{ getRemainingWins(playerId) }} győzelem szükséges a győzelemhez.</p>
+    </div>
+  </div>
+</div>
+
 <div *ngIf="gameEnded">
   <h2>Játék vége!</h2>
-  <p *ngIf="winner">A nyertes: {{ winner }}</p>
-  <h1 *ngIf="winner === currentUser.id">Nyertél</h1>
-  <h1 *ngIf="winner !== currentUser.id">Vesztettél</h1>
-  <h1 *ngIf="winner === currentUser.id">Választásod: {{playerChoice}}</h1>
-  <h1 *ngIf="winner !== currentUser.id">Választásod: {{playerChoice}}</h1>
+  <p *ngIf="winner">A nyertes: {{ getPlayerName(winner) }}</p>
+  <h1 *ngIf="winner === currentUser.id">Nyertél!</h1>
+  <h1 *ngIf="winner !== currentUser.id">Vesztettél!</h1>
+  <h1>Választásod: {{ playerChoice }}</h1>
   <p *ngIf="!winner">Döntetlen!</p>
 </div>

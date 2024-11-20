@@ -6,6 +6,7 @@ import firebase from 'firebase/compat/app';
 import {Lobby} from '../models/lobby.model';
 import {User} from '../models/user.model';
 import DocumentReference = firebase.firestore.DocumentReference;
+import {BaseGame} from "../models/games.gameplaydata.model";
 
 @Injectable({
   providedIn: 'root'
@@ -153,21 +154,47 @@ export class LobbyService {
     return batch.commit();
   }
 
-  startGame(lobbyId: string, players: string[]): Promise<any> {
-    const gameplayData = {
-      lobbyId: lobbyId,
-      players: players,
-      choices: {},
-      startedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      status: 'in-progress'
+
+  startGame(
+    lobby: Lobby
+  ): Promise<any> {
+    console.log(lobby.players)
+    let now = new Date();
+    const baseData: BaseGame = {
+      status: 'in-progress',
+      startedAt: now,
+      endedAt: null,
+      lobbyId: lobby.id,
+      players: lobby.players,
+      spectators: lobby.spectators,
+      lobbyName: lobby.name,
+      gameModifiers: lobby.gameModifiers,
+      playerNames: lobby.playerNames,
+      spectatorNames: lobby.spectatorNames,
+      winner: null,
+      maxRounds: lobby.maxRounds,
+      rounds: {},
+      endReason: null,
+      currentRound: 0,
+      ownerId: lobby.ownerId,
+      gameType: lobby.gameType,
     };
 
-    const lobbyRef = this.firestore.collection('lobbies').doc(lobbyId); // Lobby referencia
-    const gameRef = this.firestore.collection('gameplay').doc(lobbyId); // Gameplay referencia
+    let gameData: BaseGame
+    switch (lobby.gameType) {
+      case 'rps': // Rock-Paper-Scissors
+        gameData = baseData; // RPS nem ad hozzá új mezőket
+        break;
+      default:
+        throw new Error(`Unsupported game type: ${lobby.gameType}`);
+    }
 
-    lobbyRef.update({
-      status: 'started'
-    });
+    const lobbyRef = this.firestore.collection('lobbies').doc(lobby.id); // Lobby referencia
+    const gameRef = this.firestore.collection('gameplay').doc(lobby.id); // Gameplay referencia
+
+    // lobbyRef.update({
+    //   status: 'started'
+    // });
 
     return this.firestore.firestore.runTransaction(async (transaction) => {
       const doc = await transaction.get(gameRef.ref);
@@ -178,7 +205,7 @@ export class LobbyService {
 
         transaction.update(lobbyRef.ref, {status: 'started'});
 
-        transaction.set(gameRef.ref, gameplayData);
+        transaction.set(gameRef.ref, gameData);
       }
     }).then(() => {
       console.log('Gameplay dokumentum sikeresen létrehozva és a lobby státusza frissítve.');
@@ -215,7 +242,10 @@ export class LobbyService {
   }
 
   getUserLobby(userId: string): Observable<Lobby | null> {
-    return this.firestore.collection<Lobby>('lobbies', ref => ref.where('ownerId', '==', userId))
+    return this.firestore.collection<Lobby>('lobbies', ref => ref
+      .where('ownerId', '==', userId)
+      .where('status', '!=', 'ended') // Csak nem "ended" státuszú várók
+    )
       .snapshotChanges()
       .pipe(
         map(actions => {
@@ -228,7 +258,7 @@ export class LobbyService {
       );
   }
 
-  async endLobby(lobbyId: string): Promise<void> {
+  async endLobby(lobbyId: string, winner: string, endReason: string): Promise<void> {
     const lobbyRef = this.firestore.doc('lobbies/' + lobbyId);
     const lobbySnap = await firstValueFrom(lobbyRef.get());
 
@@ -236,24 +266,21 @@ export class LobbyService {
       throw new Error('Lobby not found');
     }
 
-    const lobbyData = lobbySnap.data() as any;
+    const lobbyData = lobbySnap.data() as Lobby;
     const players = lobbyData?.players || [];
     const spectators = lobbyData?.spectators || [];
 
     const batch = this.firestore.firestore.batch();
 
-    // Update all players and spectators
     [...players, ...spectators].forEach(userId => {
       const userRef = this.firestore.doc('users/' + userId).ref;
       batch.update(userRef, {inLobby: null});
     });
 
-    // Update lobby and gameplay status
     const gameplayRef = this.firestore.doc('gameplay/' + lobbyId).ref;
-    batch.update(gameplayRef, {status: 'ended'});
+    batch.update(gameplayRef, {status: 'ended', winner: winner, endReason: endReason, endedAt: new Date()});
     batch.update(lobbyRef.ref, {status: 'ended'});
 
-    // Commit the batch
     await batch.commit();
 
     console.log('Lobby ended successfully');
@@ -347,9 +374,9 @@ export class LobbyService {
     console.log('Player Promoted');
   }
 
-  async renameUser(id: string, playerId: string, playerName: string) {
-
-  }
+  // async renameUser(id: string, playerId: string, playerName: string) {
+  //
+  // }
 
   lobbyCooldown(lobbyId: string) {
     this.firestore.collection('lobbies').doc(lobbyId).update({

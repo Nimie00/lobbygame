@@ -163,9 +163,6 @@ export class LobbyComponent implements OnInit, OnDestroy{
     if (this.usersLobby) {
       if (this.usersLobby && this.usersLobby.players) {
         players = this.usersLobby.players;
-        console.log(this.usersLobby)
-        console.log('Játékosok:', players);
-        console.log(this.usersLobby.minPlayers)
         if (players.length < this.usersLobby.minPlayers) {
           console.log('Nincs elég játékos a játék indításához. Minimum ' + this.usersLobby.minPlayers + ' játékos szükséges.');
           return;
@@ -178,7 +175,7 @@ export class LobbyComponent implements OnInit, OnDestroy{
 
 
         this.lobbyService.lobbyCooldown(this.lobby.id);
-        this.gameStartService.handleCountdown(() => this.lobbyService.startGame(lobbyId, players), lobbyId);
+        this.gameStartService.handleCountdown(() => this.lobbyService.startGame(this.usersLobby), lobbyId);
       }
     }
   }
@@ -196,10 +193,6 @@ export class LobbyComponent implements OnInit, OnDestroy{
     this.lobbyService.addBot(lobbyId).then(() => {
       console.log('Bot added to lobby');
     });
-  }
-
-  kickUser(lobbyId: string) {
-    console.log('Később valósítjuk meg.');
   }
 
   joinLobby(lobbyId: string) {

@@ -7,7 +7,6 @@ import { Subscription } from 'rxjs';
 export class SubscriptionTrackerService {  private subscriptionMap: { [key: string]: Subscription[] } = {};
 
   add(category: string, name: string, subscription: Subscription): void {
-    const path = `${category}/${name}`;
 
     if (!this.subscriptionMap[category]) {
       this.subscriptionMap[category] = [];
@@ -20,14 +19,14 @@ export class SubscriptionTrackerService {  private subscriptionMap: { [key: stri
 
     if (!isDuplicate) {
       this.subscriptionMap[category].push(subscription);
-      console.log(`${path} active:`, this.getActiveCount(category), this.getAllActiveSubscriptions());
+      // console.log(`${path} active:`, this.getActiveCount(category), this.getAllActiveSubscriptions());
     } else {
-      console.log(`Subscription already exists in ${path}`);
+      // console.log(`Subscription already exists in ${path}`);
     }
   }
 
   getActiveCount(category: string): number {
-    console.log(this.subscriptionMap)
+    // console.log(this.subscriptionMap)
     return this.subscriptionMap[category]?.filter(sub => !sub.closed).length || 0;
   }
 
@@ -45,7 +44,7 @@ export class SubscriptionTrackerService {  private subscriptionMap: { [key: stri
       if (subIndex !== -1) {
         this.subscriptionMap[category][subIndex].unsubscribe();
         this.subscriptionMap[category].splice(subIndex, 1);
-        console.log(`Unsubscribed ${category}/${name}. Active:`, this.getAllActiveSubscriptions());
+        // console.log(`Unsubscribed ${category}/${name}. Active:`, this.getAllActiveSubscriptions());
       }
     }
   }
@@ -55,7 +54,7 @@ export class SubscriptionTrackerService {  private subscriptionMap: { [key: stri
     if (this.subscriptionMap[category]) {
       this.subscriptionMap[category].forEach(sub => sub.unsubscribe());
       this.subscriptionMap[category] = [];
-      console.log(`Unsubscribed category ${category}. Active:`, this.getAllActiveSubscriptions());
+      // console.log(`Unsubscribed category ${category}. Active:`, this.getAllActiveSubscriptions());
     }
   }
 
