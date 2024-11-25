@@ -20,7 +20,6 @@ export class AppComponent implements OnInit, OnDestroy {
   private CATEGORY = "app"
   isLoggedIn: boolean = false;
   user: User = null;
-  activegame: boolean = false;
   lobbyId: string;
   lobby: Observable<Lobby>;
 
@@ -35,7 +34,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-   const userSubscription = this.authService.getAuthStateObservable().subscribe(user => {
+   const userSubscription = this.authService.getUserObservable().subscribe(user => {
       this.isLoggedIn = !!user;
       this.user = user;
     });

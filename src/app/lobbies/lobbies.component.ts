@@ -41,7 +41,7 @@ export class LobbiesComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.searchTerm = window.location.pathname.split('/lobbies/')[1] || '';
-    let authSub = this.authService.getUserData().pipe(
+    let authSub = this.authService.refreshUser().pipe(
       map(user => {
         // console.log('Beérkező felhasználói adat:', user);
         return user || null;

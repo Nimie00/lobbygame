@@ -3,6 +3,7 @@ import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {RpsComponent} from './rps.component';
 import {IonicModule} from "@ionic/angular";
 import {RpsRoutingModule} from "./rps-routing.module";
+import {FormsModule} from "@angular/forms";
 
 
 @NgModule({
@@ -11,7 +12,8 @@ import {RpsRoutingModule} from "./rps-routing.module";
     CommonModule,
     IonicModule,
     RpsRoutingModule,
-    NgOptimizedImage
+    NgOptimizedImage,
+    FormsModule
   ]
 })
 export class RpsModule {}

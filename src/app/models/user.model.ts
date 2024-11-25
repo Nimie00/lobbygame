@@ -4,8 +4,8 @@ import Timestamp = firebase.firestore.Timestamp;
 export interface User {
   email: string;
   inLobby: string;
-  lastLoginAt: Timestamp;
-  registeredAt: Timestamp;
+  lastLoginAt: Date;
+  registeredAt: Date;
   roles: string[];
   id: string;
   username: string;

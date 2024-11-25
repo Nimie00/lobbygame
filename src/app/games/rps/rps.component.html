@@ -1,40 +1,101 @@
-<div *ngIf="game && !gameEnded && !isSpectator">
-  <h2>Válassz egy lehetőséget:</h2>
-  <h3>Jelenlegi kör: {{ game.currentRound }} / {{ game.maxRounds }}</h3>
+<ion-content *ngIf="game">
+  <ng-container *ngIf="!gameEnded && !isSpectator">
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Válassz egy lehetőséget:</ion-title>
+      </ion-toolbar>
+    </ion-header>
 
-  <div class="choices">
-    <img [ngSrc]="'assets/ko.png'" [width]="400" [height]="400" (click)="makeChoice('ko')" [alt]="'Ko'" [class.disabled]="playerChoice">
-    <img [ngSrc]="'assets/papir.png'" [width]="400" [height]="400" (click)="makeChoice('papir')" [alt]="'Papir'" [class.disabled]="playerChoice">
-    <img [ngSrc]="'assets/ollo.png'" [width]="400" [height]="400" (click)="makeChoice('ollo')" [alt]="'Ollo'" [class.disabled]="playerChoice">
-  </div>
-  <p *ngIf="playerChoice">Választásod: {{ playerChoice }}</p>
-</div>
-<div *ngIf="game">
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <h2>Válassz egy lehetőséget:</h2>
+          <h3>Jelenlegi kör: {{ game.currentRound }} / {{ game.maxRounds }}</h3>
+        </ion-col>
+      </ion-row>
+      <ion-row class="choices">
+        <ion-col size="4" *ngFor="let choice of ['ko', 'papir', 'ollo']">
+          <img
+            [ngSrc]="'assets/' + choice + '.png'"
+            [width]="400"
+            [height]="400"
+            (click)="makeChoice(choice)"
+            [alt]="choice"
+            [class.disabled]="playerChoice">
+        </ion-col>
+      </ion-row>
+      <ion-row *ngIf="playerChoice">
+        <ion-col>
+          <p>Választásod: {{ playerChoice }}</p>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ng-container>
 
-  <div class="round-details">
-    <h3>Korábbi körök:</h3>
-    <div *ngFor="let round of getRounds()">
-      <p>{{ round.roundNumber + 1 }}. Kör:</p>
-      <p *ngFor="let playerId of game.players">
-        {{ getPlayerName(playerId) }} választása: {{ round.choices[playerId]?.choice || 'Nem választott' }}
-      </p>
-      <p>Kör győztese: {{ getPlayerName(round.winner) || 'Döntetlen' }}</p>
-    </div>
-  </div>
+  <ng-container>
+    <ion-list>
+      <ion-list-header>
+        <ion-label>Korábbi körök:</ion-label>
+      </ion-list-header>
 
-  <div class="remaining-wins">
-    <h3>Még szükséges győzelmek:</h3>
-    <div *ngFor="let playerId of game.players">
-      <p>{{ getPlayerName(playerId) }}: {{ getRemainingWins(playerId) }} győzelem szükséges a győzelemhez.</p>
-    </div>
-  </div>
-</div>
 
-<div *ngIf="gameEnded">
-  <h2>Játék vége!</h2>
-  <p *ngIf="winner">A nyertes: {{ getPlayerName(winner) }}</p>
-  <h1 *ngIf="winner === currentUser.id">Nyertél!</h1>
-  <h1 *ngIf="winner !== currentUser.id">Vesztettél!</h1>
-  <h1>Választásod: {{ playerChoice }}</h1>
-  <p *ngIf="!winner">Döntetlen!</p>
-</div>
+<!--      <ion-card *ngFor="let round of getRounds()">-->
+<!--        <ion-card-header>-->
+<!--          <ion-card-title>{{ round.roundNumber + 1 }}. Kör:</ion-card-title>-->
+<!--        </ion-card-header>-->
+<!--        <ion-card-content>-->
+<!--          <p *ngFor="let playerId of game.players">-->
+<!--            {{ getPlayerName(playerId) }} választása: {{ round.choices[playerId]?.choice || 'Nem választott' }}-->
+<!--          </p>-->
+<!--          <p>Kör győztese: {{ getPlayerName(round.winner) || 'Döntetlen' }}</p>-->
+<!--        </ion-card-content>-->
+<!--      </ion-card>-->
+
+      <ion-card class="round-details">
+        <h3>Korábbi körök:</h3>
+        <ion-item *ngFor="let round of rounds">
+          <div class="round-content">
+            <ion-label>
+            <p>{{ round.roundNumber + 1 }}. Kör:</p>
+            </ion-label>
+            <p *ngFor="let playerId of game.players">
+              {{ getPlayerName(playerId) }} választása: {{ round.choices[playerId]?.choice || 'Nem választott' }}
+            </p>
+            <p>Kör győztese: {{ getPlayerName(round.winner) || 'Döntetlen' }}</p>
+          </div>
+        </ion-item>
+      </ion-card>
+
+    </ion-list>
+    <ion-list>
+      <ion-list-header>
+        <ion-label>Még szükséges győzelmek:</ion-label>
+      </ion-list-header>
+
+      <ion-item *ngFor="let playerId of game.players">
+        <ion-label>
+          {{ getPlayerName(playerId) }}:
+          {{ getRemainingWins(playerId) }} győzelem szükséges a győzelemhez.
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </ng-container>
+
+  <ng-container *ngIf="gameEnded">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Játék vége!</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <p *ngIf="winner">A nyertes: {{ getPlayerName(winner) }}</p>
+
+        <h1 *ngIf="winner === currentUser.id">Nyertél!</h1>
+        <h1 *ngIf="winner !== currentUser.id">Vesztettél!</h1>
+
+        <h1>Választásod: {{ playerChoice }}</h1>
+        <p *ngIf="!winner">Döntetlen!</p>
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
+</ion-content>

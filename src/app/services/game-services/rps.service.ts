@@ -5,6 +5,7 @@ import {map, switchMap} from "rxjs/operators";
 import {AngularFireAuth} from "@angular/fire/compat/auth";
 import {AuthService} from "../auth.service";
 import {BaseGame} from "../../models/games.gameplaydata.model";
+import {User} from "../../models/user.model";
 
 @Injectable({
   providedIn: 'root'
@@ -27,7 +28,6 @@ export class RpsService {
       switchMap(user => {
         if (!user) throw new Error('No authenticated user');
 
-
         const gameDocRef = this.firestore.collection('gameplay').doc(lobbyId);
         return gameDocRef.get().pipe(
           switchMap(snapshot => {
@@ -37,8 +37,8 @@ export class RpsService {
             }
 
             const currentRoundNumber = gameData.currentRound;
-
             const currentRoundChoices = gameData.rounds?.[currentRoundNumber]?.choices || {};
+
             if (currentRoundChoices[user.id]) {
               throw new Error('User has already made a choice in this round');
             }
@@ -47,16 +47,15 @@ export class RpsService {
             const updateData = {
               [choicePath]: {
                 choice,
-                timestamp: new Date() // Aktuális dátumot tárolunk
+                timestamp: new Date()
               }
             };
 
-            // Firestore frissítés
             return from(gameDocRef.update(updateData));
           })
         );
       }),
-      map(() => void 0) // Az Observable visszatérési típusa void legyen
+      map(() => void 0)
     );
   }
 
@@ -65,7 +64,7 @@ export class RpsService {
 
   getCurrentUserAndGame(lobbyId: string): Observable<{ user: any, game: any }> {
     return combineLatest([
-      this.authService.getUserData(),
+      this.authService.refreshUser(),
       this.getGameState(lobbyId)
     ]).pipe(
       map(([user, game]) => ({user, game}))

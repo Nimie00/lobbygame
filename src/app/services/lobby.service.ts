@@ -7,6 +7,8 @@ import {Lobby} from '../models/lobby.model';
 import {User} from '../models/user.model';
 import DocumentReference = firebase.firestore.DocumentReference;
 import {BaseGame} from "../models/games.gameplaydata.model";
+import {IonDatetime} from "@ionic/core/components/ion-datetime";
+
 
 @Injectable({
   providedIn: 'root'
@@ -278,7 +280,7 @@ export class LobbyService {
     });
 
     const gameplayRef = this.firestore.doc('gameplay/' + lobbyId).ref;
-    batch.update(gameplayRef, {status: 'ended', winner: winner, endReason: endReason, endedAt: new Date()});
+    batch.update(gameplayRef, {status: 'ended', winner: winner, endReason: endReason, endedAt: new IonDatetime()});
     batch.update(lobbyRef.ref, {status: 'ended'});
 
     await batch.commit();
@@ -374,9 +376,9 @@ export class LobbyService {
     console.log('Player Promoted');
   }
 
-  // async renameUser(id: string, playerId: string, playerName: string) {
-  //
-  // }
+  async renameUser(id: string, playerId: string, playerName: string) {
+
+  }
 
   lobbyCooldown(lobbyId: string) {
     this.firestore.collection('lobbies').doc(lobbyId).update({
