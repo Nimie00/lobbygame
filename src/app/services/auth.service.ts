@@ -5,7 +5,7 @@ import {BehaviorSubject, Observable, of, tap} from 'rxjs';
 import {switchMap, map} from 'rxjs/operators';
 import {SubscriptionTrackerService} from "./subscriptionTracker.service";
 import {User} from "../models/user.model";
-import {IonDatetime} from "@ionic/core/components/ion-datetime";
+
 
 
 @Injectable({
@@ -93,7 +93,7 @@ export class AuthService {
       const userCredential = await this.afAuth.signInWithEmailAndPassword(email, password);
       if (userCredential.user) {
         const id = userCredential.user.uid;
-        const now = new IonDatetime();
+        const now = new Date();
         console.log(now);
         await this.afs.collection('users').doc(id).update({lastLoginAt: now});
         return userCredential;
