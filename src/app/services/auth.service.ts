@@ -1,54 +1,37 @@
 import {Injectable} from '@angular/core';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
-import {BehaviorSubject, Observable, of, tap} from 'rxjs';
+import {Observable, of} from 'rxjs';
 import {switchMap, map} from 'rxjs/operators';
-import {SubscriptionTrackerService} from "./subscriptionTracker.service";
-import {User} from "../models/user.model";
-
-
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private CATEGORY = 'authService';
-  private userSubject = new BehaviorSubject<User | null>(null);
-  user$: Observable<User | null> = this.userSubject.asObservable();
+  user$: Observable<any>;
+  private isLoggedIn = false;
 
-  constructor(
-    private afAuth: AngularFireAuth,
-    private afs: AngularFirestore,
-    private tracker: SubscriptionTrackerService,
+  constructor(private afAuth: AngularFireAuth,
+              private afs: AngularFirestore,
   ) {
-    this.initUserTracking();
+    this.user$ = this.getUserData();
   }
 
-  /**
-   * Initializes user tracking to keep user cache up-to-date using getUserData.
-   */
-  private initUserTracking(): void {
-    const subscription = this.getUserData()
-      .pipe(
-        tap(user => this.userSubject.next(user))
-      )
-      .subscribe();
 
-    this.tracker.add(this.CATEGORY, 'initUserTracking', subscription);
-  }
-
-  /**
-   * Gets user data from Firestore based on the current auth state.
-   */
-  getUserData(): Observable<User | null> {
+  getUserData(): Observable<any> {
     return this.afAuth.authState.pipe(
       switchMap(user => {
         if (user) {
-          return this.afs.doc<User>(`users/${user.uid}`)
-            .valueChanges()
-            .pipe(
-              map(userData => userData ? {...userData, id: user.uid} as User : null)
-            );
+          return this.afs.doc<{ [key: string]: any }>(`users/${user.uid}`).valueChanges().pipe(
+            map(userData => {
+              if (userData) {
+                // `id` mezőt hozzáadjuk egy új objektumban
+                return { ...userData, id: user.uid };
+              } else {
+                return null;
+              }
+            })
+          );
         } else {
           return of(null);
         }
@@ -56,77 +39,65 @@ export class AuthService {
     );
   }
 
-  /**
-   * Fetch fresh user data from the database and update cache.
-   */
-  refreshUser(): Observable<any> {
-    return this.getUserData().pipe(
-      tap(user => this.userSubject.next(user))
+
+  isUserLoggedIn(): Observable<boolean> {
+    return this.afAuth.authState.pipe(map(user => !!user));
+  }
+
+  getCurrentUserIdObservable(): Observable<string | null> {
+    return this.afAuth.authState.pipe(
+      map(user => user ? user.uid : null)
     );
   }
 
-  /**
-   * Checks if the user is logged in.
-   */
-  isUserLoggedIn(): Observable<boolean> {
-    return this.user$.pipe(
-      map(user => !!user)
-    );
+  getAuthStateObservable(): Observable<any> {
+    return this.afAuth.authState;
   }
 
   getUserObservable(): Observable<any> {
     return this.user$;
   }
 
-  /**
-   * Get the cached user data as a synchronous value.
-   */
-  getCachedUser(): User | null {
-    return this.userSubject.value;
-  }
-
-  /**
-   * Logs in a user with email and password.
-   */
   async login(email: string, password: string) {
     try {
       const userCredential = await this.afAuth.signInWithEmailAndPassword(email, password);
       if (userCredential.user) {
         const id = userCredential.user.uid;
         const now = new Date();
-        console.log(now);
-        await this.afs.collection('users').doc(id).update({lastLoginAt: now});
+        await this.afs.collection('users').doc(id).update({
+          lastLoginAt: now
+        });
+        this.isLoggedIn = true;
         return userCredential;
+      } else {
       }
     } catch (error) {
-      console.error('Login error:', error);
-      throw error;
+      console.error('Bejelentkezési hiba:', error);
     }
   }
 
-  /**
-   * Registers a new user and saves their information in the database.
-   */
   async register(email: string, password: string, username: string) {
     try {
       const userCredential = await this.afAuth.createUserWithEmailAndPassword(email, password);
       if (userCredential.user) {
-        const id = userCredential.user.uid;
+        const user = userCredential.user;
+        const id = user.uid;
         const now = new Date();
-        const newUser: User = {
-          id,
-          username,
-          email,
+        await this.afs.collection('users').doc(id).set({
+          id: id,
+          username: username,
+          email: email,
           registeredAt: now,
           lastLoginAt: now,
-          inLobby: '',
+          inLobby: "",
           roles: ['user'],
           xp: 0,
           level: 0,
           badges: ['registered'],
-        };
-        await this.afs.collection('users').doc(id).set(newUser);
+        });
         return userCredential;
+      } else {
+        throw new Error('User creation failed');
       }
     } catch (error) {
       console.error('Registration error:', error);
@@ -134,17 +105,13 @@ export class AuthService {
     }
   }
 
-  /**
-   * Sends a password reset email to the given address.
-   */
-  resetPassword(email: string): Promise<void> {
+
+  resetPassword(email: string) {
     return this.afAuth.sendPasswordResetEmail(email);
   }
 
-  /**
-   * Logs out the current user.
-   */
-  logout(): Promise<void> {
+  logout() {
+    this.isLoggedIn = false;
     return this.afAuth.signOut();
   }
 }

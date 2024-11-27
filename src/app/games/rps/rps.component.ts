@@ -51,9 +51,15 @@ export class RpsComponent implements OnInit, OnDestroy {
           const currentRound = game.currentRound;
           const currentRoundData = this.game.rounds?.[currentRound];
 
+          console.log(this.selectedRound + "Selectedround ")
+          console.log(currentRound + "currentRound ")
           if(this.selectedRound < currentRound){
             this.playerChoice = null
             this.selectedRound = currentRound
+          }
+
+          if(this.selectedRound == currentRound){
+            this.playerChoice = null
           }
 
           if (game.status === 'ended') {
@@ -86,16 +92,18 @@ export class RpsComponent implements OnInit, OnDestroy {
     this.tracker.add(this.CATEGORY, "getGameAndUserSub", rpsSubscription);
   }
 
-  private async determineWinner(gameData: any) {
+  private determineWinner(gameData: any): void {
     const currentRound = gameData.currentRound;
     const maxRounds = gameData.maxRounds;
-    const players = Object.keys(gameData.rounds[currentRound]?.choices);
+    const players = Object.keys(gameData.rounds[currentRound].choices);
     const [choice1, choice2] = [
-      gameData.rounds[currentRound].choices[players[0]]?.choice,
-      gameData.rounds[currentRound].choices[players[1]]?.choice,
+      gameData.rounds[currentRound].choices[players[0]].choice,
+      gameData.rounds[currentRound].choices[players[1]].choice,
     ];
-    let roundWinner: string;
 
+    let roundWinner: string | null = null;
+
+    // Döntetlen vagy kör nyertese meghatározása
     if (choice1 === choice2) {
       roundWinner = "draw";
     } else if (
@@ -108,49 +116,48 @@ export class RpsComponent implements OnInit, OnDestroy {
       roundWinner = players[1];
     }
 
-    // Frissítjük a kör eredményét az adatbázisban
-    const roundUpdate: any = {
+    // Nyertes bejegyzése az aktuális körre
+    this.firestore.collection('gameplay').doc(gameData.lobbyId).update({
       [`rounds.${currentRound}.winner`]: roundWinner,
-    };
+    });
 
-    if (roundWinner === "draw") {
-      // Ha döntetlen, akkor csak ezt jegyezzük fel, és új kört kezdünk
-      roundUpdate.currentRound = currentRound + 1;
-      await this.firestore.collection('gameplay').doc(gameData.lobbyId).update(roundUpdate);
-      this.selectedRound = currentRound + 1;
-      return; // Nem folytatjuk a győztes keresését
-    }
-
-    // Győzelmek számlálása
+    // Játékosok nyert körszámainak kiszámítása
     const playerWins: Record<string, number> = {};
     players.forEach(player => {
       playerWins[player] = 0;
     });
 
-    for (let i = 0; i <= currentRound; i++) {
+    for (let i = 1; i <= currentRound; i++) {
       const winner = gameData.rounds[i]?.winner;
       if (winner && winner !== "draw") {
         playerWins[winner]++;
       }
     }
 
-    const requiredWins = Math.ceil(maxRounds / 2);
-    const potentialWinner = players.find(player => playerWins[player] >= requiredWins);
+    // Ellenőrizzük, hogy van-e játék nyertese
+    const potentialWinner = players.find(player => playerWins[player] > Math.floor(maxRounds / 2));
 
     if (potentialWinner) {
-      this.winner = potentialWinner;
-      this.endReason = "Someone Won";
-      await this.endGame();
-    } else if (currentRound < maxRounds - 1) {
-      // Ha nincs győztes, továbblépünk a következő körre
-      roundUpdate.currentRound = currentRound + 1;
-      await this.firestore.collection('gameplay').doc(gameData.lobbyId).update(roundUpdate);
-      this.selectedRound = currentRound + 1;
+      // Győztes meghatározása és játék vége
+      this.firestore.collection('gameplay').doc(gameData.lobbyId).update({
+        winner: potentialWinner,
+        status: 'ended',
+        endedAt: new Date(),
+      });
+      this.endGame();
+    } else if (currentRound < maxRounds) {
+      // Növeljük a currentRound értékét, ha nincs végső nyertes
+      this.firestore.collection('gameplay').doc(gameData.lobbyId).update({
+        currentRound: currentRound + 1,
+      });
     } else {
-      // Ha elfogytak a körök és nincs győztes
-      this.winner = null;
-      this.endReason = "Out of rounds|Draw";
-      await this.endGame();
+      // Maximum kör után döntetlen játék
+      this.firestore.collection('gameplay').doc(gameData.lobbyId).update({
+        winner: null,
+        status: 'ended',
+        endedAt: new Date(),
+      });
+      this.endGame();
     }
   }
 
@@ -162,6 +169,7 @@ export class RpsComponent implements OnInit, OnDestroy {
         .subscribe({
           next: () => {
             this.playerChoice = choice;
+            console.log(this.currentUser + " Választott: " + choice)
           },
           error: (error) => {
             console.error('Error making choice:', error);

@@ -14,9 +14,9 @@ import {GameStartService} from "../../services/game-services/gameStart.service";
   templateUrl: './lobby.component.html',
   styleUrls: ['./lobby.component.scss'],
 })
-export class LobbyComponent implements OnInit, OnDestroy{
+export class LobbyComponent implements OnInit, OnDestroy {
   private CATEGORY = "lobby"
-  @ViewChild('modal') passwrodModal: IonModal;
+  @ViewChild('modal') passwordModal: IonModal;
 
   @Input() lobby: any;
   @Input() hasLobby: boolean = false;
@@ -28,6 +28,9 @@ export class LobbyComponent implements OnInit, OnDestroy{
   @ViewChild(LobbyPlayersManagingComponent) lobbyPlayersModal: LobbyPlayersManagingComponent;
   protected password = "";
   protected actions = [];
+  passwordModalOpen: boolean = false;
+  createLobbyModalOpen: boolean = false;
+  lobbyPlayersModalOpen: boolean = false;
 
 
   constructor(private lobbyService: LobbyService,
@@ -267,11 +270,21 @@ export class LobbyComponent implements OnInit, OnDestroy{
   }
 
   openPasswordModal() {
-    this.passwrodModal.present();
+    this.passwordModalOpen = true;
+    this.passwordModal.present();
   }
 
   closePasswordModal() {
-    this.passwrodModal.dismiss();
+    this.passwordModalOpen = false;
+    this.passwordModal.dismiss();
+  }
+
+  closeCreateLobbyModal() {
+    this.createLobbyModalOpen = false;
+  }
+
+  closeLobbyPlayersModal() {
+    this.lobbyPlayersModalOpen = false;
   }
 
 

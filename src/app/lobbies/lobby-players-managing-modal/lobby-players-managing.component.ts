@@ -1,5 +1,5 @@
-import {Component, Input, ViewChild} from '@angular/core';
-import { IonModal } from '@ionic/angular';
+import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {IonModal} from '@ionic/angular';
 import {LobbyService} from "../../services/lobby.service";
 import {User} from "../../models/user.model";
 import {Lobby} from "../../models/lobby.model";
@@ -22,26 +22,28 @@ export class LobbyPlayersManagingComponent {
   @ViewChild('lobbyPlayersModal') modal!: IonModal;
   @Input() lobby: Lobby;
   @Input() currentUser: User = null;
-  players: string[]=[];
-  playerNames: string[]=[];
-  bannedPlayers: string[]=[];
-  bannedPlayerNames: string[]=[];
+  @Output() closeModal = new EventEmitter<void>();
+  players: string[] = [];
+  playerNames: string[] = [];
+  bannedPlayers: string[] = [];
+  bannedPlayerNames: string[] = [];
   routertext: string = "";
+
 
   constructor(private lobbyService: LobbyService,
               private router: Router,
               private tracker: SubscriptionTrackerService,
-              ) {
+  ) {
   }
 
   ngOnInit() {
     if (this.lobby) {
       this.initializePlayers();
-      this.routertext = window.location.pathname+'/';
-      if(this.routertext.includes(this.lobby.id)) {
+      this.routertext = window.location.pathname + '/';
+      if (this.routertext.includes(this.lobby.id)) {
         this.routertext = this.routertext.split(this.lobby.id)[0];
       }
-      this.routertext = window.location.host+this.routertext
+      this.routertext = window.location.host + this.routertext
     }
   }
 
@@ -58,6 +60,7 @@ export class LobbyPlayersManagingComponent {
   }
 
   close() {
+    this.closeModal.emit();
     this.modal.dismiss();
   }
 

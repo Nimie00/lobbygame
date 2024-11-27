@@ -26,6 +26,7 @@
   </ion-card>
 </ion-item>
 
+<ng-container *ngIf="passwordModalOpen">
 <ion-modal #modal>
   <ng-template>
     <ion-header>
@@ -53,7 +54,13 @@
     </ion-content>
   </ng-template>
 </ion-modal>
+</ng-container>
 
-<app-create-lobby-modal #createLobbyModal [currentUser]="currentUser" [lobby]="lobby"></app-create-lobby-modal>
+<app-create-lobby-modal #createLobbyModal
+                        [currentUser]="currentUser"
+                        (closeModal)="closeCreateLobbyModal()"
+                        [lobby]="lobby"></app-create-lobby-modal>
 
-<app-lobby-players-managing #lobbyPlayersModal [lobby]="lobby"></app-lobby-players-managing>
+<app-lobby-players-managing #lobbyPlayersModal
+                            (closeModal)="closeLobbyPlayersModal()"
+                            [lobby]="lobby"></app-lobby-players-managing>

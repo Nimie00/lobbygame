@@ -9,6 +9,7 @@ import {Router} from "@angular/router";
 import {User} from "../models/user.model";
 import {CreateLobbyModalComponent} from "./create-lobby-modal/create-lobby-modal.component";
 import {SubscriptionTrackerService} from "../services/subscriptionTracker.service";
+import {Game} from "../models/game.model";
 
 
 @Component({
@@ -22,7 +23,7 @@ export class LobbiesComponent implements OnInit, OnDestroy {
   @ViewChild('tagModal') tagModal: IonModal;
   lobbies: Observable<Lobby[]>;
   userId: string = "1123";
-  games$: Observable<any[]>;
+  games$: Promise<Game[]>;
   searchTerm: string = '';
   hasLobby: boolean = false;
   joinedLobby: any;
@@ -30,6 +31,8 @@ export class LobbiesComponent implements OnInit, OnDestroy {
   usersLobby: Lobby;
   minPlayers: number = 0;
   maxPlayers: number = 0;
+  createModal: boolean = false;
+
 
   constructor(
     private lobbyService: LobbyService,
@@ -41,7 +44,7 @@ export class LobbiesComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.searchTerm = window.location.pathname.split('/lobbies/')[1] || '';
-    let authSub = this.authService.refreshUser().pipe(
+    let authSub = this.authService.getUserData().pipe(
       map(user => {
         // console.log('Beérkező felhasználói adat:', user);
         return user || null;
@@ -60,14 +63,6 @@ export class LobbiesComponent implements OnInit, OnDestroy {
       }
 
       if (user) {
-        let lobbySub = this.lobbyService.getUserLobby(user.id).subscribe(userLobby => {
-          this.usersLobby = userLobby;
-          this.hasLobby = this.usersLobby != null && user.inLobby !== '';
-          if (this.usersLobby != null && this.usersLobby.status === "ended") {
-            this.hasLobby = false;
-          }
-        });
-        this.tracker.add(this.CATEGORY, "userLobbySub", lobbySub);
         this.filterLobbies(this.userId);
       }
     });
@@ -81,7 +76,16 @@ export class LobbiesComponent implements OnInit, OnDestroy {
 
   async filterLobbies(userId) {
     this.lobbies = this.lobbyService.getLobbies(userId).pipe(
-      map(lobbies => lobbies.filter(lobby => this.applyFilters(lobby, userId)))
+      map(({userLobby, otherLobbies}) => {
+        this.usersLobby = userLobby;
+
+        this.hasLobby = this.usersLobby != null &&
+          this.usersLobby.status !== "ended" &&
+          this.currentUser.inLobby !== '';
+
+        const allLobbies = userLobby ? [userLobby, ...otherLobbies] : otherLobbies;
+        return allLobbies.filter(lobby => this.applyFilters(lobby, userId));
+      })
     );
   }
 
@@ -98,7 +102,8 @@ export class LobbiesComponent implements OnInit, OnDestroy {
       return true;
     }
 
-    let searched = !lobby.private
+    let searched = !lobby.private;
+
     if (!searched && this.searchTerm != '' && this.searchTerm != null && this.searchTerm === lobby.id) {
       searched = true;
     }
@@ -107,6 +112,16 @@ export class LobbiesComponent implements OnInit, OnDestroy {
   }
 
   async toggleCreateLobby() {
+    this.createModal = true;
+    console.log(("Open"))
+    console.log(this.createLobbyModal.modal)
     await this.createLobbyModal.modal.present();
+    console.log(this.createModal)
+  }
+
+  handleModalClose() {
+    console.log(this.createModal)
+    this.createModal = false;
+    console.log(this.createModal)
   }
 }

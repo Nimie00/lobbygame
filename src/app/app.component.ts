@@ -7,7 +7,8 @@ import {User} from "./models/user.model";
 import {Game} from "./models/game.model";
 import {Lobby} from "./models/lobby.model";
 import {LobbyService} from "./services/lobby.service";
-import {Observable} from "rxjs";
+import {delay, Observable} from "rxjs";
+import {tap} from "rxjs/operators";
 
 @Component({
   selector: 'app-root',
@@ -34,10 +35,30 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-   const userSubscription = this.authService.getUserObservable().subscribe(user => {
-      this.isLoggedIn = !!user;
-      this.user = user;
+    const userSubscription = this.authService.getUserObservable().pipe(
+      // Use a more comprehensive state tracking
+      tap(user => {
+        console.log('User observable emitted:', user);
+      }),
+      // Delay slightly to ensure Firebase has time to resolve
+      delay(0)
+    ).subscribe(user => {
+      // Explicitly handle different states
+      if (user === null) {
+        // This could mean either not logged in or still loading
+        this.isLoggedIn = false;
+        this.user = null;
+      } else {
+        this.isLoggedIn = true;
+        this.user = user;
+      }
+
+      console.log('Final user state:', {
+        isLoggedIn: this.isLoggedIn,
+        user: this.user
+      });
     });
+
     this.tracker.add(this.CATEGORY, "getAuthState", userSubscription);
   }
 

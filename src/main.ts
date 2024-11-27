@@ -13,10 +13,16 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 // enableProdMode();
 bootstrapApplication(AppComponent, {
   providers: [
-
     provideRouter(routes),
-    importProvidersFrom(BrowserModule, AngularFireModule.initializeApp(firebaseConfig), AngularFireAuthModule, FormsModule),
-    provideAnimations(), provideIonicAngular({}), provideIonicAngular({})
-]
+    importProvidersFrom(
+      BrowserModule,
+      AngularFireModule.initializeApp(firebaseConfig),
+      AngularFireAuthModule,
+      FormsModule
+    ),
+    provideAnimations(),
+    provideIonicAngular({}),
+    provideIonicAngular({}) // Note: Duplicated provider
+  ]
 })
   .catch(err => console.error(err));

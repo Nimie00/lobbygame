@@ -1,11 +1,11 @@
 import {Component, ViewChild, Output, EventEmitter, Input} from '@angular/core';
 import {IonModal} from '@ionic/angular';
-import {Observable} from 'rxjs';
 import {CreateLobbyData} from '../../models/create-lobby.interface';
 import {LobbyService} from "../../services/lobby.service";
 import {Lobby} from "../../models/lobby.model";
 import {User} from "../../models/user.model";
 import {SubscriptionTrackerService} from "../../services/subscriptionTracker.service";
+import {Game} from "../../models/game.model";
 
 @Component({
   selector: 'app-create-lobby-modal',
@@ -18,6 +18,7 @@ export class CreateLobbyModalComponent {
   @Input() lobby: Lobby | null; // Adat fogadása
   @ViewChild('createLobbyModal') modal!: IonModal;
   @Output() createLobbyEvent = new EventEmitter<CreateLobbyData>();
+  @Output() closeModal = new EventEmitter<void>();
 
   selectedGame: any;
   lobbyName: string = '';
@@ -39,7 +40,7 @@ export class CreateLobbyModalComponent {
   gameType: string;
   currentRound: number;
   gameModifiers: { [p: string]: any };
-  games$: Observable<any[]>;
+  games$: Promise<Game[]>;
 
   players: string[];
   playerNames: string[];
@@ -51,7 +52,7 @@ export class CreateLobbyModalComponent {
 
   constructor(private lobbyService: LobbyService,
               private tracker: SubscriptionTrackerService,
-              ) {
+  ) {
     this.games$ = this.lobbyService.getGames();
   }
 
@@ -61,6 +62,7 @@ export class CreateLobbyModalComponent {
 
   close() {
     this.modal.dismiss();
+    this.closeModal.emit();
     this.lobbyId = null;
   }
 
@@ -174,6 +176,7 @@ export class CreateLobbyModalComponent {
         this.isButtonDisabled = false;
       }, this.cooldownTime);
       this.createLobbyEvent.emit(lobbyData);
+      this.closeModal.emit();
     } catch (error) {
       console.error('Error creating/updating lobby:', error);
     }

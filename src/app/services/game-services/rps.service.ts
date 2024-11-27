@@ -64,7 +64,7 @@ export class RpsService {
 
   getCurrentUserAndGame(lobbyId: string): Observable<{ user: any, game: any }> {
     return combineLatest([
-      this.authService.refreshUser(),
+      this.authService.getUserData(),
       this.getGameState(lobbyId)
     ]).pipe(
       map(([user, game]) => ({user, game}))
