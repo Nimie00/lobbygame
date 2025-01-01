@@ -7,6 +7,8 @@ import {Lobby} from '../models/lobby.model';
 import {User} from '../models/user.model';
 import DocumentReference = firebase.firestore.DocumentReference;
 import {BaseGame} from "../models/games.gameplaydata.model";
+import {Game} from "../models/game.model";
+import {Firestore, doc, updateDoc, arrayUnion, writeBatch, arrayRemove} from '@angular/fire/firestore';
 
 
 
@@ -18,17 +20,22 @@ export class LobbyService {
   ) {
   }
 
-  getLobbies(userId: string): Observable<Lobby[]> {
-    return this.firestore.collection<Lobby>('lobbies').snapshotChanges().pipe(
+  getLobbies(userId: string): Observable<{ userLobby: Lobby | null, otherLobbies: Lobby[] }> {
+    return this.firestore.collection<Lobby>('lobbies', ref => ref.where('status', '!=', 'ended')).snapshotChanges().pipe(
       map(actions => {
         const lobbies = actions.map(a => {
           const data = a.payload.doc.data() as Lobby;
           const id = a.payload.doc.id;
           return {id, ...data};
-        }).filter(lobby => lobby.status !== 'ended');
-        const userLobby = lobbies.find(lobby => lobby.ownerId === userId);
+        });
+
+        const userLobby = lobbies.find(lobby => lobby.ownerId === userId) || null;
         const otherLobbies = lobbies.filter(lobby => lobby.ownerId !== userId);
-        return userLobby ? [userLobby, ...otherLobbies] : otherLobbies;
+
+        return {
+          userLobby,
+          otherLobbies
+        };
       })
     );
   }
@@ -62,10 +69,11 @@ export class LobbyService {
       inLobby: lobbyId,
     });
 
+
     const lobbyRef = this.firestore.collection('lobbies').doc(lobbyId).ref;
     batch.update(lobbyRef, {
-      players: firebase.firestore.FieldValue.arrayUnion(user.id),
-      playerNames: firebase.firestore.FieldValue.arrayUnion(user.username),
+      players: arrayUnion(user.id),
+      playerNames: arrayUnion(user.username),
     });
     return batch.commit();
   }
@@ -118,8 +126,8 @@ export class LobbyService {
     });
     const lobbyRef = this.firestore.collection('lobbies').doc(lobbyId).ref;
     batch.update(lobbyRef, {
-      players: firebase.firestore.FieldValue.arrayRemove(user.id),
-      playerNames: firebase.firestore.FieldValue.arrayRemove(user.username)
+      players: arrayRemove(user.id),
+      playerNames: arrayRemove(user.username)
     });
     return batch.commit();
   }
@@ -136,8 +144,8 @@ export class LobbyService {
     });
     const lobbyRef = this.firestore.collection('lobbies').doc(lobbyId).ref;
     batch.update(lobbyRef, {
-      spectators: firebase.firestore.FieldValue.arrayUnion(user.id),
-      spectatorNames: firebase.firestore.FieldValue.arrayUnion(user.username),
+      spectators: arrayUnion(user.id),
+      spectatorNames: arrayUnion(user.username),
     });
     return batch.commit();
   }
@@ -150,8 +158,8 @@ export class LobbyService {
     });
     const lobbyRef = this.firestore.collection('lobbies').doc(lobbyId).ref;
     batch.update(lobbyRef, {
-      spectators: firebase.firestore.FieldValue.arrayRemove(user.id),
-      spectatorNames: firebase.firestore.FieldValue.arrayRemove(user.username)
+      spectators: arrayRemove(user.id),
+      spectatorNames: arrayRemove(user.username)
     });
     return batch.commit();
   }
@@ -194,10 +202,6 @@ export class LobbyService {
     const lobbyRef = this.firestore.collection('lobbies').doc(lobby.id); // Lobby referencia
     const gameRef = this.firestore.collection('gameplay').doc(lobby.id); // Gameplay referencia
 
-    // lobbyRef.update({
-    //   status: 'started'
-    // });
-
     return this.firestore.firestore.runTransaction(async (transaction) => {
       const doc = await transaction.get(gameRef.ref);
 
@@ -239,25 +243,14 @@ export class LobbyService {
     }
   }
 
-  getGames() {
-    return this.firestore.collection('games').valueChanges();
-  }
-
-  getUserLobby(userId: string): Observable<Lobby | null> {
-    return this.firestore.collection<Lobby>('lobbies', ref => ref
-      .where('ownerId', '==', userId)
-      .where('status', '!=', 'ended') // Csak nem "ended" státuszú várók
-    )
-      .snapshotChanges()
-      .pipe(
-        map(actions => {
-          if (actions.length === 0) return null;
-          const action = actions[0];
-          const data = action.payload.doc.data() as Lobby;
-          const id = action.payload.doc.id;
-          return {id, ...data};
-        })
-      );
+  async getGames(): Promise<Game[]> {
+    const gamesSnapshot = await firstValueFrom(
+      this.firestore.collection('games').get()
+    );
+    return gamesSnapshot.docs.map(doc => {
+      const data = doc.data() as Record<string, any>;
+      return {id: doc.id, ...data} as Game;
+    });
   }
 
   async endLobby(lobbyId: string, winner: string, endReason: string): Promise<void> {
@@ -324,10 +317,10 @@ export class LobbyService {
     });
     const lobbyRef = this.firestore.collection('lobbies').doc(lobbyId).ref;
     batch.update(lobbyRef, {
-      players: firebase.firestore.FieldValue.arrayRemove(userId),
-      playerNames: firebase.firestore.FieldValue.arrayRemove(userName),
-      bannedPlayers: firebase.firestore.FieldValue.arrayUnion(userId),
-      bannedPlayerNames: firebase.firestore.FieldValue.arrayUnion(userName),
+      players: arrayRemove(userId),
+      playerNames: arrayRemove(userName),
+      bannedPlayers: arrayUnion(userId),
+      bannedPlayerNames: arrayUnion(userName),
     });
     await batch.commit();
 
@@ -338,8 +331,8 @@ export class LobbyService {
     const batch = this.firestore.firestore.batch();
     const lobbyRef = this.firestore.collection('lobbies').doc(lobbyId).ref;
     batch.update(lobbyRef, {
-      bannedPlayers: firebase.firestore.FieldValue.arrayRemove(userId),
-      bannedPlayerNames: firebase.firestore.FieldValue.arrayRemove(userName),
+      bannedPlayers: arrayRemove(userId),
+      bannedPlayerNames: arrayRemove(userName),
     });
     await batch.commit();
 
@@ -355,8 +348,8 @@ export class LobbyService {
     });
     const lobbyRef = this.firestore.collection('lobbies').doc(lobbyId).ref;
     batch.update(lobbyRef, {
-      players: firebase.firestore.FieldValue.arrayRemove(userId),
-      playerNames: firebase.firestore.FieldValue.arrayRemove(userName),
+      players: arrayRemove(userId),
+      playerNames: arrayRemove(userName),
     });
     await batch.commit();
 

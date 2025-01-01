@@ -23,7 +23,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-   const dataSubscription = this.authService.refreshUser().subscribe(data => {
+   const dataSubscription = this.authService.getUserData().subscribe(data => {
       this.user = data;
     });
     this.tracker.add(this.CATEGORY, "getUserDataSub", dataSubscription);

@@ -14,3 +14,48 @@
   cursor: not-allowed;
 }
 
+.winner {
+  background-color: lightblue;
+}
+
+.loser {
+  background-color: palevioletred;
+}
+
+.draw {
+  background-color: gray;
+}
+
+.round-details {
+  overflow-y: auto;  /* Engedd meg a görgetést */
+}
+
+
+ion-content {
+  height: 100%;
+  --overflow: scroll;
+  --ion-background-color: transparent;
+  max-height: 100vh;
+  overflow-y: scroll;
+  position: relative;
+  --ion-safe-area-top: 0;
+  --ion-safe-area-bottom: 0;
+  --offset-bottom: 0;
+}
+
+.round-details {
+  margin-bottom: 16px; /* Hagyjon helyet a kártyák között */
+}
+
+ion-item {
+  overflow: visible; /* Engedélyezze a tartalom megjelenítését */
+}
+
+ion-item {
+  min-height: 50px; /* vagy az igényeid szerint */
+}
+
+
+ion-toolbar.large-title-fix {
+  padding-top: env(safe-area-inset-top);
+}

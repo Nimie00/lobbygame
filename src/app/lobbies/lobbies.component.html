@@ -1,7 +1,7 @@
 <ion-content>
-
   <app-create-lobby-modal
-    [currentUser]="currentUser">
+    [currentUser]="currentUser"
+    (closeModal)="handleModalClose()">
   </app-create-lobby-modal>
 
   <ion-card class="container">

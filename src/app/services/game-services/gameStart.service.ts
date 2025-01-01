@@ -1,16 +1,15 @@
 import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
-import {AngularFireAuth} from "@angular/fire/compat/auth";
-import {AuthService} from "../auth.service";
 import {Router} from "@angular/router";
 import {SubscriptionTrackerService} from "../subscriptionTracker.service";
-import {LobbyService} from "../lobby.service";
+import {Lobby} from "../../models/lobby.model";
 
 @Injectable({
   providedIn: 'root'
 })
 export class GameStartService {
-  private CATEGORY = "gameStart"
+  private CATEGORY = "gameStart";
+  isSpectator: boolean;
 
   constructor(
     private firestore: AngularFirestore,
@@ -19,29 +18,31 @@ export class GameStartService {
   ) {
   }
 
+
   // Játékosok számára: Lobby figyelése
-  watchLobbyAsPlayer(lobbyId: string) {
+  watchLobbyAsPlayer(lobbyId: string, userId: string) {
     const subscription = this.firestore
       .collection('lobbies')
       .doc(lobbyId)
       .valueChanges()
       .subscribe((lobbyData: any) => {
         if (lobbyData?.status === 'starting') {
+
           this.handleCountdown(() => {
             this.stopWatchingLobby(lobbyId);
-          }, lobbyId);
+          }, lobbyId, lobbyData?.spectators.includes(userId));
         }
       });
 
-    this.subscriptionTracker.add('lobbyWatch', lobbyId, subscription);
+    this.subscriptionTracker.add(this.CATEGORY, "lobbyWatch", subscription);
   }
 
   // Feliratkozás törlése
   stopWatchingLobby(lobbyId: string) {
-    this.subscriptionTracker.unsubscribeCategory('lobbyWatch');
+    this.subscriptionTracker.unsubscribeCategory(this.CATEGORY);
   }
 
-  handleCountdown(onComplete: () => void, lobbyId: string): Promise<void> {
+  handleCountdown(onComplete: () => void, lobbyId: string, isSpectator: boolean): Promise<void> {
     return new Promise((resolve) => {
       let countdown = 3;
 
@@ -53,7 +54,11 @@ export class GameStartService {
           clearInterval(countdownInterval);
           onComplete();
           resolve();
-          this.jumpToGame(lobbyId);
+          if(isSpectator != null && isSpectator){
+            this.jumpToSpectating(lobbyId);
+          } else {
+            this.jumpToGame(lobbyId);
+          }
         }
       }, 1000);
     });
@@ -81,6 +86,11 @@ export class GameStartService {
   }
 
   jumpToGame(lobbyId: string) {
-    this.router.navigate(['/game/' + lobbyId]);
+      this.router.navigate(['/game/' + lobbyId]);
   }
+
+  jumpToSpectating(lobbyId: string){
+    this.router.navigate(['/spectate/' + lobbyId]);
+  }
+
 }

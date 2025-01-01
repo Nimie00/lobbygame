@@ -14,9 +14,9 @@ import {GameStartService} from "../../services/game-services/gameStart.service";
   templateUrl: './lobby.component.html',
   styleUrls: ['./lobby.component.scss'],
 })
-export class LobbyComponent implements OnInit, OnDestroy{
+export class LobbyComponent implements OnInit, OnDestroy {
   private CATEGORY = "lobby"
-  @ViewChild('modal') passwrodModal: IonModal;
+  @ViewChild('modal') passwordModal: IonModal;
 
   @Input() lobby: any;
   @Input() hasLobby: boolean = false;
@@ -28,6 +28,9 @@ export class LobbyComponent implements OnInit, OnDestroy{
   @ViewChild(LobbyPlayersManagingComponent) lobbyPlayersModal: LobbyPlayersManagingComponent;
   protected password = "";
   protected actions = [];
+  passwordModalOpen: boolean = false;
+  createLobbyModalOpen: boolean = false;
+  lobbyPlayersModalOpen: boolean = false;
 
 
   constructor(private lobbyService: LobbyService,
@@ -106,11 +109,18 @@ export class LobbyComponent implements OnInit, OnDestroy{
         condition: this.isUserSpectatingLobby(this.lobby)
       });
       this.actions.push({
+        label: 'Spectate Game',
+        class: 'spectategame',
+        command: () => this.gameStartService.jumpToSpectating(this.lobby.id),
+        condition: this.lobby.status === 'started' && this.isUserSpectatingLobby(this.lobby.id),
+      });
+      this.actions.push({
         label: 'Jump to Game Window',
         class: 'jumptogame',
         command: () => this.gameStartService.jumpToGame(this.lobby.id),
-        condition: this.lobby.status === 'started'
+        condition: this.lobby.status === 'started'  && !this.isUserSpectatingLobby(this.lobby.id),
       });
+
     }
 
     // Private non-owner actions with password
@@ -137,8 +147,15 @@ export class LobbyComponent implements OnInit, OnDestroy{
         label: 'Jump to Game Window',
         class: 'jumptogame',
         command: () => this.gameStartService.jumpToGame(this.lobby.id),
-        condition: this.lobby.status === 'started'
+        condition: this.lobby.status === 'started' && !this.isUserSpectatingLobby(this.lobby.id),
       });
+      this.actions.push({
+        label: 'Spectate game',
+        class: 'spectategame',
+        command: () => this.gameStartService.jumpToSpectating(this.lobby.id),
+        condition: this.lobby.status === 'started' && this.isUserSpectatingLobby(this.lobby.id),
+      });
+
     }
 
     return this.actions;
@@ -175,7 +192,7 @@ export class LobbyComponent implements OnInit, OnDestroy{
 
 
         this.lobbyService.lobbyCooldown(this.lobby.id);
-        this.gameStartService.handleCountdown(() => this.lobbyService.startGame(this.usersLobby), lobbyId);
+        this.gameStartService.handleCountdown(() => this.lobbyService.startGame(this.usersLobby), lobbyId, false);
       }
     }
   }
@@ -199,7 +216,7 @@ export class LobbyComponent implements OnInit, OnDestroy{
     this.joinedLobby = lobbyId;
     this.lobbyService.joinLobby(lobbyId, this.currentUser).then(() => {
 
-      this.gameStartService.watchLobbyAsPlayer(lobbyId);
+      this.gameStartService.watchLobbyAsPlayer(lobbyId, this.currentUser.id);
 
       console.log('Joined lobby');
     });
@@ -209,7 +226,7 @@ export class LobbyComponent implements OnInit, OnDestroy{
     this.joinedLobby = lobbyId;
     this.lobbyService.addSpectator(lobbyId, this.currentUser).then(() => {
 
-      this.gameStartService.watchLobbyAsPlayer(lobbyId);
+      this.gameStartService.watchLobbyAsPlayer(lobbyId, this.currentUser.id);
 
       console.log('Joined as spectator');
     });
@@ -267,11 +284,21 @@ export class LobbyComponent implements OnInit, OnDestroy{
   }
 
   openPasswordModal() {
-    this.passwrodModal.present();
+    this.passwordModalOpen = true;
+    this.passwordModal.present();
   }
 
   closePasswordModal() {
-    this.passwrodModal.dismiss();
+    this.passwordModalOpen = false;
+    this.passwordModal.dismiss();
+  }
+
+  closeCreateLobbyModal() {
+    this.createLobbyModalOpen = false;
+  }
+
+  closeLobbyPlayersModal() {
+    this.lobbyPlayersModalOpen = false;
   }
 
 

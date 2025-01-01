@@ -1,5 +1,6 @@
-<ion-content *ngIf="game">
-  <ng-container *ngIf="!gameEnded && !isSpectator">
+<ion-content *ngIf="game && isPlayer" [scrollEvents]="true">
+
+  <ng-container *ngIf="!gameEnded && isPlayer"> <!--Játékosok oldala -->
     <ion-header>
       <ion-toolbar>
         <ion-title>Válassz egy lehetőséget:</ion-title>
@@ -10,7 +11,8 @@
       <ion-row>
         <ion-col>
           <h2>Válassz egy lehetőséget:</h2>
-          <h3>Jelenlegi kör: {{ game.currentRound }} / {{ game.maxRounds }}</h3>
+          <h3>Jelenlegi kör: {{ game.currentRound }} / {{ game.maxRounds }} </h3>
+          <h3>Valós körszám:  {{game.maxRounds- this.drawCount}}</h3>
         </ion-col>
       </ion-row>
       <ion-row class="choices">
@@ -33,24 +35,25 @@
   </ng-container>
 
   <ng-container>
+  <ion-list>
+    <ion-list-header>
+      <ion-label>Még szükséges győzelmek:</ion-label>
+    </ion-list-header>
+
+    <ion-item *ngFor="let playerId of game.players">
+      <ion-label>
+        {{ getPlayerName(playerId) }}:
+        {{ getRemainingWins(playerId) }} győzelem szükséges a győzelemhez.
+      </ion-label>
+    </ion-item>
+  </ion-list>
+  </ng-container>
+
+  <ng-container>
     <ion-list>
       <ion-list-header>
         <ion-label>Korábbi körök:</ion-label>
       </ion-list-header>
-
-
-<!--      <ion-card *ngFor="let round of getRounds()">-->
-<!--        <ion-card-header>-->
-<!--          <ion-card-title>{{ round.roundNumber + 1 }}. Kör:</ion-card-title>-->
-<!--        </ion-card-header>-->
-<!--        <ion-card-content>-->
-<!--          <p *ngFor="let playerId of game.players">-->
-<!--            {{ getPlayerName(playerId) }} választása: {{ round.choices[playerId]?.choice || 'Nem választott' }}-->
-<!--          </p>-->
-<!--          <p>Kör győztese: {{ getPlayerName(round.winner) || 'Döntetlen' }}</p>-->
-<!--        </ion-card-content>-->
-<!--      </ion-card>-->
-
       <ion-card class="round-details">
         <h3>Korábbi körök:</h3>
         <ion-item *ngFor="let round of rounds">
@@ -61,25 +64,36 @@
             <p *ngFor="let playerId of game.players">
               {{ getPlayerName(playerId) }} választása: {{ round.choices[playerId]?.choice || 'Nem választott' }}
             </p>
-            <p>Kör győztese: {{ getPlayerName(round.winner) || 'Döntetlen' }}</p>
+            <p         [ngClass]="{
+              'winner': currentUser.id === round.winner,
+              'draw': round.winner === 'draw',
+              'loser': currentUser.id !== round.winner && round.winner !== 'draw'
+              }">
+                       Kör győztese: {{ getPlayerName(round.winner) || 'Döntetlen' }}</p>
           </div>
         </ion-item>
       </ion-card>
 
-    </ion-list>
-    <ion-list>
-      <ion-list-header>
-        <ion-label>Még szükséges győzelmek:</ion-label>
-      </ion-list-header>
 
-      <ion-item *ngFor="let playerId of game.players">
-        <ion-label>
-          {{ getPlayerName(playerId) }}:
-          {{ getRemainingWins(playerId) }} győzelem szükséges a győzelemhez.
-        </ion-label>
-      </ion-item>
+
+      <!--      <ion-card *ngFor="let round of getRounds()">-->
+      <!--        <ion-card-header>-->
+      <!--          <ion-card-title>{{ round.roundNumber + 1 }}. Kör:</ion-card-title>-->
+      <!--        </ion-card-header>-->
+      <!--        <ion-card-content>-->
+      <!--          <p *ngFor="let playerId of game.players">-->
+      <!--            {{ getPlayerName(playerId) }} választása: {{ round.choices[playerId]?.choice || 'Nem választott' }}-->
+      <!--          </p>-->
+      <!--          <p>Kör győztese: {{ getPlayerName(round.winner) || 'Döntetlen' }}</p>-->
+      <!--        </ion-card-content>-->
+      <!--      </ion-card>-->
+
+
+
     </ion-list>
   </ng-container>
+  <hr>
+
 
   <ng-container *ngIf="gameEnded">
     <ion-card>
@@ -92,10 +106,17 @@
 
         <h1 *ngIf="winner === currentUser.id">Nyertél!</h1>
         <h1 *ngIf="winner !== currentUser.id">Vesztettél!</h1>
-
-        <h1>Választásod: {{ playerChoice }}</h1>
+        <h1>Winner: {{winner}}</h1>
+        <h1>Currentuser: {{currentUser.id}}</h1>
+        <h1>Username: {{currentUser.username}}</h1>
         <p *ngIf="!winner">Döntetlen!</p>
       </ion-card-content>
     </ion-card>
   </ng-container>
+  <ion-toolbar class="large-title-fix"></ion-toolbar>
 </ion-content>
+
+
+
+
+

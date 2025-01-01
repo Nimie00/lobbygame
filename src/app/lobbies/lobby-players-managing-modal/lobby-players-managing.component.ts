@@ -1,96 +1,93 @@
-import {Component, Input, ViewChild} from '@angular/core';
-import { IonModal } from '@ionic/angular';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
+import {IonModal} from '@ionic/angular';
 import {LobbyService} from "../../services/lobby.service";
 import {User} from "../../models/user.model";
 import {Lobby} from "../../models/lobby.model";
 import {Router} from "@angular/router";
 import {SubscriptionTrackerService} from "../../services/subscriptionTracker.service";
-
-interface Player {
-  id: string;
-  username: string;
-  status: 'online' | 'offline' | 'in-game';
-}
+import {Observable} from "rxjs";
 
 @Component({
   selector: 'app-lobby-players-managing',
   templateUrl: './lobby-players-managing.component.html',
   styleUrls: ['./lobby-players-managing.component.scss']
 })
-export class LobbyPlayersManagingComponent {
+export class LobbyPlayersManagingComponent implements OnInit, OnDestroy {
   private CATEGORY = "lobby-player-managing-modal"
   @ViewChild('lobbyPlayersModal') modal!: IonModal;
-  @Input() lobby: Lobby;
   @Input() currentUser: User = null;
-  players: string[]=[];
-  playerNames: string[]=[];
-  bannedPlayers: string[]=[];
-  bannedPlayerNames: string[]=[];
+  @Input() lobbyId: string;
+  @Output() closeModal = new EventEmitter<void>();
+  lobby: Lobby;
   routertext: string = "";
+  protected lobbyObservable: Observable<Lobby>;
+
 
   constructor(private lobbyService: LobbyService,
               private router: Router,
               private tracker: SubscriptionTrackerService,
-              ) {
+  ) {
   }
-
   ngOnInit() {
-    if (this.lobby) {
-      this.initializePlayers();
-      this.routertext = window.location.pathname+'/';
-      if(this.routertext.includes(this.lobby.id)) {
-        this.routertext = this.routertext.split(this.lobby.id)[0];
-      }
-      this.routertext = window.location.host+this.routertext
+    this.routertext = window.location.pathname + '/';
+    if (this.routertext.includes(this.lobbyId)) {
+      this.routertext = this.routertext.split(this.lobbyId)[0];
     }
+    this.routertext = window.location.host + this.routertext;
+
+    // Lobby adatokat figyelő Observable
+    this.lobbyObservable = this.lobbyService.getLobby(this.lobbyId);
+
+    // Manuálisan a trackerhez adva az előfizetés
+    const lobbysub = this.lobbyObservable.subscribe((lobby) => {
+      if (lobby) {
+        this.lobby = lobby;
+      }
+    });
+    this.tracker.add(this.CATEGORY, "lobbySub", lobbysub);
   }
 
   ngOnDestroy(): void {
     this.tracker.unsubscribeCategory(this.CATEGORY);
   }
 
-
-  private initializePlayers() {
-    this.players = this.lobby.players || [];
-    this.bannedPlayers = this.lobby.bannedPlayers || [];
-    this.playerNames = this.lobby.playerNames || [];
-    this.bannedPlayerNames = this.lobby.bannedPlayerNames || [];
+  async close() {
+    console.log("Bezárás")
+    await this.modal.dismiss();
   }
 
-  close() {
-    this.modal.dismiss();
-  }
-
-  open() {
-    if (this.lobby) {
-      this.initializePlayers(); // Frissítjük az adatokat amikor megnyitjuk a modalt
-    }
-    this.modal.present();
+  async open() {
+    await this.modal.present();
   }
 
   async renamePlayer(playerId: string, playerName: string) {
     console.log(playerId + " renameplayer")
     await this.lobbyService.renameUser(this.lobby.id, playerId, playerName);
+    // await this.close();
   }
 
   async kickPlayer(playerId: string, playerName: string) {
     console.log(playerId + " kickplayer")
     await this.lobbyService.kickUser(this.lobby.id, playerId, playerName);
+    // await this.close();
   }
 
   async banPlayer(playerId: string, playerName: string) {
     console.log(playerId + " banplayer")
     await this.lobbyService.banPlayer(this.lobby.id, playerId, playerName);
+    // await this.close();
   }
 
   async unbanPlayer(playerId: string, playerName: string) {
     console.log(playerId + " unbanplayer")
     await this.lobbyService.unbanPlayer(this.lobby.id, playerId, playerName);
+    // await this.close();
   }
 
   async promotePlayer(playerId: string, playerName: string) {
     console.log(playerId + " promoteplayer")
     await this.lobbyService.promotePlayer(this.lobby.id, playerId, playerName);
+    // await this.close();
   }
 
   copyToClipboard(text: string): void {

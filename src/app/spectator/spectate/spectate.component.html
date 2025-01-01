@@ -1,0 +1,23 @@
+<ion-content>
+<h1>Spectating Lobby: {{ lobbyId }}</h1>
+<div class="timeline-container">
+  <div #visualization id="visualization"></div>
+  <div class="controls" *ngIf="game">
+    <button (click)="startTimeline()">Start</button>
+    <button (click)="stopTimeline()">Pause</button>
+    <button (click)="jumpToStart()">Jump to Start</button>
+  </div>
+</div>
+
+  <ng-container *ngIf="game">
+    <app-rps-spectate
+      [playerChoices]="playerChoices"
+      [game]="game">
+    </app-rps-spectate>
+  </ng-container>
+
+  <ng-container *ngIf="!game">
+    <h1>Az alábbi játék nem létezik, vagy nem sikerült betölteni</h1>
+  </ng-container>
+</ion-content>
+
