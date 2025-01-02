@@ -1,19 +1,16 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {AuthService} from './services/auth.service';
-import {Router, RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
-import {NgIf} from "@angular/common";
-import {SubscriptionTrackerService} from "./services/subscriptionTracker.service";
-import {User} from "./models/user.model";
-import {Game} from "./models/game.model";
-import {Lobby} from "./models/lobby.model";
-import {LobbyService} from "./services/lobby.service";
+import {AuthService} from './shared/services/auth.service';
+import {Router} from '@angular/router';
+import {SubscriptionTrackerService} from "./shared/services/subscriptionTracker.service";
+import {User} from "./shared/models/user.model";
+import {Lobby} from "./shared/models/lobby.model";
+import {LobbyService} from "./shared/services/lobby.service";
 import {Observable} from "rxjs";
+import {LanguageService} from "./shared/services/language.service";
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, NgIf],
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit, OnDestroy {
@@ -23,10 +20,12 @@ export class AppComponent implements OnInit, OnDestroy {
   lobbyId: string;
   lobby: Observable<Lobby>;
 
+
   constructor(private authService: AuthService,
               private router: Router,
               private lobbyService: LobbyService,
               private tracker: SubscriptionTrackerService,
+              private languageService: LanguageService,
               ) {}
 
   ngOnDestroy(): void {

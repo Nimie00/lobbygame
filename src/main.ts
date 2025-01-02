@@ -1,22 +1,9 @@
-import {bootstrapApplication, BrowserModule} from '@angular/platform-browser';
-import { provideRouter } from '@angular/router';
-import {enableProdMode, importProvidersFrom} from '@angular/core';
-import { AngularFireModule } from '@angular/fire/compat';
-import { AngularFireAuthModule } from '@angular/fire/compat/auth';
-import { AppComponent } from './app/app.component';
-import { firebaseConfig } from './app/environments/environments';
-import { routes } from './app/app-routing.module';
-import { FormsModule } from "@angular/forms";
-import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideIonicAngular } from '@ionic/angular/standalone';
+import {platformBrowserDynamic} from "@angular/platform-browser-dynamic";
+import {AppModule} from "./app/app.module";
+
 
 // enableProdMode();
-bootstrapApplication(AppComponent, {
-  providers: [
 
-    provideRouter(routes),
-    importProvidersFrom(BrowserModule, AngularFireModule.initializeApp(firebaseConfig), AngularFireAuthModule, FormsModule),
-    provideAnimations(), provideIonicAngular({}), provideIonicAngular({})
-]
-})
+platformBrowserDynamic()
+  .bootstrapModule(AppModule)
   .catch(err => console.error(err));

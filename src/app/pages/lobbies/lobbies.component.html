@@ -1,0 +1,40 @@
+<ion-content>
+  <app-create-lobby-modal
+    [currentUser]="currentUser"
+    (closeModal)="handleModalClose()">
+  </app-create-lobby-modal>
+
+  <ion-card class="container">
+    <ion-card-header>
+      <ion-button *ngIf="listLive" expand="block" class="create-lobby-button" (click)="toggleCreateLobby()"
+                  [disabled]=" hasLobby || joinedLobby!=null">
+        {{ "CREATE_NEW_LOBBY" | language }}
+      </ion-button>
+
+      <ion-button expand="block" class="change-to-replays" (click)="changeFilteredLobbyStatus()">
+        {{ (listLive ? 'CHANGE_TO_REPLAYS' : 'Change_TO_LIVE_LOBBIES') | language }}
+      </ion-button>
+
+      <h2>
+        {{ (listLive ? 'AVAILABLE_LOBBIES' : 'REPLAYS') | language  }}
+      </h2>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-searchbar [(ngModel)]="searchTerm" [debounce]="500" (ionInput)="filterLobbies(this.userId, listLive)"></ion-searchbar>
+      <ion-list class="lobby-list">
+        <div *ngFor="let lobby of (lobbies | async)">
+          <app-lobby
+            [lobby]="lobby"
+            [hasLobby]="hasLobby"
+            [joinedLobby]="joinedLobby"
+            [userId]="userId"
+            [usersLobby]="usersLobby"
+            [listLive]="listLive"
+            *ngIf="currentUser" [currentUser]="currentUser">
+          </app-lobby>
+        </div>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

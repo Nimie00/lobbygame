@@ -1,0 +1,23 @@
+<ion-content>
+<h1>{{"SPECTATING_GAME" | language}}: {{ lobbyId }}</h1>
+<div class="timeline-container">
+  <div #visualization id="visualization"></div>
+  <div class="controls" *ngIf="game">
+    <button (click)="startTimeline()">{{"START" | language}}</button>
+    <button (click)="stopTimeline()">{{"PAUSE" | language}}</button>
+    <button (click)="jumpToStart()">{{"JUMP_TO_START" | language}}</button>
+  </div>
+</div>
+
+  <ng-container *ngIf="game">
+    <app-rps-spectate
+      [playerChoices]="playerChoices"
+      [game]="game">
+    </app-rps-spectate>
+  </ng-container>
+
+  <ng-container *ngIf="!game">
+    <h1>{{"GAME_DOESNT_EXIST" | language}}</h1>
+  </ng-container>
+</ion-content>
+

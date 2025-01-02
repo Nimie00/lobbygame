@@ -1,0 +1,56 @@
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+  background-color: #dddddd;
+
+  h2 {
+    color: black;
+  }
+
+  .create-lobby-button {
+    background-color: #1e90ff;
+    color: black;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    padding: 10px 20px;
+    text-transform: uppercase;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .lobby-list {
+    border-radius: 10px;
+    padding: 40px;
+    color: black;
+    width: 100%;
+    height: fit-content;
+    margin: 15px auto;
+    text-align: left;
+    display: block;
+    box-sizing: border-box;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 1.2em;
+  }
+
+  p {
+    margin: 5px 0;
+    font-size: 0.9em;
+  }
+
+  button {
+    margin-top: 10px;
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-weight: bold;
+  }
+}

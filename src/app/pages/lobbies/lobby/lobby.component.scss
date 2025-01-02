@@ -1,0 +1,119 @@
+.lobby-item {
+  padding: 10px;
+  margin: 0 auto;
+  text-align: left;
+
+}
+
+.lobby-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background: grey;
+  border-radius: 5px;
+  padding: 10px;
+  color: black;
+  text-align: left;
+}
+
+ion-card-content {
+  flex-direction: column;
+  width: 100%;
+  align-items: flex-start;
+}
+
+ion-card-header{
+  color: black;
+}
+
+ion-button {
+  --border-radius: 5px;
+  --padding-start: 10px;
+  --padding-end: 10px;
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+  font-weight: bold;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+ion-button:hover {
+  transform: scale(1.05);
+}
+
+ion-button:active {
+  transform: scale(0.9);
+  opacity: 0.8;
+}
+
+ion-button.btn-view-game {
+  --background: #4caf50; /* Zöld */
+  --color: white;
+}
+
+ion-button.btn-start-spectating {
+  --background: #2196f3; /* Kék */
+  --color: white;
+}
+
+ion-button.btn-stop-spectating {
+  --background: #ff5722; /* Narancssárga */
+  --color: white;
+}
+
+ion-button.btn-join-game {
+  --background: #673ab7; /* Lila */
+  --color: white;
+}
+
+ion-button.btn-leave-game {
+  --background: #f44336; /* Piros */
+  --color: white;
+}
+
+ion-button.btn-open-game {
+  --background: #03a9f4; /* Világoskék */
+  --color: white;
+}
+
+ion-button.btn-edit-lobby-settings {
+  --background: #ffc107; /* Sárga */
+  --color: white;
+}
+
+ion-button.btn-manage-users {
+  --background: #9c27b0; /* Mélylila */
+  --color: white;
+}
+
+ion-button.btn-delete-lobby {
+  --background: #e91e63; /* Rózsaszín */
+  --color: white;
+}
+
+ion-button.btn-start-game {
+  --background: #00bcd4; /* Türkiz */
+  --color: white;
+}
+
+ion-button.btn-ready-up {
+  --background: #8bc34a; /* Világoszöld */
+  --color: white;
+}
+
+ion-button.btn-password-protected {
+  --background: #d32f2f; /* Sötétebb piros */
+  --color: white;
+}
+
+ion-button.btn-join-with-password {
+  padding: 30px;
+  --background: #675ab7; /* Lila */
+  --color: white;
+}
+
+ion-button.btn-spectate-with-password {
+  padding: 30px;
+  --background: #2146f3; /* Kék */
+  --color: white;
+}
+
