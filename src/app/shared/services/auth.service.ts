@@ -102,6 +102,8 @@ export class AuthService {
           picture: "picture0.png",
         });
         return userCredential;
+      } else {
+        throw new Error('User creation failed');
       }
     } catch (error) {
       console.error('Registration error:', error);
@@ -119,8 +121,6 @@ export class AuthService {
   }
 
   async reauthenticateUser(email: string, password: string): Promise<void> {
-    console.log(email)
-    console.log(password)
     try {
       const credential = firebase.auth.EmailAuthProvider.credential(email, password);
       const user = await this.afAuth.currentUser;
@@ -130,13 +130,10 @@ export class AuthService {
     }
   }
 
-  // Felhasználó adatainak módosítása
   updateUserProfile(uid: string, data: { username?: string; profilePicture?: string; email?: string }): Promise<void> {
-    console.log(data)
     return this.afs.doc(`users/${uid}`).update(data);
   }
 
-  // Jelszó módosítása
   async updatePassword(newPassword: string): Promise<void> {
     return this.afAuth.currentUser.then(user => {
       return user?.updatePassword(newPassword);
@@ -150,7 +147,7 @@ export class AuthService {
           ref.where('username', '==', username).limit(1)
         ).get()
       );
-      return !snapshot.empty;
+      return snapshot.empty;
     } catch (error) {
       throw error;
     }
@@ -160,13 +157,8 @@ export class AuthService {
     try {
       const user = await this.afAuth.currentUser;
 
-      // Törlés az adatbázisból
       await this.afs.doc(`users/${user.uid}`).delete();
-
-      // Törlés az autentikációból
       await user.delete();
-
-      // Kijelentkeztetés
       await this.afAuth.signOut();
     } catch (error) {
       throw error;
