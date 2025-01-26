@@ -3,6 +3,7 @@ export interface User {
   inLobby: string;
   lastLoginAt: Date;
   registeredAt: Date;
+  picture:string;
   roles: string[];
   id: string;
   username: string;

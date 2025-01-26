@@ -5,62 +5,110 @@
 </ion-header>
 
 <ion-card>
-  <ion-card-header>
-    <ion-card-title>{{ "MODIFY_YOUR_PROFILE" | language }}</ion-card-title>
-  </ion-card-header>
-
   <ion-card-content>
-    <div class="container">
-      <div class="left-section">
+    <form #profileForm="ngForm">
+      <div class="selection-groups">
+        <div class="edit-group" [class.disabled]="isDeleteSelected">
+          <ion-chip
+            *ngFor="let option of availableOptions"
+            [color]="selectedOptions.has(option.value) ? 'primary' : 'medium'"
+            (click)="!isDeleteSelected && toggleOption(option.value)">
+            <ion-label>{{ option.label | language }}</ion-label>
+          </ion-chip>
+        </div>
+
+        <div class="delete-group">
+          <ion-chip
+            [color]="isDeleteSelected ? 'danger' : 'medium'"
+            (click)="toggleDelete()">
+            <ion-label>{{ "DELETE_PROFILE" | language }}</ion-label>
+          </ion-chip>
+        </div>
+      </div>
+
+      <div *ngIf="!isDeleteSelected && selectedOptions.size === 0" class="empty-state">
+        <ion-text color="medium">
+          {{ "SELECT_MODIFICATION_TYPE" | language }}
+        </ion-text>
+      </div>
+
+      <div *ngIf="selectedOptions.has('picture')" class="form-section">
         <ion-item>
-          <ion-label position="stacked">{{ "PROFILE_PICTURE" | language }}</ion-label>
-          <div class="profile-picture-selection">
-            <img
-              *ngFor="let picture of profilePictures"
-              [src]="'assets/profilePictures/'+picture"
-              [class.selected]="picture === selectedPicture"
-              (click)="onProfilePictureSelect(picture)"
-              class="profile-picture"
-            />
-          </div>
+          <ion-label>{{ "SELECT_PROFILE_PICTURE" | language }}</ion-label>
+        </ion-item>
+        <div class="picture-scroller">
+          <img
+            *ngFor="let picture of profilePictures"
+            [ngSrc]="'assets/profilePictures/'+picture"
+            [class.selected]="picture === selectedPicture + '.png'"
+            (click)="onProfilePictureSelect(picture)"
+            [height]="200"
+            [width]="200"
+            [alt]="picture"
+            class="profile-picture"
+          />
+        </div>
+      </div>
+
+
+      <div *ngIf="selectedOptions.size > 0" class="form-section">
+
+        <div *ngIf="selectedOptions.has('username')">
+          <ion-item>
+            <ion-label position="stacked">{{ "NEW_USERNAME" | language }}</ion-label>
+            <ion-input [(ngModel)]="form.username" name="username" required></ion-input>
+          </ion-item>
+        </div>
+
+        <div *ngIf="selectedOptions.has('password')">
+          <ion-item>
+            <ion-label position="stacked">{{ "NEW_PASSWORD" | language }}</ion-label>
+            <ion-input [(ngModel)]="form.password" name="newPassword" type="password" required></ion-input>
+          </ion-item>
+        </div>
+
+        <div>
+          <ion-item>
+            <ion-label position="stacked" class="required-star">{{ "CONFIRM_PASSWORD" | language }}</ion-label>
+            <ion-input [(ngModel)]="confirmPassword" name="confirmPassword" type="password" required></ion-input>
+          </ion-item>
+        </div>
+
+      </div>
+
+
+      <!-- Törlés mezők -->
+      <div *ngIf="isDeleteSelected" class="delete-fields">
+        <ion-item>
+          <ion-label position="stacked" class="required-star">{{ "USERNAME" | language }}</ion-label>
+          <ion-input [(ngModel)]="deleteData.username" name="deleteUsername" required></ion-input>
         </ion-item>
 
-        <!-- Username -->
         <ion-item>
-          <ion-label position="stacked">{{ "USERNAME" | language }}</ion-label>
-          <ion-input [(ngModel)]="form.username" placeholder="Enter your username"></ion-input>
+          <ion-label position="stacked" class="required-star">{{ "EMAIL" | language }}</ion-label>
+          <ion-input [(ngModel)]="deleteData.email" name="deleteEmail" type="email" required></ion-input>
         </ion-item>
 
-        <!-- Email -->
         <ion-item>
-          <ion-label position="stacked">{{ "EMAIL" | language }}</ion-label>
-          <ion-input [(ngModel)]="form.email" type="email" placeholder="Enter your email"></ion-input>
-        </ion-item>
-
-        <!-- Password -->
-        <ion-item>
-          <ion-label position="stacked">{{ "PASSWORD" | language }}</ion-label>
-          <ion-input [(ngModel)]="form.password" type="password" placeholder="Enter your new password"></ion-input>
+          <ion-label position="stacked" class="required-star">{{ "PASSWORD" | language }}</ion-label>
+          <ion-input [(ngModel)]="deleteData.password" name="deletePassword" type="password" required></ion-input>
         </ion-item>
       </div>
 
-      <div class="right-section">
-        <ion-item>
-          <ion-label position="stacked">{{ "CONFIRM_EMAIL" | language }}</ion-label>
-          <ion-input [(ngModel)]="confirmEmail" type="email" placeholder="Confirm email"></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="stacked">{{ "CONFIRM_PASSWORD" | language }}</ion-label>
-          <ion-input [(ngModel)]="confirmPassword" type="password" placeholder="Confirm password"></ion-input>
-        </ion-item>
+      <!-- Gombok -->
+      <div class="action-buttons">
+        <div *ngIf="!isDeleteSelected && selectedOptions.size > 0">
+          <ion-button type="submit" (click)="onSubmit()" [disabled]="!profileForm.valid">
+            {{ "SAVE_CHANGES" | language }}
+          </ion-button>
+        </div>
 
-      <div class="buttons">
-        <ion-item>
-          <ion-button  [disabled]="!canSubmit()" (click)="onSubmit()">{{ "SAVE_CHANGES" | language }}</ion-button>
-          <ion-button color="danger" (click)="onDeleteProfile()">{{ "DELETE_PROFILE" | language }}</ion-button>
-        </ion-item>
+        <div *ngIf="isDeleteSelected">
+          <ion-button color="danger" type="button" (click)="onDeleteProfile()" [disabled]="!isDeleteFormValid()">
+            {{ "CONFIRM_DELETE" | language }}
+          </ion-button>
+        </div>
       </div>
-    </div>
-    </div>
+    </form>
   </ion-card-content>
 </ion-card>

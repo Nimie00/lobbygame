@@ -1,11 +1,11 @@
-import { IonicModule } from '@ionic/angular';
+import {IonicModule} from '@ionic/angular';
 import {APP_INITIALIZER, NgModule} from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { AngularFireModule } from '@angular/fire/compat';
-import { AngularFireAuthModule } from '@angular/fire/compat/auth';
-import { firebaseConfig } from '../environments/environments';
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
-import { MatDialogModule } from "@angular/material/dialog";
+import {BrowserModule} from '@angular/platform-browser';
+import {AngularFireModule} from '@angular/fire/compat';
+import {AngularFireAuthModule} from '@angular/fire/compat/auth';
+import {firebaseConfig} from '../environments/environments';
+import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+import {MatDialogModule} from "@angular/material/dialog";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {AngularFirestoreModule} from "@angular/fire/compat/firestore";
 import {CommonModule, NgOptimizedImage} from "@angular/common";
@@ -28,10 +28,11 @@ import {
 import {RouterModule, Routes} from "@angular/router";
 import {AuthGuard} from "./shared/guards/auth.guard";
 import {SettingsComponent} from "./pages/settings-component/settings.component";
-import { provideFirestore, getFirestore, setLogLevel } from '@angular/fire/firestore';
+import {provideFirestore, getFirestore} from '@angular/fire/firestore';
 import {ProfileSettingsComponent} from "./pages/profile/profile-settings/profile-settings.component";
 import {ProfileStatisticsComponent} from "./pages/profile/statistics/profile-statistics.component";
 import {GlobalModalComponent} from "./shared/services/modal-services/global-modal.component";
+import {getAuth, provideAuth} from "@angular/fire/auth";
 
 export function initializeLanguage(languageService: LanguageService) {
   return () => languageService.init();
@@ -124,9 +125,8 @@ export const routes: Routes = [
     BrowserModule,
     AngularFireModule.initializeApp(firebaseConfig),
     provideFirestore(() => {
-      const firestore = getFirestore();
-       setLogLevel('debug');
-      return firestore;
+      provideAuth(() => getAuth());
+      return getFirestore();
     }),
     AngularFireAuthModule,
     BrowserAnimationsModule,
@@ -155,5 +155,6 @@ export const routes: Routes = [
       multi: true
     }]
 })
-export class AppModule { }
+export class AppModule {
+}
 

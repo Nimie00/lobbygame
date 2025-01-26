@@ -3,106 +3,211 @@ import {AuthService} from '../../../shared/services/auth.service';
 import {SubscriptionTrackerService} from "../../../shared/services/subscriptionTracker.service";
 import {User} from "../../../shared/models/user.model";
 import {HttpClient} from "@angular/common/http";
+import {AlertController} from "@ionic/angular";
+import {LanguageService} from "../../../shared/services/language.service";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-profile-settings',
   templateUrl: './profile-settings.component.html',
   styleUrls: ['./profile-settings.component.scss']
 })
-export class ProfileSettingsComponent  implements OnInit, OnDestroy {
-  @Input() user: User;
+export class ProfileSettingsComponent implements OnInit, OnDestroy {
   private CATEGORY = "profileSettings"
-  currentUser: any;
-  form: any = {
+  @Input() user: User;
+
+  userInLobby: boolean = false;
+  isDeleteSelected: boolean = false;
+  confirmPassword: string = '';
+  selectedPicture: string | null = null;
+  profilePictures: string[] = [];
+  selectedOptions: Set<string> = new Set<string>();
+
+  availableOptions = [
+    {value: 'picture', label: 'PROFILE_PICTURE'},
+    {value: 'username', label: 'USERNAME'},
+    {value: 'password', label: 'PASSWORD'},
+  ];
+
+  form = {
     username: '',
     email: '',
     password: '',
   };
-  confirmEmail = '';
-  confirmPassword = '';
-  profilePictures: string[] = [];
-  selectedPicture: string | null = null;
+
+  deleteData = {
+    username: '',
+    email: '',
+    password: ''
+  };
+
 
   constructor(private authService: AuthService,
               private tracker: SubscriptionTrackerService,
-              private http: HttpClient) {}
+              private http: HttpClient,
+              private alertController: AlertController,
+              private translateService: LanguageService,
+              private router: Router
+  ) {
+  }
 
   ngOnInit() {
     this.loadProfilePictures();
-      this.currentUser = this.user;
-      this.form.username = this.currentUser.username;
-      this.form.email = this.currentUser.email;
-      this.selectedPicture = this.currentUser.picture || null;
-    }
-
-  onProfilePictureSelect(picture: string) {
-    this.selectedPicture = picture;
+    this.selectedPicture = this.user.picture || null;
+    this.userInLobby = this.user.inLobby === null || this.user.inLobby === '';
   }
 
+  ngOnDestroy(): void {
+    this.tracker.unsubscribeCategory(this.CATEGORY);
+  }
 
-  loadProfilePictures() {
-    this.http.get<string[]>('assets/profilePictures/profile-pictures.json').subscribe({
+  onProfilePictureSelect(picture: string) {
+    this.selectedPicture = picture.split('.')[0];
+  }
+
+  toggleDelete() {
+    this.isDeleteSelected = !this.isDeleteSelected;
+    if (this.isDeleteSelected) {
+      this.selectedOptions.clear();
+    }
+  }
+
+  toggleOption(option: string) {
+    if (this.selectedOptions.has(option)) {
+      this.selectedOptions.delete(option);
+    } else {
+      this.selectedOptions.add(option);
+    }
+  }
+
+  isDeleteFormValid(): boolean {
+    return this.deleteData.username !== '' &&
+      this.deleteData.email !== '' &&
+      this.deleteData.password !== '';
+  }
+
+  async onDeleteProfile() {
+    if (this.userInLobby) {
+      await this.showError(`${this.translateService.translate('CANT_DELETE_WHILE_IN_LOBBY')}`);
+      return;
+    }
+
+    try {
+      await this.authService.reauthenticateUser(this.deleteData.email, this.deleteData.password);
+
+      if (this.deleteData.username !== this.user.username) {
+        await this.showError(`${this.translateService.translate('INVALID_USERNAME')}`);
+        return;
+      }
+      await this.authService.deleteUser();
+      await this.router.navigate(['/login/']);
+    } catch (error) {
+      await this.showError(`${this.translateService.translate('AUTH_FAILED')}`);
+    }
+  }
+
+  async onSubmit() {
+    try {
+      await this.authService.reauthenticateUser(this.user.email, this.confirmPassword);
+
+      let updates: any = {};
+
+      if (this.selectedOptions.has('username')) {
+        if (await this.isUserNameUsable()) {
+          updates.username = this.form.username;
+        } else {
+          await this.showError(`${this.translateService.translate('USERNAME_TAKEN')}`);
+          return;
+        }
+      }
+
+      if (this.selectedOptions.has('password')) {
+        await this.authService.updatePassword(this.form.password);
+      }
+
+      if (this.selectedOptions.has('picture')) {
+        updates.picture = this.selectedPicture;
+      }
+
+      if (Object.values(updates).filter(value => value !== "").length > 0) {
+        await this.authService.updateUserProfile(this.user.id, updates);
+      }
+
+
+      await this.showSuccess(`${this.translateService.translate('CHANGES_SAVED')}`);
+    } catch (error) {
+      await this.handleError(error);
+    }
+  }
+
+  private async handleError(error: any) {
+    let errorMessage = 'UNKNOWN_ERROR';
+
+    if (error.code) {
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          errorMessage = 'EMAIL_IN_USE';
+          break;
+        case 'auth/requires-recent-login':
+          errorMessage = 'REAUTHENTICATION_REQUIRED';
+          break;
+        case 'auth/weak-password':
+          errorMessage = 'WEAK_PASSWORD';
+          break;
+        case 'auth/user-not-found':
+          errorMessage = 'USER_NOT_FOUND';
+          break;
+        case 'auth/network-request-failed':
+          errorMessage = 'NETWORK_ERROR';
+          break;
+        case 'auth/wrong-password':
+          errorMessage = 'INVALID_PASSWORD';
+          break;
+      }
+    }
+
+    let message = `${this.translateService.translate(errorMessage)}`
+    await this.showError(message);
+  }
+
+  private async showSuccess(changesSaved: string) {
+    const alert = await this.alertController.create({
+      header: `${this.translateService.translate('SUCCESS')}`,
+      message: changesSaved,
+      buttons: ['OK']
+    });
+    await alert.present();
+  }
+
+  private async showError(message: string) {
+    const alert = await this.alertController.create({
+      header: `${this.translateService.translate('ERROR')}`,
+      message: message,
+      buttons: ['OK']
+    });
+    await alert.present();
+  }
+
+  private loadProfilePictures() {
+    const pictureSub = this.http.get<string[]>('assets/profilePictures/profile-pictures.json').subscribe({
       next: (pictures) => {
-        console.log(pictures);
         this.profilePictures = pictures;
       },
       error: (err) => {
         console.error('Failed to load profile pictures:', err);
       },
     });
+    this.tracker.add(this.CATEGORY, "jsonLoadSub", pictureSub);
   }
 
-  canSubmit(): boolean {
-    return (
-      this.currentUser.email === this.confirmEmail &&
-      this.form.email !== '' &&
-      this.form.password !== ''
-    );
-  }
-
-  async onSubmit() {
-    if (!this.canSubmit) {
-      console.error('Form validation failed.');
-      return;
-    }
+  private async isUserNameUsable() {
+    if (this.form.username === this.user.username) return false;
 
     try {
-      // Ellenőrizzük az emailt és a jelszót
-      await this.authService.reauthenticateUser(this.confirmEmail, this.confirmPassword);
-
-      // Adatok frissítése
-      const updates: any = {};
-      if (this.form.email !== this.currentUser.email) {
-        await this.authService.updateEmail(this.form.email);
-        updates.email = this.form.email;
-      }
-      if (this.form.password) {
-        await this.authService.updatePassword(this.form.password);
-      }
-      if (this.form.username) {
-        updates.username = this.form.username;
-      }
-      if (this.form.profilePicture) {
-        updates.profilePicture = this.form.profilePicture;
-      }
-
-      // Mentés az adatbázisba
-      await this.authService.updateUserProfile(this.currentUser.uid, updates);
-      console.log('Felhasználói adatok sikeresen frissítve!');
+      return !await this.authService.checkUsernameTaken(this.form.username);
     } catch (error) {
-      console.error('Hiba történt a frissítés során:', error.message);
+      console.error('Error checking username:', error);
+      return false;
     }
-  }
-
-  onDeleteProfile() {
-    console.log('Delete profile action triggered');
-    // TODO: Implement delete logic
-  }
-
-
-
-
-  ngOnDestroy(): void {
-    this.tracker.unsubscribeCategory(this.CATEGORY);
   }
 }

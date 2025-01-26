@@ -36,9 +36,10 @@
           <ion-button expand="block" color="secondary" (click)="changeProfilePart()">Módosítás</ion-button>
         </div>
 
-        <app-profile-settings *ngIf="!showStatistics" [user] = currentUser></app-profile-settings>
-        <app-profile-statistics *ngIf="showStatistics" [user] = currentUser ></app-profile-statistics>
+        <app-profile-settings *ngIf="!showStatistics" [user]=currentUser></app-profile-settings>
+        <app-profile-statistics *ngIf="showStatistics" [user]=currentUser></app-profile-statistics>
       </ion-card-content>
     </ion-card>
   </ng-container>
+  <ion-toolbar class="large-title-fix"></ion-toolbar>
 </ion-content>

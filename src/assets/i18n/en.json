@@ -11,32 +11,26 @@
   "START_GAME": "Start Game",
   "READY_UP": "Ready Up",
   "PASSWORD_PROTECTED_LOBBY": "This lobby is password protected, click here to type in password",
-
   "LOGIN_PAGE": "Login/Registration",
   "PROFILE_PAGE": "Profile",
   "CONTACT_PAGE": "Contact",
   "LOBBIES_PAGE": "Lobbies",
-
   "CONTACT": "Contact",
   "CONTACT_THE_DEV": "Contact the developer at: h267734@stud.u-szeged.hu",
-
   "LOGIN": "Login",
   "REGISTRATION": "Register",
   "LOGOUT": "Logout",
-
   "EMAIL": "Email",
   "PASSWORD": "Password",
   "USERNAME": "Username",
   "FORGOT_PASSWORD": "If you forgot your password fill in the email field and click here",
-  "SWITCH_REGISTER_TO_LOGIN" : "Click here to get to the login window!",
-  "SWITCH_LOGIN_TO_REGISTER" : "Click here to get to the registration window!",
-
+  "SWITCH_REGISTER_TO_LOGIN": "Click here to get to the login window!",
+  "SWITCH_LOGIN_TO_REGISTER": "Click here to get to the registration window!",
   "SETTINGS_MENU": "Settings",
   "LANGUAGE": "Language",
   "ENGLISH": "English",
-  "HUNGARIAN":"Hungarian",
+  "HUNGARIAN": "Hungarian",
   "DARK_MODE": "Dark mode",
-
   "GAME": "Game",
   "OWNER": "Owner",
   "PLAYERS": "Players",
@@ -44,14 +38,12 @@
   "LOBBY_PRIVATE_NOTIFIER_OWNER": "This lobby is set to private, you can find the invite link after clicking the 'Manage Players' button",
   "LOBBY_PRIVATE_NOTIFIER": "This lobby is private",
   "ENTER_PASSWORD": "Enter the password",
-  "SPECTATORS_NOT_ALLOWED" : "The lobby doesn't allow spectators",
-
+  "SPECTATORS_NOT_ALLOWED": "The lobby doesn't allow spectators",
   "AVAILABLE_LOBBIES": "Available Lobbies",
   "REPLAYS": "Replays",
   "CHANGE_TO_REPLAYS": "Change to replays",
   "Change_TO_LIVE_LOBBIES": "Change to live lobbies",
   "CREATE_NEW_LOBBY": "Create New Lobby",
-
   "CLOSE": "Close",
   "SELECT_GAME": "Select Game",
   "LOBBY_NAME": "Lobby name",
@@ -63,19 +55,16 @@
   "MIN_PLAYERS": "Minimal number of players to start the game",
   "MAX_PLAYERS": "Maximal number of players to start the game",
   "CREATE": "Create",
-
   "HOUSE": "House game",
   "PIRAMID": "Magical pyramid",
   "RPS": "Rock-paper-scissors",
   "CARDGAME": "Uno",
   "TESTING_GAME": "Test GameName",
-
-  "ID" : "ID",
+  "ID": "ID",
   "INVITE_LINK": "Invite link",
   "BANNED": "Banned",
   "UNBAN": "Unban",
   "YOU": "You",
-
   "SPECTATING_GAME": "Spectating game",
   "START": "Start",
   "PAUSE": "Pause",
@@ -83,7 +72,6 @@
   "GAME_DOESNT_EXIST": "This game doesn't exist or failed to load",
   "SPECTATING_RPS": "Currently spectating rock-paper-scissors",
   "GAMEPLAY": "Gameplay",
-
   "CHOOSE_ONE": "Choose one",
   "CURRENT_ROUND": "Current round",
   "REAL_ROUND_NUMBER": "Real round number",
@@ -103,13 +91,12 @@
   "CHOICE": "'s Choice",
   "NOT_CHOSEN": "Not chosen",
   "CHOOSE": "Choose",
-  "DRAWED_ROUNDS" : "Drawed rounds",
+  "DRAWED_ROUNDS": "Drawed rounds",
   "JUMP_TO_FIRST_EVENT": "Jump to first event",
   "JUMP_TO_NEXT_EVENT": "Jump to next event",
   "JUMP_TO_REAL_TIME": "Show Real Time",
   "GAME_STARTING_SOON": "The game is starting soon...",
   "UNKNOWN_PLAYER": "Unknown player",
-
   "EDIT_PROFILE": "Edit Profile",
   "MODIFY_YOUR_PROFILE": "Modify your profile",
   "PROFILE_PICTURE": "Profile picture",
@@ -117,15 +104,42 @@
   "CONFIRM_PASSWORD": "Confirmation password",
   "SAVE_CHANGES": "Save changes",
   "DELETE_PROFILE": "Delete profile",
-
   "EVEN_ROUNDS_WARNING": "You set even rounds for this lobby. This could lead to a drawn game as a result.",
   "LONG_GAME_WARNING": "You set more than 5 rounds. This could lead to a very long game.",
   "WARNINGS_NOTIFIER": "The following problems arose",
   "ARE_YOU_SURE_CREATION": "Are you sure you want to create lobby like this",
-
   "COOLDOWN_TITLE": "Remaining time",
   "OPPONENT": "Opponent",
   "YOU_WON_ROUND": "You won this round",
-  "YOU_LOST_ROUND": "You lost this round"
+  "YOU_LOST_ROUND": "You lost this round",
+  "EMAIL_IN_USE": "This email is already registered",
+  "REAUTHENTICATION_REQUIRED": "Please re-login to perform this action",
+  "WEAK_PASSWORD": "Password must be at least 6 characters",
+  "USER_NOT_FOUND": "User not found",
+  "UNKNOWN_ERROR": "An unknown error occurred",
+  "FAILED_TO_DELETE_PROFILE": "Failed to delete profile",
+  "CANT_DELETE_WHILE_IN_LOBBY": "Cannot delete profile while in a lobby",
+  "INVALID_USERNAME": "Invalid username",
+  "AUTH_FAILED": "Credentials don't match",
+  "SELECT_MODIFICATION_TYPE": "Select something you want to change",
+  "CURRENT_PASSWORD_CONFIRM": "Confirmation password",
+  "SELECT_PROFILE_PICTURE": "Choose a new profile picture",
+  "NEW_USERNAME": "New username",
+  "NEW_EMAIL": "New email",
+  "NEW_PASSWORD": "New password",
+  "CHANGES_SAVED": "Changes saved",
+  "NETWORK_ERROR": "Network error, or you typed in the wrong password",
+  "INVALID_PASSWORD": "Invalid confirmation password",
+
+  "USERNAME_TAKEN": "Username already in use",
+  "EMAIL_MISMATCH": "Email and confirmation email doesn't match",
+  "SUCCESS": "Success",
+  "ERROR": "Error",
+  "CONFIRM_DELETE": "Confirm deletion",
+  "CANCEL": "Cancel",
+  "DELETE": "Delete",
+  "CURRENT_EMAIL": "Current email"
+
 }
+
 

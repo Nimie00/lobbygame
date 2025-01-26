@@ -1,11 +1,10 @@
 import {Injectable} from '@angular/core';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
-import {Observable, of, shareReplay} from 'rxjs';
+import {firstValueFrom, Observable, of, shareReplay} from 'rxjs';
 import {switchMap, map} from 'rxjs/operators';
-import {update} from "@angular/fire/database";
-import firebase from "firebase/compat/app";
-
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
 
 @Injectable({
   providedIn: 'root'
@@ -25,18 +24,18 @@ export class AuthService {
   }
 
 
-
   getUserData(): Observable<any> {
     return this.afAuth.authState.pipe(
       switchMap(user => {
         if (user) {
           return this.afs.doc<{ [key: string]: any }>(`users/${user.uid}`).valueChanges().pipe(
-            map(userData => userData ? { ...userData, id: user.uid } : null),
+            map(userData => userData ? {...userData, id: user.uid} : null),
             shareReplay({
               bufferSize: 1,
               refCount: true
             })
           );
+
         } else {
           console.warn('No authenticated user found.');
           return of(null);
@@ -44,8 +43,6 @@ export class AuthService {
       })
     );
   }
-
-
 
 
   isUserLoggedIn(): Observable<boolean> {
@@ -105,8 +102,6 @@ export class AuthService {
           picture: "picture0.png",
         });
         return userCredential;
-      } else {
-        throw new Error('User creation failed');
       }
     } catch (error) {
       console.error('Registration error:', error);
@@ -123,33 +118,58 @@ export class AuthService {
     return this.afAuth.signOut();
   }
 
-  reauthenticateUser(email: string, password: string) {
-    const credential = firebase.auth.EmailAuthProvider.credential(email, password);
-    return this.afAuth.currentUser.then(user => {
-      if (user) {
-        return user.reauthenticateWithCredential(credential);
-      } else {
-        throw new Error('User not found!');
-      }
-    });
+  async reauthenticateUser(email: string, password: string): Promise<void> {
+    console.log(email)
+    console.log(password)
+    try {
+      const credential = firebase.auth.EmailAuthProvider.credential(email, password);
+      const user = await this.afAuth.currentUser;
+      await user?.reauthenticateWithCredential(credential);
+    } catch (error) {
+      throw error;
+    }
   }
 
   // Felhasználó adatainak módosítása
   updateUserProfile(uid: string, data: { username?: string; profilePicture?: string; email?: string }): Promise<void> {
+    console.log(data)
     return this.afs.doc(`users/${uid}`).update(data);
   }
 
-  // Email módosítása
-  updateEmail(newEmail: string): Promise<void> {
-    return this.afAuth.currentUser.then(user => {
-      return user?.updateEmail(newEmail);
-    });
-  }
-
   // Jelszó módosítása
-  updatePassword(newPassword: string): Promise<void> {
+  async updatePassword(newPassword: string): Promise<void> {
     return this.afAuth.currentUser.then(user => {
       return user?.updatePassword(newPassword);
     });
+  }
+
+  async checkUsernameTaken(username: string): Promise<boolean> {
+    try {
+      const snapshot = await firstValueFrom(
+        this.afs.collection('users', ref =>
+          ref.where('username', '==', username).limit(1)
+        ).get()
+      );
+      return !snapshot.empty;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async deleteUser(): Promise<void> {
+    try {
+      const user = await this.afAuth.currentUser;
+
+      // Törlés az adatbázisból
+      await this.afs.doc(`users/${user.uid}`).delete();
+
+      // Törlés az autentikációból
+      await user.delete();
+
+      // Kijelentkeztetés
+      await this.afAuth.signOut();
+    } catch (error) {
+      throw error;
+    }
   }
 }

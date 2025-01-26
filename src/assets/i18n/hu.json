@@ -11,32 +11,26 @@
   "START_GAME": "Játék indítása",
   "READY_UP": "Kész vagyok",
   "PASSWORD_PROTECTED_LOBBY": "Ezt a várót jelszó védi, kattints ide és utánna írd be a jelszót",
-
   "LOGIN_PAGE": "Bejelentkezés/Regisztráció",
   "PROFILE_PAGE": "Profil",
   "CONTACT_PAGE": "Elérhetőség",
   "LOBBIES_PAGE": "Várók",
-
   "CONTACT": "Elérhetőség",
   "CONTACT_THE_DEV": "A fejlesztő itt érhető el: h267734@stud.u-szeged.hu",
-
   "LOGIN": "Bejelentkezés",
   "REGISTRATION": "Regisztráció",
   "LOGOUT": "Kijelentkezés",
-
   "EMAIL": "Email cím",
   "PASSWORD": "Jelszó",
   "USERNAME": "Felhasználónév",
   "FORGOT_PASSWORD": "Ha elfelejtetted a jelszavadat, töltsd ki az email mezőt és kattints ide!",
-  "SWITCH_REGISTER_TO_LOGIN" : "A bejelentkezéshez kattints ide!",
-  "SWITCH_LOGIN_TO_REGISTER" : "A regisztrációhoz kattints ide!",
-
+  "SWITCH_REGISTER_TO_LOGIN": "A bejelentkezéshez kattints ide!",
+  "SWITCH_LOGIN_TO_REGISTER": "A regisztrációhoz kattints ide!",
   "SETTINGS_MENU": "Beállítások",
   "LANGUAGE": "Nyelv",
   "ENGLISH": "Angol",
-  "HUNGARIAN":"Magyar",
+  "HUNGARIAN": "Magyar",
   "DARK_MODE": "Sötét mód",
-
   "GAME": "Játék",
   "OWNER": "Tulajdonos",
   "PLAYERS": "Játékosok",
@@ -44,14 +38,12 @@
   "LOBBY_PRIVATE_NOTIFIER_OWNER": "Ez a váró privátra van állítva, a meghívót tartalmazó linket a 'Játékosok kezelése' menüben találod",
   "LOBBY_PRIVATE_NOTIFIER": "Ez a váró privátra van állítva",
   "ENTER_PASSWORD": "Írd be a jelszót",
-  "SPECTATORS_NOT_ALLOWED" : "A váróhoz nem csatlakozhatnak nézők",
-
+  "SPECTATORS_NOT_ALLOWED": "A váróhoz nem csatlakozhatnak nézők",
   "AVAILABLE_LOBBIES": "Aktív várók",
   "REPLAYS": "Játékok Visszanézése",
   "CHANGE_TO_REPLAYS": "Befejezett játékok visszanézése",
   "Change_TO_LIVE_LOBBIES": "Átváltás aktív várókra",
   "CREATE_NEW_LOBBY": "Új váró létrehozása",
-
   "CLOSE": "Bezárás",
   "SELECT_GAME": "Válassz játékot",
   "LOBBY_NAME": "Váró neve",
@@ -63,19 +55,16 @@
   "MIN_PLAYERS": "Minimum mennyi játékossal lehessen elindítani a játékot",
   "MAX_PLAYERS": "Maximmum mennyi játékossal lehessen elindítani a játékot",
   "CREATE": "Létrehozás",
-
   "HOUSE": "Gazdálkodj okosan",
   "PIRAMID": "Mágikus piramis",
   "RPS": "Kő-papír-olló",
   "CARDGAME": "Uno",
   "TESTING_GAME": "Teszt játéknév",
-
-  "ID" : "Azonosító",
+  "ID": "Azonosító",
   "INVITE_LINK": "Meghívó linkje",
   "BANNED": "Kitiltott",
   "UNBAN": "Kitiltás feloldása",
   "YOU": "Te",
-
   "SPECTATING_GAME": "Nézett játék",
   "START": "Indítás",
   "PAUSE": "Megállítás",
@@ -83,7 +72,6 @@
   "GAME_DOESNT_EXIST": "Az alábbi játék nem létezik, vagy nem sikerült betölteni",
   "SPECTATING_RPS": "Jelenleg kő-papír-ollót nézel",
   "GAMEPLAY": "Játékmenet",
-
   "CHOOSE_ONE": "Válassz egyet",
   "CURRENT_ROUND": "Jelenlegi kör",
   "REAL_ROUND_NUMBER": "Valós körszám",
@@ -109,7 +97,6 @@
   "JUMP_TO_REAL_TIME": "Valós idő mutatása",
   "GAME_STARTING_SOON": "A játék hamarosan kezdődik...",
   "UNKNOWN_PLAYER": "Ismeretlen játékos",
-
   "EDIT_PROFILE": "Profile módosítása",
   "MODIFY_YOUR_PROFILE": "Módosítsd a profilodat",
   "PROFILE_PICTURE": "Profilkép",
@@ -117,16 +104,39 @@
   "CONFIRM_PASSWORD": "Megerősítő jelszó",
   "SAVE_CHANGES": "Változtatások mentése",
   "DELETE_PROFILE": "Profil törlése",
-
   "EVEN_ROUNDS_WARNING": "Páros számú körrel hozod létre a várót. Ez döntetlen eredményt is hozhat.",
   "LONG_GAME_WARNING": "5-nél több kört állítottál be. Ez hosszú játékmenetet eredményezhet.",
   "WARNINGS_NOTIFIER": "A következő figyelmeztetések merültek fel",
   "ARE_YOU_SURE_CREATION": "Biztosan így szeretnéd létrehozni a várót",
-
   "COOLDOWN_TITLE": "Hátralevő idő",
   "OPPONENT": "Ellenfél",
   "YOU_WON_ROUND": "Megnyerted ezt a kört",
-  "YOU_LOST_ROUND": "Elvesztetted ezt a kört"
-
+  "YOU_LOST_ROUND": "Elvesztetted ezt a kört",
+  "EMAIL_IN_USE": "Ez az email már használatban van",
+  "REAUTHENTICATION_REQUIRED": "Kérlek lépj be újra",
+  "WEAK_PASSWORD": "A jelszónak legalább 6 karakternek kell lennie",
+  "USER_NOT_FOUND": "Ez a felhasználó nem létezik",
+  "UNKNOWN_ERROR": "Ismeretlen hiba történt",
+  "FAILED_TO_DELETE_PROFILE": "Nem sikerült a profilt törölni",
+  "CANT_DELETE_WHILE_IN_LOBBY": "Nem törölhető a profil ameddig váróban van",
+  "INVALID_USERNAME": "Nem megfelelő felhasználónév",
+  "AUTH_FAILED": "A megadott adatok nem helyesek",
+  "SELECT_MODIFICATION_TYPE": "Válassz módosítási lehetőséget",
+  "CURRENT_PASSWORD_CONFIRM": "Jelenlegi jelszó megerősítése",
+  "SELECT_PROFILE_PICTURE": "Válassz profilképet",
+  "NEW_USERNAME": "Új felhasználónév",
+  "NEW_EMAIL": "Új email",
+  "NEW_PASSWORD": "Új jelszó",
+  "CHANGES_SAVED": "Változtatások elmentve",
+  "NETWORK_ERROR": "Hálózati hiba vagy rossz jelszót adtál meg",
+  "INVALID_PASSWORD": "Helytelen a megerősítő jelszó",
+  "USERNAME_TAKEN": "A felhasználónév már foglalt",
+  "EMAIL_MISMATCH": "Az email és a megerősítő email nem egyeznek meg",
+  "SUCCESS": "Siker",
+  "ERROR": "Hiba",
+  "CONFIRM_DELETE": "Törlés megerősítése",
+  "CANCEL": "Mégse",
+  "DELETE": "Törlés",
+  "CURRENT_EMAIL": "Aktuális email"
 }
 
