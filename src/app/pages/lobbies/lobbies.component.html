@@ -1,9 +1,4 @@
 <ion-content>
-  <app-create-lobby-modal
-    [currentUser]="currentUser"
-    (closeModal)="handleModalClose()">
-  </app-create-lobby-modal>
-
   <ion-card class="container">
     <ion-card-header>
       <ion-button *ngIf="listLive" expand="block" class="create-lobby-button" (click)="toggleCreateLobby()"
@@ -15,15 +10,15 @@
         {{ (listLive ? 'CHANGE_TO_REPLAYS' : 'Change_TO_LIVE_LOBBIES') | language }}
       </ion-button>
 
-      <h2>
-        {{ (listLive ? 'AVAILABLE_LOBBIES' : 'REPLAYS') | language  }}
-      </h2>
+      <h2>{{ (listLive ? 'AVAILABLE_LOBBIES' : 'REPLAYS') | language }}</h2>
+
     </ion-card-header>
 
     <ion-card-content>
-      <ion-searchbar [(ngModel)]="searchTerm" [debounce]="500" (ionInput)="filterLobbies(this.userId, listLive)"></ion-searchbar>
+      <ion-searchbar [(ngModel)]="searchTerm" [debounce]="500"
+                     (ionInput)="loadLobbies(this.userId, listLive)"></ion-searchbar>
       <ion-list class="lobby-list">
-        <div *ngFor="let lobby of (lobbies | async)">
+        <div *ngFor="let lobby of (lobbiesObservables | async);  trackBy: trackByLobbyId">
           <app-lobby
             [lobby]="lobby"
             [hasLobby]="hasLobby"
@@ -37,4 +32,5 @@
       </ion-list>
     </ion-card-content>
   </ion-card>
+  <app-global-modal></app-global-modal>
 </ion-content>

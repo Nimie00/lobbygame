@@ -82,6 +82,51 @@
   "JUMP_TO_START": "Ugrás az elejére",
   "GAME_DOESNT_EXIST": "Az alábbi játék nem létezik, vagy nem sikerült betölteni",
   "SPECTATING_RPS": "Jelenleg kő-papír-ollót nézel",
-  "GAMEPLAY": "Játékmenet"
+  "GAMEPLAY": "Játékmenet",
+
+  "CHOOSE_ONE": "Válassz egyet",
+  "CURRENT_ROUND": "Jelenlegi kör",
+  "REAL_ROUND_NUMBER": "Valós körszám",
+  "YOUR_CHOICE": "A te választásod",
+  "ko": "Kő",
+  "papir": "Papír",
+  "ollo": "Olló",
+  "NEEDED_WINS": "Még szükséges győzelmek",
+  "PREVIOUS_ROUNDS": "Korábbi körök",
+  "ROUND": "Kör",
+  "ROUND_WINNER": "Kör nyertese",
+  "DRAW": "Döntetlen",
+  "GAME_OVER": "Játék vége",
+  "YOU_WON": "Nyertél",
+  "YOU_LOST": "Vesztettél",
+  "WINNER": "Nyertes",
+  "CHOICE": " Választása",
+  "NOT_CHOSEN": "Nem választott",
+  "CHOOSE": "Válassz",
+  "DRAWED_ROUNDS": "Döntetlen körök",
+  "JUMP_TO_FIRST_EVENT": "Ugrás az első eseményhez",
+  "JUMP_TO_NEXT_EVENT": "Ugrás a következő eseményhez",
+  "JUMP_TO_REAL_TIME": "Valós idő mutatása",
+  "GAME_STARTING_SOON": "A játék hamarosan kezdődik...",
+  "UNKNOWN_PLAYER": "Ismeretlen játékos",
+
+  "EDIT_PROFILE": "Profile módosítása",
+  "MODIFY_YOUR_PROFILE": "Módosítsd a profilodat",
+  "PROFILE_PICTURE": "Profilkép",
+  "CONFIRM_EMAIL": "Megerősítő email",
+  "CONFIRM_PASSWORD": "Megerősítő jelszó",
+  "SAVE_CHANGES": "Változtatások mentése",
+  "DELETE_PROFILE": "Profil törlése",
+
+  "EVEN_ROUNDS_WARNING": "Páros számú körrel hozod létre a várót. Ez döntetlen eredményt is hozhat.",
+  "LONG_GAME_WARNING": "5-nél több kört állítottál be. Ez hosszú játékmenetet eredményezhet.",
+  "WARNINGS_NOTIFIER": "A következő figyelmeztetések merültek fel",
+  "ARE_YOU_SURE_CREATION": "Biztosan így szeretnéd létrehozni a várót",
+
+  "COOLDOWN_TITLE": "Hátralevő idő",
+  "OPPONENT": "Ellenfél",
+  "YOU_WON_ROUND": "Megnyerted ezt a kört",
+  "YOU_LOST_ROUND": "Elvesztetted ezt a kört"
 
 }
+

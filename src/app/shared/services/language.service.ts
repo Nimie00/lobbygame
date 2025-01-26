@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, catchError, finalize, Observable, tap } from 'rxjs';
+import {Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {BehaviorSubject, catchError, finalize, Observable, tap} from 'rxjs';
+import {setLogLevel} from "@angular/fire/firestore";
 
 @Injectable({
   providedIn: 'root'
@@ -52,6 +53,7 @@ export class LanguageService {
       console.error('Error saving translations to storage:', error);
     }
   }
+
   loadTranslations(lang: string): Promise<void> {
     const url = `${this.baseUrl}/${lang}.json`;
 
@@ -90,18 +92,16 @@ export class LanguageService {
     });
   }
 
-
   translate(key: string): string {
     const currentLang = this.currentLanguage.value;
 
     if (this.translations[currentLang] && this.translations[currentLang][key]) {
       return this.translations[currentLang]?.[key];
     } else {
-      console.error(`Translation not found for key: ${key} in language: ${currentLang}`);
+      // console.error(`Translation not found for key: ${key} in language: ${currentLang}`);
       return key;
     }
   }
-
 
 
   getCurrentLanguage() {

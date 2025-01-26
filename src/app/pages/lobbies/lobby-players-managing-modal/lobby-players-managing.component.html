@@ -1,4 +1,4 @@
-<ion-modal #lobbyPlayersModal>
+<ion-modal #lobbyPlayersModal [isOpen]="isModalOpen" (didDismiss)="close()">
   <ng-template>
     <ion-header>
       <ion-toolbar>
@@ -10,37 +10,35 @@
     </ion-header>
 
     <ion-content>
-      <!-- Current Players Section -->
-      <ng-container *ngIf="lobbyObservable | async as lobbyO">
+      <ng-container *ngIf="lobbyData">
         <ion-list>
           <ion-list-header>
             <ion-label>{{ "PLAYERS" | language }}</ion-label>
           </ion-list-header>
 
-          <ion-item *ngFor="let playerId of lobbyO.players; let i = index">
+          <ion-item *ngFor="let playerId of lobbyData.players; let i = index">
             <ion-label>
-              <h2>{{ lobbyO.playerNames[i] }}
-                <span
-                *ngIf="currentUser.username === lobbyO.playerNames[i]">({{ "YOU" | language }})
-                <h5 *ngIf="currentUser.id=== lobbyO.ownerId">--{{ "OWNER" | language}}</h5>
-              </span>
+              <h2>
+                {{ lobbyData.playerNames[i] }}
+                <span *ngIf="currentUser.username === lobbyData.playerNames[i]">
+                  ({{ "YOU" | language }})
+                  <h5 *ngIf="currentUser.id === lobbyData.ownerId">--{{ "OWNER" | language }}</h5>
+                </span>
               </h2>
-
               <p class="player-id">{{ "ID" | language }}: {{ playerId }}</p>
             </ion-label>
 
-            <!-- Player Actions -->
-            <ion-buttons slot="end" *ngIf="playerId !== lobbyO.ownerId">
-              <ion-button (click)="renamePlayer(playerId, lobbyO.playerNames[i])" color="primary">
+            <ion-buttons slot="end" *ngIf="playerId !== lobbyData.ownerId && lobbyData.ownerId === currentUser.id" >
+              <ion-button (click)="renamePlayer(playerId, lobbyData.playerNames[i])" color="primary">
                 <ion-icon name="create-outline"></ion-icon>
               </ion-button>
-              <ion-button (click)="kickPlayer(playerId, lobbyO.playerNames[i])" color="warning">
+              <ion-button (click)="kickPlayer(playerId, lobbyData.playerNames[i])" color="warning">
                 <ion-icon name="exit-outline"></ion-icon>
               </ion-button>
-              <ion-button (click)="banPlayer(playerId, lobbyO.playerNames[i])" color="danger">
+              <ion-button (click)="banPlayer(playerId, lobbyData.playerNames[i])" color="danger">
                 <ion-icon name="ban-outline"></ion-icon>
               </ion-button>
-              <ion-button (click)="promotePlayer(playerId, lobbyO.playerNames[i])" color="danger">
+              <ion-button (click)="promotePlayer(playerId, lobbyData.playerNames[i])" color="danger">
                 <ion-icon name="diamond-outline"></ion-icon>
               </ion-button>
             </ion-buttons>
@@ -50,8 +48,8 @@
         <!-- Invite Link -->
         <ion-item>
           <ion-label>{{ "INVITE_LINK" | language }}</ion-label>
-          <ion-text>{{ routertext + lobbyO?.id }}</ion-text>
-          <ion-button (click)="copyToClipboard(routertext + lobbyO?.id)" class='padding-left'>
+          <ion-text>{{ routerText + lobbyData?.id }}</ion-text>
+          <ion-button (click)="copyToClipboard(routerText + lobbyData?.id)" class="padding-left">
             <ion-icon name="copy-outline"></ion-icon>
           </ion-button>
         </ion-item>
@@ -61,12 +59,12 @@
           <ion-list-header>
             <ion-label>{{ "BANNED" | language }} {{ "PLAYERS" | language }}</ion-label>
           </ion-list-header>
-          <ion-item *ngFor="let bannedId of lobbyO.bannedPlayers; let i = index">
+          <ion-item *ngFor="let bannedId of lobbyData.bannedPlayers; let i = index">
             <ion-label>
-              <h2>{{ lobbyO.bannedPlayerNames[i] }}</h2>
+              <h2>{{ lobbyData.bannedPlayerNames[i] }}</h2>
               <p class="player-id">{{ "ID" | language }}: {{ bannedId }}</p>
             </ion-label>
-            <ion-button slot="end" (click)="unbanPlayer(bannedId, lobbyO.bannedPlayerNames[i])" color="medium">
+            <ion-button slot="end" (click)="unbanPlayer(bannedId, lobbyData.bannedPlayerNames[i])" color="medium">
               <ion-icon name="refresh-outline"></ion-icon>
               {{ "UNBAN" | language }}
             </ion-button>

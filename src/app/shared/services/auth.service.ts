@@ -1,8 +1,11 @@
 import {Injectable} from '@angular/core';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
-import {Observable, of} from 'rxjs';
+import {Observable, of, shareReplay} from 'rxjs';
 import {switchMap, map} from 'rxjs/operators';
+import {update} from "@angular/fire/database";
+import firebase from "firebase/compat/app";
+
 
 @Injectable({
   providedIn: 'root'
@@ -11,11 +14,16 @@ export class AuthService {
   user$: Observable<any>;
   private isLoggedIn = false;
 
-  constructor(private afAuth: AngularFireAuth,
-              private afs: AngularFirestore,
-  ) {
-    this.user$ = this.getUserData();
+
+  constructor(private afAuth: AngularFireAuth, private afs: AngularFirestore) {
+    this.user$ = this.getUserData().pipe(
+      shareReplay({
+        bufferSize: 1,
+        refCount: true
+      })
+    );
   }
+
 
 
   getUserData(): Observable<any> {
@@ -23,21 +31,21 @@ export class AuthService {
       switchMap(user => {
         if (user) {
           return this.afs.doc<{ [key: string]: any }>(`users/${user.uid}`).valueChanges().pipe(
-            map(userData => {
-              if (userData) {
-                // `id` mezőt hozzáadjuk egy új objektumban
-                return { ...userData, id: user.uid };
-              } else {
-                return null;
-              }
+            map(userData => userData ? { ...userData, id: user.uid } : null),
+            shareReplay({
+              bufferSize: 1,
+              refCount: true
             })
           );
         } else {
+          console.warn('No authenticated user found.');
           return of(null);
         }
       })
     );
   }
+
+
 
 
   isUserLoggedIn(): Observable<boolean> {
@@ -94,6 +102,7 @@ export class AuthService {
           xp: 0,
           level: 0,
           badges: ['registered'],
+          picture: "picture0.png",
         });
         return userCredential;
       } else {
@@ -105,7 +114,6 @@ export class AuthService {
     }
   }
 
-
   resetPassword(email: string) {
     return this.afAuth.sendPasswordResetEmail(email);
   }
@@ -113,5 +121,35 @@ export class AuthService {
   logout() {
     this.isLoggedIn = false;
     return this.afAuth.signOut();
+  }
+
+  reauthenticateUser(email: string, password: string) {
+    const credential = firebase.auth.EmailAuthProvider.credential(email, password);
+    return this.afAuth.currentUser.then(user => {
+      if (user) {
+        return user.reauthenticateWithCredential(credential);
+      } else {
+        throw new Error('User not found!');
+      }
+    });
+  }
+
+  // Felhasználó adatainak módosítása
+  updateUserProfile(uid: string, data: { username?: string; profilePicture?: string; email?: string }): Promise<void> {
+    return this.afs.doc(`users/${uid}`).update(data);
+  }
+
+  // Email módosítása
+  updateEmail(newEmail: string): Promise<void> {
+    return this.afAuth.currentUser.then(user => {
+      return user?.updateEmail(newEmail);
+    });
+  }
+
+  // Jelszó módosítása
+  updatePassword(newPassword: string): Promise<void> {
+    return this.afAuth.currentUser.then(user => {
+      return user?.updatePassword(newPassword);
+    });
   }
 }

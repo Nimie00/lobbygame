@@ -4,31 +4,44 @@
 }
 
 .choices img {
-  width: 100px;
-  height: 100px;
-  cursor: pointer;
+  width: 400px;
+  height: 400px;
+  cursor: crosshair;
 }
 
-.player1 ion-row,
-.player2 ion-row {
+.player0 ion-row,
+.player1 ion-row {
   margin-bottom: 10px;
 }
 
-.player1 img,
-.player2 img {
+.player0 img,
+.player1 img {
   max-width: 100%;
   height: auto;
 }
 
-
-.player1 {
-  background-color: rgba(0, 0, 255, 0.6);
-  border: 1px solid #0000b3;
+.player0{
+  border-color: var(--player0-color);
+  background-color: var(--player0-color);
 }
 
-.player2 {
-  background-color: rgba(255, 0, 0, 0.6);
-  border: 1px solid #b30000;
+.player1{
+  border-color: var(--player1-color);
+  background-color: var(--player1-color);
+}
+
+ion-label{
+  color:black;
 }
 
 
+:host {
+  --player0-color: rgba(0, 114, 178, 1);
+  --player1-color: rgba(230, 159, 0, 1);
+  --player2-color: rgba(0, 158, 115, 1);
+  --player3-color: rgba(204, 121, 167, 1);
+  --player4-color: rgba(213, 94, 0, 1);
+  --player5-color: rgba(86, 180, 233, 1);
+  --player6-color: rgba(171, 171, 171, 1);
+  --player7-color: rgba(240, 228, 66, 1);
+}

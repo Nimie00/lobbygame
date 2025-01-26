@@ -13,12 +13,14 @@ export interface BaseGame {
   gameModifiers: Record<string, any>;
   currentRound: number;
   maxRounds: number;
+  bestOfRounds: number;
+  gameEnded: boolean;
   rounds: {
     [roundNumber: number]: {
       choices: {
         [player: string]: {
           choice: string;
-          timestamps: Date
+          timestamp: Date
         };
       };
       winner: string | null;

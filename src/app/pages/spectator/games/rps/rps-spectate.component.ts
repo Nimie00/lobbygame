@@ -10,6 +10,7 @@ import {SubscriptionTrackerService} from "../../../../shared/services/subscripti
 export class RpsSpectateComponent implements OnInit, OnDestroy, OnChanges {
   private CATEGORY = "rpsSpectate"
   @Input() game!: any;
+  @Input() playerChoices: { [username: string]: string } = {};
   lobbyId: string;
   gameEnded: boolean = false;
   winner: string | null = null;
@@ -18,10 +19,9 @@ export class RpsSpectateComponent implements OnInit, OnDestroy, OnChanges {
   choice2: string = null;
   name1: string;
   name2: string;
-  allchanges: number = -1;
-  roundchanes: number = -1;
-  @Input() playerChoices: { [username: string]: string } = {};
-  private roundWinner: string;
+  allChanges: number = -1;
+  roundChanges: number = -1;
+  roundWinner: string;
 
 
 
@@ -46,16 +46,16 @@ export class RpsSpectateComponent implements OnInit, OnDestroy, OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     if (changes['playerChoices'] && changes['playerChoices'].currentValue) {
       if (changes['playerChoices'] && Object.keys(changes['playerChoices'].currentValue).length === 0) {
-        this.allchanges = -1;
-        this.roundchanes = -1;
+        this.allChanges = -1;
+        this.roundChanges = -1;
       }
       this.playerChoices = changes['playerChoices'].currentValue;
-      this.allchanges += 1;
-      this.roundchanes += 1;
+      this.allChanges += 1;
+      this.roundChanges += 1;
       this.choice1 = this.playerChoices[this.name1]
       this.choice2 = this.playerChoices[this.name2]
 
-      if (this.roundchanes === 2) {
+      if (this.roundChanges === 2) {
 
         if (this.choice1 === this.choice2) {
           console.log("Winner: draw");
@@ -73,13 +73,13 @@ export class RpsSpectateComponent implements OnInit, OnDestroy, OnChanges {
         }
 
         setTimeout(() => {
-          this.roundchanes = 0;
+          this.roundChanges = 0;
           this.playerChoices[this.name1] = null;
           this.playerChoices[this.name2] = null;
-          this.choice1 = this.playerChoices[this.name1];
-          this.choice2 = this.playerChoices[this.name2];
+          this.choice1 = null;
+          this.choice2 = null;
 
-        }, 750);
+        }, 99);
       }
     }
   }

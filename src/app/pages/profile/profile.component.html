@@ -1,9 +1,44 @@
-<div>
-  <h2>Profile</h2>
-  <ion-item *ngFor="let item of user | keyvalue">
-    <ion-label>
-      <h2>{{ item.key }}</h2>
-      <p>{{ item.value | json }}</p>
-    </ion-label>
-  </ion-item>
-</div>
+<ion-content>
+  <ng-container>
+    <ion-card *ngIf="currentUser">
+      <ion-card-title>{{ "PROFILE_PAGE" | language }}</ion-card-title>
+      <ion-card-content class="profile-card-content">
+        <!-- Felhasználói adatok és kép -->
+        <div class="profile-info">
+          <img
+            [ngSrc]="'assets/profilePictures/' + currentUser.picture + '.png'"
+            [width]="200"
+            [height]="200"
+            [alt]="'Profile picture'"
+            [priority]="true">
+          <div class="profile-details">
+            <p><strong>Felhasználónév:</strong> {{ currentUser.username }}</p>
+            <p><strong>Jogosultság:</strong> {{ currentUser.roles }}</p>
+            <p><strong>Szint:</strong> {{ currentUser.level }}</p>
+            <p><strong>Kitűző:</strong> {{ currentUser.badges }}</p>
+          </div>
+        </div>
+
+        <!-- Tapasztalati pont jelző -->
+        <div class="xp-bar-container">
+          <div class="xp-bar">
+            <div
+              class="xp-bar-progress"
+              [style.width.%]="(currentUser.xp / nextLevel.xp) * 100">
+            </div>
+          </div>
+          <p class="xp-info">{{ currentUser.xp }} / {{ nextLevel.xp }} XP</p>
+        </div>
+
+        <!-- Gombok -->
+        <div class="button-group">
+          <ion-button expand="block" color="primary" (click)="changeProfilePart()">Statisztika</ion-button>
+          <ion-button expand="block" color="secondary" (click)="changeProfilePart()">Módosítás</ion-button>
+        </div>
+
+        <app-profile-settings *ngIf="!showStatistics" [user] = currentUser></app-profile-settings>
+        <app-profile-statistics *ngIf="showStatistics" [user] = currentUser ></app-profile-statistics>
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
+</ion-content>

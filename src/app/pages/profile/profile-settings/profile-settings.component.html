@@ -1,0 +1,66 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ "EDIT_PROFILE" | language }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-card>
+  <ion-card-header>
+    <ion-card-title>{{ "MODIFY_YOUR_PROFILE" | language }}</ion-card-title>
+  </ion-card-header>
+
+  <ion-card-content>
+    <div class="container">
+      <div class="left-section">
+        <ion-item>
+          <ion-label position="stacked">{{ "PROFILE_PICTURE" | language }}</ion-label>
+          <div class="profile-picture-selection">
+            <img
+              *ngFor="let picture of profilePictures"
+              [src]="'assets/profilePictures/'+picture"
+              [class.selected]="picture === selectedPicture"
+              (click)="onProfilePictureSelect(picture)"
+              class="profile-picture"
+            />
+          </div>
+        </ion-item>
+
+        <!-- Username -->
+        <ion-item>
+          <ion-label position="stacked">{{ "USERNAME" | language }}</ion-label>
+          <ion-input [(ngModel)]="form.username" placeholder="Enter your username"></ion-input>
+        </ion-item>
+
+        <!-- Email -->
+        <ion-item>
+          <ion-label position="stacked">{{ "EMAIL" | language }}</ion-label>
+          <ion-input [(ngModel)]="form.email" type="email" placeholder="Enter your email"></ion-input>
+        </ion-item>
+
+        <!-- Password -->
+        <ion-item>
+          <ion-label position="stacked">{{ "PASSWORD" | language }}</ion-label>
+          <ion-input [(ngModel)]="form.password" type="password" placeholder="Enter your new password"></ion-input>
+        </ion-item>
+      </div>
+
+      <div class="right-section">
+        <ion-item>
+          <ion-label position="stacked">{{ "CONFIRM_EMAIL" | language }}</ion-label>
+          <ion-input [(ngModel)]="confirmEmail" type="email" placeholder="Confirm email"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">{{ "CONFIRM_PASSWORD" | language }}</ion-label>
+          <ion-input [(ngModel)]="confirmPassword" type="password" placeholder="Confirm password"></ion-input>
+        </ion-item>
+
+      <div class="buttons">
+        <ion-item>
+          <ion-button  [disabled]="!canSubmit()" (click)="onSubmit()">{{ "SAVE_CHANGES" | language }}</ion-button>
+          <ion-button color="danger" (click)="onDeleteProfile()">{{ "DELETE_PROFILE" | language }}</ion-button>
+        </ion-item>
+      </div>
+    </div>
+    </div>
+  </ion-card-content>
+</ion-card>

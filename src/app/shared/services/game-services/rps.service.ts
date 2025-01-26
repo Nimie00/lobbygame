@@ -14,6 +14,7 @@ export class RpsService {
     private auth: AngularFireAuth,
     private authService: AuthService,
   ) {
+    // setLogLevel('debug');
   }
 
 
@@ -32,7 +33,6 @@ export class RpsService {
           timestamp: new Date()
         }
       };
-
       gameDocRef.update(updateData);
       return true;
     } catch (error) {

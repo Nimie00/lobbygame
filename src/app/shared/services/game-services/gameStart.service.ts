@@ -3,18 +3,19 @@ import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {Router} from "@angular/router";
 import {SubscriptionTrackerService} from "../subscriptionTracker.service";
 import {Lobby} from "../../models/lobby.model";
+import {LanguageService} from "../language.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class GameStartService {
   private CATEGORY = "gameStart";
-  isSpectator: boolean;
 
   constructor(
     private firestore: AngularFirestore,
     private router: Router,
-    private subscriptionTracker: SubscriptionTrackerService
+    private subscriptionTracker: SubscriptionTrackerService,
+    private translateService: LanguageService,
   ) {
   }
 
@@ -48,7 +49,8 @@ export class GameStartService {
 
       const countdownInterval = setInterval(() => {
         if (countdown > 0) {
-          this.showCountdownMessage(`A játék hamarosan kezdődik... ${countdown}`);
+
+          this.showCountdownMessage(`${this.translateService.translate("GAME_STARTING_SOON")} ${countdown}`);
           countdown--;
         } else {
           clearInterval(countdownInterval);
@@ -91,6 +93,10 @@ export class GameStartService {
 
   openSpectatorWindow(lobbyId: string){
     this.router.navigate(['/spectate/' + lobbyId]);
+  }
+
+  openSpectatorReplayWindow(lobbyId: string){
+    this.router.navigate(['/spectate/' + lobbyId + '/replay']);
   }
 
 }

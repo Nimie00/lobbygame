@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
-import {firstValueFrom, Observable} from 'rxjs';
+import {firstValueFrom, Observable, shareReplay} from 'rxjs';
 import {map} from 'rxjs/operators';
 import firebase from 'firebase/compat/app';
 import {Lobby} from '../models/lobby.model';
@@ -8,40 +8,54 @@ import {User} from '../models/user.model';
 import DocumentReference = firebase.firestore.DocumentReference;
 import {BaseGame} from "../models/games.gameplaydata.model";
 import {Game} from "../models/game.model";
-import {Firestore, doc, updateDoc, arrayUnion, writeBatch, arrayRemove} from '@angular/fire/firestore';
-
+import {arrayUnion, arrayRemove, setLogLevel} from '@angular/fire/firestore';
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class LobbyService {
+  private lobbiesCache$: { [key: string]: Observable<{ userLobby: Lobby | null, otherLobbies: Lobby[] }> } = {};
+  private readonly gamesCacheKey = 'gamesCache';
+
+
   constructor(private firestore: AngularFirestore,
   ) {
   }
 
+
   getLobbies(userId: string, live: boolean): Observable<{ userLobby: Lobby | null, otherLobbies: Lobby[] }> {
-    return this.firestore.collection<Lobby>('lobbies', ref =>
-      live
-        ? ref.where('status', '!=', 'ended')
-        : ref.where('status', '==', 'ended')
-    ).snapshotChanges().pipe(
-      map(actions => {
-        const lobbies = actions.map(a => {
-          const data = a.payload.doc.data() as Lobby;
-          const id = a.payload.doc.id;
-          return { id, ...data };
-        });
+    const cacheKey = `${userId}-${live}`;
 
-        const userLobby = lobbies.find(lobby => lobby.ownerId === userId) || null;
-        const otherLobbies = lobbies.filter(lobby => lobby.ownerId !== userId);
+    if (!this.lobbiesCache$[cacheKey]) {
+      this.lobbiesCache$[cacheKey] = this.firestore.collection<Lobby>('lobbies', ref =>
+        live
+          ? ref.where('status', '!=', 'ended')
+          : ref.where('status', '==', 'ended')
+      ).snapshotChanges().pipe(
+        map(actions => {
+          const lobbies = actions.map(a => {
+            const data = a.payload.doc.data() as Lobby;
+            const id = a.payload.doc.id;
+            return {id, ...data};
+          });
 
-        return {
-          userLobby,
-          otherLobbies
-        };
-      })
-    );
+          const userLobby = lobbies.find(lobby => lobby.ownerId === userId && lobby.status != "ended") || null;
+          const otherLobbies = lobbies.filter(lobby => lobby.ownerId !== userId || (lobby.ownerId === userId && lobby.status == "ended"));
+
+          return {
+            userLobby,
+            otherLobbies
+          };
+        }),
+        shareReplay({
+          bufferSize: 1,
+          refCount: true
+        })
+      );
+    }
+
+    return this.lobbiesCache$[cacheKey];
   }
 
   createLobby(lobbyData: Omit<Lobby, 'id'>, userId: string): Promise<DocumentReference<Lobby>> {
@@ -98,7 +112,6 @@ export class LobbyService {
         );
       }
 
-      // Frissítjük a playerek adatait
       for (const playerId of lobbyData.players) {
         userUpdates.push(
           this.firestore.collection('users').doc(playerId).update({
@@ -107,7 +120,6 @@ export class LobbyService {
         );
       }
 
-      // Töröljük a lobby dokumentumot
       userUpdates.push(
         this.firestore.collection('lobbies').doc(lobbyId).delete()
       );
@@ -186,9 +198,11 @@ export class LobbyService {
       spectatorNames: lobby.spectatorNames,
       winner: null,
       maxRounds: lobby.maxRounds,
+      bestOfRounds: lobby.maxRounds,
       rounds: {},
       endReason: null,
       currentRound: 0,
+      gameEnded:false,
       ownerId: lobby.ownerId,
       gameType: lobby.gameType,
     };
@@ -238,22 +252,41 @@ export class LobbyService {
   }
 
   async getLobbySnapshot(lobbyId: string): Promise<Lobby | undefined> {
-    const docSnapshot = await firstValueFrom(this.firestore.doc<Lobby>(`lobbies/${lobbyId}`).get());
-    if (docSnapshot.exists) {
-      return docSnapshot.data() as Lobby;
-    } else {
+    try {
+      const docSnapshot = await firstValueFrom(
+        this.firestore.doc<Lobby>(`lobbies/${lobbyId}`).get()
+      );
+      return docSnapshot.exists ? (docSnapshot.data() as Lobby) : undefined;
+    } catch (error) {
+      console.error('Error fetching lobby snapshot:', error);
       return undefined;
     }
   }
 
   async getGames(): Promise<Game[]> {
+    const cachedGames = localStorage.getItem(this.gamesCacheKey);
+    if (cachedGames) {
+      try {
+//        console.log(JSON.stringify(JSON.parse(cachedGames)));
+        return JSON.parse(cachedGames) as Game[];
+      } catch (error) {
+        console.error('Hiba a cache feldolgozása során:', error);
+        localStorage.removeItem(this.gamesCacheKey);
+      }
+    }
+
     const gamesSnapshot = await firstValueFrom(
       this.firestore.collection('games').get()
     );
-    return gamesSnapshot.docs.map(doc => {
+
+    const games = gamesSnapshot.docs.map(doc => {
       const data = doc.data() as Record<string, any>;
       return {id: doc.id, ...data} as Game;
     });
+
+    localStorage.setItem(this.gamesCacheKey, JSON.stringify(games));
+
+    return games;
   }
 
   async endLobby(lobbyId: string, winner: string, endReason: string): Promise<void> {
@@ -268,6 +301,8 @@ export class LobbyService {
     const players = lobbyData?.players || [];
     const spectators = lobbyData?.spectators || [];
 
+    console.log("Service lobbydata: ", lobbyData);
+
     const batch = this.firestore.firestore.batch();
 
     [...players, ...spectators].forEach(userId => {
@@ -276,7 +311,7 @@ export class LobbyService {
     });
 
     const gameplayRef = this.firestore.doc('gameplay/' + lobbyId).ref;
-    batch.update(gameplayRef, {status: 'ended', winner: winner, endReason: endReason, endedAt: new Date()});
+    batch.update(gameplayRef, {status: 'ended', winner: winner, endReason: endReason, endedAt: new Date(), gameEnded: true});
     batch.update(lobbyRef.ref, {status: 'ended'});
 
     await batch.commit();

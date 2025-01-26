@@ -21,6 +21,7 @@ nav {
         &:hover {
           font-weight: bold;
           text-decoration: underline;
+          transform: scale(1.05);
         }
       }
     }
@@ -30,4 +31,6 @@ nav {
 router-outlet {
   display: block;
   margin-top: 1rem;
+  margin-bottom: 1rem;
+
 }

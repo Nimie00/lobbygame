@@ -1,0 +1,78 @@
+/* Alap stílusok a profilképekhez */
+.profile-picture {
+  padding: 10px;
+  border: 1px solid #000;
+  border-radius: 3px;
+  cursor: pointer;
+  margin: 15px;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+/* Profilkép hover és aktív állapot */
+.profile-picture:hover {
+  transform: scale(1.1);
+  border-color: #007bff; /* Kiemelés színe hover esetén */
+}
+
+.profile-picture:active {
+  transform: scale(0.9);
+  opacity: 0.8;
+}
+
+/* Kiemelés a kiválasztott profilképhez */
+.profile-picture.selected {
+  border-color: #28a745; /* Zöld szegély a kiválasztott képnél */
+  box-shadow: 0 0 10px #28a745; /* Halvány zöld fényhatás */
+  transform: scale(1.15); /* Kicsit nagyobb méret a kiválasztáskor */
+}
+
+/* Gomb hover és aktív állapot */
+ion-button:hover {
+  transform: scale(1.05);
+}
+
+ion-button:active {
+  transform: scale(0.9);
+  opacity: 0.8;
+}
+
+/* Konténerek elrendezése */
+.container {
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin: 20px;
+}
+
+/* Bal oldali információk */
+.left-section {
+  flex: 1;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+}
+
+/* Jobb oldali információk */
+.right-section {
+  flex: 1;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #f2f2f2;
+  position: relative;
+}
+
+/* Required megjelölés */
+.right-section::before {
+  content: "Required";
+  position: absolute;
+  top: -10px;
+  left: 10px;
+  background-color: #dc3545;
+  color: white;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 5px;
+}

@@ -9,8 +9,10 @@
         <ion-label><strong>{{ "OWNER" | language }}: {{ lobby.ownerName }}</strong></ion-label>
         <ion-label><strong>{{ "PLAYERS" | language }}: {{ lobby.players.length }}</strong></ion-label>
         <ion-label><strong>{{ "SPECTATORS" | language }}: {{ lobby.spectators.length }}</strong></ion-label>
-        <p *ngIf="lobby.private && lobby.ownerId === currentUser.id" ><strong>{{ "LOBBY_PRIVATE_NOTIFIER_OWNER" | language }}</strong></p>
-        <p *ngIf="lobby.private && lobby.ownerId !== currentUser.id" ><strong>{{ "LOBBY_PRIVATE_NOTIFIER" | language }}</strong></p>
+        <p *ngIf="lobby.private && lobby.ownerId === currentUser.id">
+          <strong>{{ "LOBBY_PRIVATE_NOTIFIER_OWNER" | language }}</strong></p>
+        <p *ngIf="lobby.private && lobby.ownerId !== currentUser.id">
+          <strong>{{ "LOBBY_PRIVATE_NOTIFIER" | language }}</strong></p>
 
       </div>
 
@@ -62,14 +64,3 @@
     </ion-content>
   </ng-template>
 </ion-modal>
-
-<app-create-lobby-modal #createLobbyModal
-                        [currentUser]="currentUser"
-                        (closeModal)="closeCreateLobbyModal()"
-                        [lobby]="lobby"></app-create-lobby-modal>
-
-<app-lobby-players-managing #lobbyPlayersModal
-                            [currentUser]="currentUser"
-                            [lobbyId]="lobby.id"
-                            (closeModal)="closeLobbyPlayersModal()">
-</app-lobby-players-managing>

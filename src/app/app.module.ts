@@ -28,6 +28,10 @@ import {
 import {RouterModule, Routes} from "@angular/router";
 import {AuthGuard} from "./shared/guards/auth.guard";
 import {SettingsComponent} from "./pages/settings-component/settings.component";
+import { provideFirestore, getFirestore, setLogLevel } from '@angular/fire/firestore';
+import {ProfileSettingsComponent} from "./pages/profile/profile-settings/profile-settings.component";
+import {ProfileStatisticsComponent} from "./pages/profile/statistics/profile-statistics.component";
+import {GlobalModalComponent} from "./shared/services/modal-services/global-modal.component";
 
 export function initializeLanguage(languageService: LanguageService) {
   return () => languageService.init();
@@ -79,6 +83,11 @@ export const routes: Routes = [
     component: SpectateComponent,
     canActivate: [AuthGuard]
   },
+  {
+    path: 'spectate/:lobbyId/replay',
+    component: SpectateComponent,
+    canActivate: [AuthGuard]
+  },
 
   {
     path: 'settings',
@@ -94,7 +103,7 @@ export const routes: Routes = [
 
 @NgModule({
   declarations: [
-    AppComponent ,
+    AppComponent,
     LanguagePipe,
     ContactComponent,
     LoginComponent,
@@ -107,10 +116,18 @@ export const routes: Routes = [
     SpectateComponent,
     LobbyPlayersManagingComponent,
     SettingsComponent,
+    ProfileSettingsComponent,
+    ProfileStatisticsComponent,
+    GlobalModalComponent,
   ],
   imports: [
     BrowserModule,
     AngularFireModule.initializeApp(firebaseConfig),
+    provideFirestore(() => {
+      const firestore = getFirestore();
+       setLogLevel('debug');
+      return firestore;
+    }),
     AngularFireAuthModule,
     BrowserAnimationsModule,
     MatDialogModule,
@@ -119,6 +136,7 @@ export const routes: Routes = [
     AngularFirestoreModule,
     CommonModule,
     HttpClientModule,
+    BrowserAnimationsModule,
 
     NgOptimizedImage,
     IonicModule.forRoot(),

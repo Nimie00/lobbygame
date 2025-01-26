@@ -1,4 +1,4 @@
-import {Component, ViewChild, Output, EventEmitter, Input} from '@angular/core';
+import {Component, ViewChild, Output, EventEmitter, Input, OnInit, OnDestroy} from '@angular/core';
 import {IonModal} from '@ionic/angular';
 import {CreateLobbyData} from '../../../shared/models/create-lobby.interface';
 import {LobbyService} from "../../../shared/services/lobby.service";
@@ -6,17 +6,18 @@ import {Lobby} from "../../../shared/models/lobby.model";
 import {User} from "../../../shared/models/user.model";
 import {SubscriptionTrackerService} from "../../../shared/services/subscriptionTracker.service";
 import {Game} from "../../../shared/models/game.model";
+import {LanguageService} from "../../../shared/services/language.service";
 
 @Component({
   selector: 'app-create-lobby-modal',
   templateUrl: './create-lobby-modal.component.html',
   styleUrls: ['./create-lobby-modal.component.scss']
 })
-export class CreateLobbyModalComponent {
+export class CreateLobbyModalComponent implements OnInit, OnDestroy {
   private CATEGORY = "create-lobby-modal"
   @Input() currentUser: User; // Adat fogadása
   @Input() lobby: Lobby | null; // Adat fogadása
-  @ViewChild('createLobbyModal') modal!: IonModal;
+  @ViewChild('createLobbyModal') modal: IonModal;
   @Output() createLobbyEvent = new EventEmitter<CreateLobbyData>();
   @Output() closeModal = new EventEmitter<void>();
 
@@ -52,52 +53,75 @@ export class CreateLobbyModalComponent {
 
   constructor(private lobbyService: LobbyService,
               private tracker: SubscriptionTrackerService,
-  ) {
+              private translateSerice: LanguageService,
+
+) {
     this.games$ = this.lobbyService.getGames();
+
   }
 
   ngOnDestroy(): void {
     this.tracker.unsubscribeCategory(this.CATEGORY);
   }
 
-  close() {
-    this.modal.dismiss();
-    this.closeModal.emit();
-    this.lobbyId = null;
+  async ngOnInit() {
+    // Várunk egy ticket, hogy a ViewChild betöltődjön
+    setTimeout(async () => {
+      await this.initializeModal();
+    });
   }
 
-  async open(lobbyId?: string) {
-    this.lobbyId = lobbyId;
+  private async initializeModal() {
+    if (this.lobby) {
+      // Ha van lobby, akkor feltöltjük az adatokat
+      this.lobbyId = this.lobby.id;
+      this.lobbyName = this.lobby.name;
+      this.ownerId = this.lobby.ownerId;
+      this.ownerName = this.lobby.ownerName;
+      this.status = this.lobby.status;
+      this.maxRounds = this.lobby.maxRounds;
+      this.allowSpectators = this.lobby.allowSpectators;
+      this.private = this.lobby.private;
+      this.enablePassword = !!this.lobby.password;
+      this.password = this.lobby.password || '';
+      this.enablePlayerNumbers = this.lobby.minPlayers !== this.lobby.maxPlayers;
+      this.minPlayers = this.lobby.minPlayers;
+      this.maxPlayers = this.lobby.maxPlayers;
+      this.hasBots = this.lobby.hasBots;
+      this.gameType = this.lobby.gameType;
+      this.spectators = this.lobby.spectators;
+      this.currentRound = this.lobby.currentRound;
+      this.gameModifiers = this.lobby.gameModifiers;
+      this.playerNames = this.lobby.playerNames;
+      this.spectatorNames = this.lobby.spectatorNames;
+      this.bannedPlayers = this.lobby.bannedPlayers;
+      this.bannedPlayerNames = this.lobby.bannedPlayerNames;
+      this.players = this.lobby.players;
 
-    this.lobbyName = this.lobby.name;
-    this.ownerId = this.lobby.ownerId;
-    this.ownerName = this.lobby.ownerName;
-    this.status = this.lobby.status;
-    this.maxRounds = this.lobby.maxRounds;
-    this.allowSpectators = this.lobby.allowSpectators;
-    this.private = this.lobby.private;
-    this.enablePassword = !!this.lobby.password;
-    this.password = this.lobby.password || '';
-    this.enablePlayerNumbers = this.lobby.minPlayers !== this.lobby.maxPlayers;
-    this.minPlayers = this.lobby.minPlayers;
-    this.maxPlayers = this.lobby.maxPlayers;
-    this.hasBots = this.lobby.hasBots;
-    this.gameType = this.lobby.gameType;
-    this.spectators = this.lobby.spectators;
-    this.currentRound = this.lobby.currentRound;
-    this.gameModifiers = this.lobby.gameModifiers;
-    this.playerNames = this.lobby.playerNames;
-    this.spectatorNames = this.lobby.spectatorNames;
-    this.bannedPlayers = this.lobby.bannedPlayers;
-    this.bannedPlayerNames = this.lobby.bannedPlayerNames;
-    this.players = this.lobby.players;
+      // Kiválasztjuk a megfelelő játékot
+      this.gameModifiers["timed"] = 300;
+      const games = await this.games$;
+      this.selectedGame = games.find(game => game.name === this.lobby.gameType);
+    }
 
-    await this.modal.present();
+    if (this.modal) {
+      await this.modal.present();
+    } else {
+      console.error('Modal not initialized');
+    }
+  }
+
+  close() {
+    this.closeModal.emit();
+    this.lobbyId = null;
+    if (this.modal) {
+      this.modal.dismiss();
+    }
   }
 
   async createLobby() {
     if (this.isButtonDisabled) {
-      return; // Ha a gomb le van tiltva, ne történjen semmi
+      return;
     }
 
     if (!this.currentUser) {
@@ -105,11 +129,37 @@ export class CreateLobbyModalComponent {
       return;
     }
 
-    if (this.maxRounds > 16) {
-      this.maxRounds = 16;
+    let warningMessages = [];
+    let shouldWarn = false;
+
+
+    // Összegyűjtjük az összes figyelmeztetést
+    if (this.maxRounds % 2 === 0) {
+      warningMessages.push(`- ${this.translateSerice.translate("EVEN_ROUNDS_WARNING")}`);
+      shouldWarn = true;
     }
 
+    if (this.maxRounds > 5) {
+      warningMessages.push(`- ${this.translateSerice.translate("LONG_GAME_WARNING")}`);
+      shouldWarn = true;
+    }
 
+    if (shouldWarn) {
+      const message = `${this.translateSerice.translate("WARNINGS_NOTIFIER")}:\n\n`+
+        warningMessages.join('\n') +
+        "\n\n"+`${this.translateSerice.translate("ARE_YOU_SURE_CREATION")}?`;
+
+      if (confirm(message)) {
+        console.log("Elfogadva a figyelmeztetések");
+        await this.proceedWithLobbyCreation();
+      }
+      return;
+    }
+
+    await this.proceedWithLobbyCreation();
+  }
+
+  private async proceedWithLobbyCreation() {
     let minGAMENumber = this.selectedGame.minPlayers;
     let maxGAMENumber = this.selectedGame.maxPlayers;
     let minNumber = this.selectedGame.minPlayers;
@@ -123,12 +173,6 @@ export class CreateLobbyModalComponent {
         maxNumber = this.maxPlayers;
       }
     }
-    console.log(minGAMENumber)
-    console.log(minNumber)
-
-    console.log(maxGAMENumber)
-    console.log(maxNumber)
-
     minNumber = Math.min(this.minPlayers, minGAMENumber,2);
     maxNumber = Math.max(this.maxPlayers, maxGAMENumber,8);
 
@@ -144,9 +188,13 @@ export class CreateLobbyModalComponent {
       this.spectatorNames = [];
       this.bannedPlayers = [];
       this.bannedPlayerNames = [];
+      this.gameModifiers = {};
+
+
+      this.gameModifiers.timed = 300;
+      this.gameModifiers.endWhenOutOfTime = true;
     }
 
-    // Lobby objektum létrehozása
     const lobbyData: Omit<Lobby, 'id'> = {
       name: this.lobbyName,
       ownerName: this.currentUser.username,
@@ -158,7 +206,10 @@ export class CreateLobbyModalComponent {
       minPlayers: minNumber,
       maxPlayers: maxNumber,
       hasBots: this.hasBots,
-      gameModifiers: this.selectedGame.gameModifiers || {},
+      gameModifiers: {
+        timed: 50,
+        endWhenOutOfTime: true,
+      },
       spectators: this.spectators,
       currentRound: 0,
       password: this.enablePassword ? this.password : null,

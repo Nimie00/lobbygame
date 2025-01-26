@@ -1,33 +1,36 @@
-<h1>{{"SPECTATING_RPS" | language}}</h1>
-<ion-content *ngIf="game">
-  <ng-container>
-    <ion-header>
+<ion-card *ngIf="game">
+  <ion-card-title>
+    <h1>{{ "SPECTATING_RPS" | language }}</h1>
+  </ion-card-title>
+  <ion-card-content>
+    <ng-container>
       <ion-toolbar>
-        <ion-title>{{"GAMEPLAY" | language}}</ion-title>
+        <ion-title>{{ "GAMEPLAY" | language }}</ion-title>
       </ion-toolbar>
-    </ion-header>
-    <ion-grid>
-      <ion-row class="choices">
-        <ion-col size="6" class="player1">
-          <ion-row>
-            <ion-label>{{name1}}</ion-label>
-          </ion-row>
-          <ion-row *ngIf="choice1 != null">
-            <img [src]="'assets/' + choice1 + '.png'" [alt]="choice1" />
-          </ion-row>
-        </ion-col>
-        <ion-col size="6" class="player2">
-          <ion-row>
-            <ion-label>{{name2}}</ion-label>
-          </ion-row>
-          <ion-row *ngIf="choice2 != null">
-            <img [src]="'assets/' + choice2 + '.png'" [alt]="choice2" />
-          </ion-row>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-  </ng-container>
-</ion-content>
+      <ion-grid>
+        <ion-row class="choices">
+          <ion-col size="6" class="player0">
+            <ion-row>
+              <ion-label>{{ name1 }}</ion-label>
+            </ion-row>
+            <ion-row *ngIf="choice1 != null">
+              <img [src]="'assets/' + choice1 + '.png'" [alt]="choice1"/>
+            </ion-row>
+          </ion-col>
+          <ion-col size="6" class="player1">
+            <ion-row>
+              <ion-label>{{ name2 }}</ion-label>
+            </ion-row>
+            <ion-row *ngIf="choice2 != null">
+              <img [src]="'assets/' + choice2 + '.png'" [alt]="choice2"/>
+            </ion-row>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ng-container>
+  </ion-card-content>
+</ion-card>
+
 
 
 
