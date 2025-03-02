@@ -2,9 +2,9 @@
   <ng-template>
     <ion-header>
       <ion-toolbar>
-        <ion-title>{{"CREATE_NEW_LOBBY" | language}}</ion-title>
+        <ion-title>{{ "CREATE_NEW_LOBBY" | language }}</ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="close()">{{"CLOSE" | language}}</ion-button>
+          <ion-button (click)="close()">{{ "CLOSE" | language }}</ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
@@ -12,76 +12,86 @@
     <ion-content>
       <form (ngSubmit)="createLobby()" #createLobbyForm="ngForm">
         <ion-list>
-          <!-- Game Selection -->
           <ion-item>
-            <ion-label position="stacked">{{"SELECT_GAME" | language}}</ion-label>
+            <div class="label-wrapper">
+            <ion-label position="stacked" class="required-star">{{ "SELECT_GAME" | language }}</ion-label>
+            </div>
             <ion-select [(ngModel)]="selectedGame" name="gameType" required>
               <ion-select-option *ngFor="let game of games$ | async" [value]="game">
-                {{game.name | language}}
+                {{ game.name | language }}
               </ion-select-option>
             </ion-select>
           </ion-item>
 
-          <!-- Lobby Name -->
           <ion-item>
-            <ion-label position="stacked">{{"LOBBY_NAME" | language}}</ion-label>
+            <div class="label-wrapper">
+              <ion-label position="stacked" class="required-star">{{ "LOBBY_NAME" | language }}</ion-label>
+            </div>
             <ion-input [(ngModel)]="lobbyName" name="lobbyName" required></ion-input>
           </ion-item>
 
-          <!-- Rounds Input -->
+
           <ion-item>
-            <ion-label position="stacked">{{"MAX_ROUNDS" | language}}</ion-label>
-            <ion-input type="number" [(ngModel)]="maxRounds" name="maxRounds" min="1"></ion-input>
+            <div class="label-wrapper">
+              <ion-label position="stacked" class="required-star">{{ "MAX_ROUNDS" | language }}</ion-label>
+            </div>
+            <ion-input type="number" [(ngModel)]="maxRounds" name="maxRounds" min="1" required></ion-input>
           </ion-item>
 
-          <!-- Settings Toggles -->
           <ion-item>
-            <ion-label>{{"ALLOW_SPECTATORS" | language}}</ion-label>
+            <ion-label>{{ "ALLOW_SPECTATORS" | language }}</ion-label>
             <ion-toggle [(ngModel)]="allowSpectators" name="allowSpectators"></ion-toggle>
           </ion-item>
 
           <ion-item>
-            <ion-label>{{"PRIVATE_LOBBY" | language}}</ion-label>
+            <ion-label>{{ "PRIVATE_LOBBY" | language }}</ion-label>
             <ion-toggle [(ngModel)]="private" name="private"></ion-toggle>
           </ion-item>
 
           <ion-item>
-            <ion-label>{{"ENABLE_PASSWORD" | language}}</ion-label>
+            <ion-label>{{ "ENABLE_PASSWORD" | language }}</ion-label>
             <ion-toggle [(ngModel)]="enablePassword" name="enablePassword"></ion-toggle>
           </ion-item>
 
           <ion-item>
-            <ion-label>{{"CHANGE_LOBBY_CAPACITY" | language}}</ion-label>
+            <ion-label>{{ "CHANGE_LOBBY_CAPACITY" | language }}</ion-label>
             <ion-toggle [(ngModel)]="enablePlayerNumbers" name="enablePlayerNumbers"></ion-toggle>
           </ion-item>
 
-          <!-- Conditional Password Input -->
           <ion-item *ngIf="enablePassword">
-            <ion-label position="stacked">{{"PASSWORD" | language}}</ion-label>
-            <ion-input type="password" [(ngModel)]="password" name="password"></ion-input>
+            <div class="label-wrapper">
+              <ion-label position="stacked" class="required-star">{{ "PASSWORD" | language }}</ion-label>
+            </div>
+            <ion-input type="password" [(ngModel)]="password" name="password" minlength="4"></ion-input>
           </ion-item>
 
-          <!-- Conditional Player Limits -->
           <ng-container *ngIf="enablePlayerNumbers">
             <ion-item>
-              <ion-label position="stacked">{{"MIN_PLAYERS" | language}}</ion-label>
+              <div class="label-wrapper">
+                <ion-label position="stacked" class="required-star">{{ "MIN_PLAYERS" | language }}</ion-label>
+              </div>
               <ion-input
                 type="number"
                 [(ngModel)]="minPlayers"
                 name="minPlayers"
-                [min]="minPlayers"
-                [max]="maxPlayers">
+                [min]="minGAMENumber"
+                [max]="maxGAMENumber"
+                required>
+
               </ion-input>
             </ion-item>
 
             <ion-item>
-              <ion-label position="stacked">{{"MAX_PLAYERS" | language}}</ion-label>
+              <div class="label-wrapper">
+                <ion-label position="stacked" class="required-star">{{ "MAX_PLAYERS" | language }}</ion-label>
+              </div>
               <ion-input
                 type="number"
                 [(ngModel)]="maxPlayers"
                 name="maxPlayers"
-                [min]="minPlayers"
-                [max]="maxPlayers">
+                [min]="minGAMENumber"
+                [max]="maxGAMENumber"
+                required>
               </ion-input>
             </ion-item>
           </ng-container>
@@ -90,9 +100,9 @@
         <ion-button
           type="submit"
           expand="block"
-          [disabled]="!createLobbyForm.valid"
+          [disabled]="!createLobbyForm.valid || this.enablePassword && this.password.length < 6"
           class="create-button">
-          {{"CREATE" | language}}
+          {{ lobby ? "UPDATE" : "CREATE" | language }}
         </ion-button>
       </form>
     </ion-content>

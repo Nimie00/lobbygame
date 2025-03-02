@@ -1,38 +1,230 @@
 <ion-card *ngIf="game">
-  <ion-card-title>
-    <h1>{{ "SPECTATING_RPS" | language }}</h1>
-  </ion-card-title>
-  <ion-card-content>
-    <ng-container>
-      <ion-toolbar>
-        <ion-title>{{ "GAMEPLAY" | language }}</ion-title>
-      </ion-toolbar>
-      <ion-grid>
-        <ion-row class="choices">
-          <ion-col size="6" class="player0">
-            <ion-row>
-              <ion-label>{{ name1 }}</ion-label>
+  <ng-container *ngIf="!gameEnded">
+    <ion-card-content>
+
+      <div>
+        <ion-toolbar>
+          <ion-title>{{ "GAMEPLAY" | language }}</ion-title>
+        </ion-toolbar>
+        <div class="game-container">
+
+          <ion-grid class="game-grid">
+
+            <div class="result-overlay" [class.active]="animationState"
+                 *ngIf="animationState !== 'initial' && !skipAnimations">
+
+              <div class="result-text-wrapper">
+                <div class="result-text" [class]=" player1Won ? 'player1' : 'player2'" *ngIf="player1Won !== null">
+                  {{ player1Won ? name1 : name2 }} {{ ('WON_THE_ROUND' | language) }}!
+                </div>
+                <div class="result-text" [class]="'draw'" *ngIf="player1Won === null">
+                  {{ 'ROUND_DRAWN' | language }}
+                </div>
+              </div>
+              <div class="animation-container">
+
+                <div class="choice player1-choice"
+                     [@player1MoveToCenter]="animationState"
+                     (@player1MoveToCenter.done)="playerAnimationDone.emit()">
+                  <img [ngSrc]="'assets/rpsPictures/' + player1choice + '.png'"
+                       [class.winner]="player1Won"
+                       [width]="200"
+                       [height]="200"
+                       [alt]="player1choice"/>
+                </div>
+
+                <div class="choice player2-choice"
+                     [@player2MoveToCenter]="animationState"
+                     (@player2MoveToCenter.done)="opponentAnimationDone.emit()">
+                  <img [ngSrc]="'assets/rpsPictures/' + player2choice + '.png'"
+                       [class.winner]="player1Won!= null && !player1Won"
+                       [width]="200"
+                       [height]="200"
+                       [alt]="player2choice"/>
+                </div>
+
+                <div class="loser-sprite-container" *ngIf="losingChoice && animationPhase === 'showing-loser'">
+                  <img class="loser-sprite"
+                       [ngSrc]="'assets/rpsPictures/'+losingChoice+'-sheet.png'"
+                       [@spriteAnimation]="animationPhase"
+                       [width]="200"
+                       [height]="200"
+                       [alt]="losingChoice">
+
+                </div>
+              </div>
+            </div>
+
+            <ion-row class="game-row">
+              <ion-col class="player-area">
+                <div class="score-indicator">
+                  <ion-label>{{ name1 }}</ion-label>
+                  <hr>
+                  <ng-container *ngIf="game.maxRounds > 16; else circleScore">
+                    <span class="current">{{ player1Score }}</span>
+                    <span class="separator">/</span>
+                    <span class="required">{{ requiredWins }}</span>
+                  </ng-container>
+                  <ng-template #circleScore>
+                    <div class="circle-container">
+                      <div class="circle"
+                           *ngFor="let circle of getScoreCircles(player1Required); let i = index"
+                           [class.filled]="i < (player1Required - player1Remaining)">
+                      </div>
+                    </div>
+                  </ng-template>
+
+                </div>
+
+                <div [@playerChoiceAnimation]="player1choice">
+                  <div *ngIf="!player1choice">
+                    <div class="waiting-dots">
+                      <div class="dot"></div>
+                      <div class="dot"></div>
+                      <div class="dot"></div>
+                    </div>
+                  </div>
+                  <img class="playerItem"
+                       *ngIf="player1choice"
+                       [ngSrc]="'assets/rpsPictures/' + player1choice + '.png'"
+                       [alt]="player1choice"
+                       [@finalChoice]="'shownPlayer'"
+                       [width]="200"
+                       [height]="200">
+                </div>
+              </ion-col>
+
+
+              <ion-col class="center-area">
+                <div *ngIf="roundLength > 0">
+                  <ion-label color="medium" class="cooldown-text">{{ "COOLDOWN_TITLE" | language }}:<br><br></ion-label>
+                  <ion-label color="medium">
+                    {{ roundTimer }}
+                  </ion-label>
+                </div>
+                <div>
+                  <ion-label color="medium" class="cooldown-text">{{ "ROUND_COUNTER" | language }}:<br><br></ion-label>
+                  <ion-label color="medium">
+                    {{ currentRound }}
+                  </ion-label>
+                </div>
+              </ion-col>
+
+
+              <ion-col class="opponent-area">
+                <div class="score-indicator">
+                  <ion-label>{{ name2 }}</ion-label>
+                  <hr>
+                  <ng-container *ngIf="game.maxRounds > 16; else opponentCircleScore">
+                    <span class="current">{{ player2Score }}</span>
+                    <span class="separator">/</span>
+                    <span class="required">{{ requiredWins }}</span>
+                  </ng-container>
+                  <ng-template #opponentCircleScore>
+                    <div class="circle-container">
+                      <div class="circle"
+                           *ngFor="let circle of getScoreCircles(player2Required); let i = index"
+                           [class.filled]="i < (player2Required - player2Remaining)">
+                      </div>
+                    </div>
+                  </ng-template>
+                </div>
+
+                <div>
+                  <ng-container *ngIf="player2choice">
+                    <img class="opponentItem choice-image"
+                         [ngSrc]="'assets/rpsPictures/' + player2choice + '.png'"
+                         [alt]="player2choice"
+                         [@finalChoice]="'shown'"
+                         [width]="200"
+                         [height]="200">
+                  </ng-container>
+
+                  <div *ngIf="!player2choice">
+                    <div class="waiting-dots">
+                      <div class="dot"></div>
+                      <div class="dot"></div>
+                      <div class="dot"></div>
+                    </div>
+                  </div>
+                </div>
+              </ion-col>
+
             </ion-row>
-            <ion-row *ngIf="choice1 != null">
-              <img [src]="'assets/' + choice1 + '.png'" [alt]="choice1"/>
-            </ion-row>
-          </ion-col>
-          <ion-col size="6" class="player1">
-            <ion-row>
-              <ion-label>{{ name2 }}</ion-label>
-            </ion-row>
-            <ion-row *ngIf="choice2 != null">
-              <img [src]="'assets/' + choice2 + '.png'" [alt]="choice2"/>
-            </ion-row>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </ng-container>
-  </ion-card-content>
+          </ion-grid>
+        </div>
+      </div>
+    </ion-card-content>
+  </ng-container>
+
+
+  <ng-container *ngIf="gameEnded">
+    <ion-card>
+      <ion-card-header class="ion-text-center">
+        <ion-card-title>{{ 'GAME_OVER' | language }}!</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content class="ion-text-center">
+        <div class="result" [ngClass]="{
+                    'player1': game.winner && game.winner == player1Id,
+                    'player2': game.winner && game.winner == player2Id,
+                    'draw': game.winner === 'draw'}">
+          <h2 *ngIf="winner === '#Drew'">{{ 'DRAW' | language }}</h2>
+          <h2 *ngIf="winner !== '#Drew'">
+            {{ 'WINNER' | language }}: {{ winnerName }}
+          </h2>
+        </div>
+
+        <div class="statistics">
+          <p>{{ 'PLAYERS' | language }}: {{ name1 + " / " + name2 }}</p>
+          <p>{{ 'WON_ROUNDS' | language }}: {{ player1WonRounds + " / " + player2WonRounds }}</p>
+          <p>{{ 'DRAWN_ROUNDS' | language }}: {{ drawCount }}</p>
+          <p>{{ 'TOTAL_ROUNDS' | language }}: {{ totalRounds }}</p>
+        </div>
+
+
+        <div class="rounds-line">
+          <br>
+          <ion-label class="ion-text-center">{{ "PLAYED_ROUNDS_DISTRIBUTION" | language }}:</ion-label>
+          <br>
+          <br>
+          <br>
+          <div class="round-square-container"
+               *ngFor="let round of rounds | keyvalue: sortByRoundNumber"
+               [ngClass]="{
+         'player1': round.value.winner && round.value.winner == player1Id,
+         'player2': round.value.winner && round.value.winner == player2Id,
+         'draw': round.value.winner === 'draw'
+     }">
+            <div class="round-square"></div>
+            <div class="tooltip" id="tooltip-{{round.value.roundNumber}}">
+              <div class="tooltip-content">
+
+                <p><span class="player1-color">{{ name1 }} {{ ('CHOICE' | language) }} </span>
+                  : {{ round.value.choices[player1Id].choice | language }}
+                </p>
+                <p><span class="player1-color">{{ name1 }} {{ ('TIME' | language) }} </span>
+                  : {{ round.value.choices[player1Id].timestamp | firebaseDate | date:'yyyy MM dd, HH:mm:ss' }}
+                </p>
+                <p><span class="player2-color">{{ name2 }} {{ ('CHOICE' | language) }} </span>
+                  : {{ round.value.choices[player2Id].choice | language }}
+                </p>
+                <p><span class="player2-color">{{ name2 }} {{ ('TIME' | language) }} </span>
+                  : {{ round.value.choices[player2Id].timestamp | firebaseDate | date:'yyyy MM dd, HH:mm:ss' }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="end-buttons">
+          <ion-button expand="block" class="return-button" (click)="goToWatchingReplay()">
+            {{ 'BACK_TO_LOBBY' | language }}
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
+
+
 </ion-card>
-
-
-
-
-
-

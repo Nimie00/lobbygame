@@ -1,36 +1,81 @@
-nav {
-  background-color: #333;
-  color: white;
-  padding: 1rem;
-  text-decoration: none;
+.main-nav {
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
 
-  ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
+  li {
+    cursor: pointer;
+    margin-right: 1rem;
 
-    li {
-      margin-right: 1rem;
+    a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: var(--ion-text-color, white);
+      padding: 0.5rem 0.75rem;
+      transition: transform 0.2s;
 
-      a {
-        color: white;
-        cursor: pointer;
-        text-decoration: none;
-
-        &:hover {
-          font-weight: bold;
-          text-decoration: underline;
-          transform: scale(1.05);
-        }
+      &:hover {
+        font-weight: bold;
+        transform: scale(1.05);
       }
+    }
+
+    &.active a {
+      background-color: var(--ion-color-primary, #333);
+      border-radius: 4px;
+      color: var(--ion-color-light, white);
+    }
+
+    .main-nav li.active a {
+      background-color: var(--ion-color-primary, #333);
+      border-radius: 4px;
+      color: var(--ion-color-light, white);
+    }
+  }
+
+  .nav-icon {
+    font-size: 1.5rem;
+    margin-right: 0.5rem;
+  }
+
+  .nav-text {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .nav-text {
+    display: none;
+  }
+  li {
+    margin-right: 0.75rem;
+    a {
+      padding: 0.5rem;
     }
   }
 }
 
-router-outlet {
-  display: block;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-
+nav{
+  border-bottom: 1px solid var(--ion-border-color);
 }
+
+.pulse-animation {
+  animation: ionPulse 1.5s infinite;
+}
+
+@keyframes ionPulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+

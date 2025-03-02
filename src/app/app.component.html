@@ -1,11 +1,78 @@
 <nav>
-  <ul>
-    <li *ngIf="!isLoggedIn"><a routerLink="/login" routerLinkActive="active">{{ "LOGIN_PAGE" | language}}</a></li>
-    <li *ngIf="isLoggedIn"><a (click)="logout()">{{ "LOGOUT"| language}}</a></li>
-    <li *ngIf="isLoggedIn"><a routerLink="/profile" routerLinkActive="active">{{ "PROFILE_PAGE" | language }}</a></li>
-    <li *ngIf="isLoggedIn"><a routerLink="/lobbies" routerLinkActive="active">{{ "LOBBIES_PAGE" | language}}</a></li>
-    <li *ngIf="isLoggedIn"><a routerLink="/contact" routerLinkActive="active">{{ "CONTACT_PAGE"  | language}}</a></li>
-    <li><a routerLink="/settings" routerLinkActive="active">{{ "SETTINGS_MENU"  | language}}</a></li>
+  <ul class="main-nav">
+    <li *ngIf="!isLoggedIn" routerLinkActive="active">
+      <a routerLink="/login" (click)="closeSettings()">
+        <ion-icon name="log-in" class="nav-icon"></ion-icon>
+        <span class="nav-text">{{ "LOGIN_PAGE" | language }}</span>
+      </a>
+    </li>
+
+    <li *ngIf="isLoggedIn" routerLinkActive="active">
+      <a (click)="logout(); closeSettings()">
+        <ion-icon name="log-out" class="nav-icon"></ion-icon>
+        <span class="nav-text">{{ "LOGOUT"| language }}</span>
+      </a>
+    </li>
+
+
+    <li *ngIf="isLoggedIn" routerLinkActive="active">
+      <a routerLink="/profile" routerLinkActive="active" (click)="closeSettings()">
+        <ion-icon name="person" class="nav-icon"></ion-icon>
+        <span class="nav-text">{{ "PROFILE_PAGE" | language }}</span>
+      </a>
+    </li>
+
+
+    <li *ngIf="isLoggedIn" routerLinkActive="active">
+      <a routerLink="/lobbies" routerLinkActive="active"  (click)="closeSettings()">
+        <ion-icon name="people" class="nav-icon"></ion-icon>
+        <span class="nav-text">{{ "LOBBIES_PAGE" | language }}</span>
+      </a>
+    </li>
+
+    <li *ngIf="isLoggedIn && user.inGame"
+        [ngClass]="{'active': isGameActive(), 'pulse-animation': !isGameActive()}">
+      <a [routerLink]="['/game', user.inGame]" (click)="closeSettings()">
+        <ion-icon name="extension-puzzle" class="nav-icon"></ion-icon>
+        <span class="nav-text">{{ "GAME_PAGE" | language }}</span>
+      </a>
+    </li>
+
+    <li *ngIf="isLoggedIn && user.inSpectate"
+        [ngClass]="{'active': isSpectateActive(), 'pulse-animation': !isSpectateActive()}">
+      <a [routerLink]="['/spectate', user.inSpectate]" (click)="closeSettings()">
+        <ion-icon name="eye" class="nav-icon"></ion-icon>
+        <span class="nav-text">{{ "SPECTATE_PAGE" | language }}</span>
+      </a>
+    </li>
+
+
+
+    <li *ngIf="isLoggedIn" routerLinkActive="active" >
+      <a routerLink="/contact"  (click)="closeSettings()">
+        <ion-icon name="mail" class="nav-icon"></ion-icon>
+        <span class="nav-text">{{ "CONTACT_PAGE"  | language }}</span>
+      </a>
+    </li>
+
+
+    <li routerLinkActive="active"
+        [ngClass]="{'pulse-animation': !openedInfoBefore()}">
+      <a routerLink="/information" routerLinkActive="active"  (click)="closeSettings()">
+        <ion-icon name="information" class="nav-icon"></ion-icon>
+        <span class="nav-text">{{ "INFORMATION_PAGE" | language }}</span>
+      </a>
+    </li>
+
+    <li [class.active]="settingsOpen">
+      <a (click)="openSettings()">
+        <ion-icon name="settings" class="nav-icon"></ion-icon>
+        <span class="nav-text">{{ "SETTINGS_MENU"  | language }}</span>
+      </a>
+    </li>
+
+
   </ul>
 </nav>
 <router-outlet></router-outlet>
+<app-global-modal></app-global-modal>

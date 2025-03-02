@@ -21,18 +21,21 @@ import {LobbyComponent} from "./pages/lobbies/lobby/lobby.component";
 import {LobbiesComponent} from "./pages/lobbies/lobbies.component";
 import {ProfileComponent} from "./pages/profile/profile.component";
 import {RpsSpectateComponent} from "./pages/spectator/games/rps/rps-spectate.component";
-import {SpectateComponent} from "./pages/spectator/spectate/spectate.component";
+import {SpectateComponent} from "./pages/spectator/spectate.component";
 import {
-  LobbyPlayersManagingComponent
-} from "./pages/lobbies/lobby-players-managing-modal/lobby-players-managing.component";
+  LobbyPlayersManagingModalComponent
+} from "./pages/lobbies/lobby-players-managing-modal/lobby-players-managing-modal.component";
 import {RouterModule, Routes} from "@angular/router";
 import {AuthGuard} from "./shared/guards/auth.guard";
-import {SettingsComponent} from "./pages/settings-component/settings.component";
+import {SettingsModalComponent} from "./pages/settings-modal/settings-modal.component";
 import {provideFirestore, getFirestore} from '@angular/fire/firestore';
 import {ProfileSettingsComponent} from "./pages/profile/profile-settings/profile-settings.component";
 import {ProfileStatisticsComponent} from "./pages/profile/statistics/profile-statistics.component";
-import {GlobalModalComponent} from "./shared/services/modal-services/global-modal.component";
+import {GlobalModalComponent} from "./shared/global-modal/global-modal.component";
 import {getAuth, provideAuth} from "@angular/fire/auth";
+import {LobbyPasswordModalComponent} from "./pages/lobbies/lobby/password-modal/lobby-password-modal.component";
+import {InformationComponent} from "./pages/Information/information.component";
+import {FirebaseDatePipe} from "./shared/pipes/firebaseDate";
 
 export function initializeLanguage(languageService: LanguageService) {
   return () => languageService.init();
@@ -92,7 +95,11 @@ export const routes: Routes = [
 
   {
     path: 'settings',
-    component: SettingsComponent,
+    component: SettingsModalComponent,
+  },
+  {
+    path: 'information',
+    component: InformationComponent,
   },
   {
     path: '**',
@@ -109,17 +116,20 @@ export const routes: Routes = [
     ContactComponent,
     LoginComponent,
     RpsComponent,
-    CreateLobbyModalComponent,
     LobbyComponent,
     LobbiesComponent,
     ProfileComponent,
     RpsSpectateComponent,
     SpectateComponent,
-    LobbyPlayersManagingComponent,
-    SettingsComponent,
+    LobbyPlayersManagingModalComponent,
+    SettingsModalComponent,
+    CreateLobbyModalComponent,
+    LobbyPasswordModalComponent,
     ProfileSettingsComponent,
     ProfileStatisticsComponent,
     GlobalModalComponent,
+    InformationComponent,
+    FirebaseDatePipe,
   ],
   imports: [
     BrowserModule,

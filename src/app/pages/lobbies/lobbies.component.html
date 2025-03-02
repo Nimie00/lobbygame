@@ -1,17 +1,21 @@
 <ion-content>
   <ion-card class="container">
     <ion-card-header>
-      <ion-button *ngIf="listLive" expand="block" class="create-lobby-button" (click)="toggleCreateLobby()"
+      <ion-button *ngIf="listLive" class="create-lobby-button" (click)="toggleCreateLobby()"
                   [disabled]=" hasLobby || joinedLobby!=null">
+
+        <ion-icon name="add-circle"></ion-icon>
         {{ "CREATE_NEW_LOBBY" | language }}
       </ion-button>
 
-      <ion-button expand="block" class="change-to-replays" (click)="changeFilteredLobbyStatus()">
+      <ion-button class="change-to-replays" (click)="changeFilteredLobbyStatus()">
+        <span *ngIf="listLive"> <ion-icon name="archive"></ion-icon> </span>
+        <span *ngIf="!listLive"> <ion-icon name="eye"></ion-icon> </span>
+
         {{ (listLive ? 'CHANGE_TO_REPLAYS' : 'Change_TO_LIVE_LOBBIES') | language }}
       </ion-button>
 
-      <h2>{{ (listLive ? 'AVAILABLE_LOBBIES' : 'REPLAYS') | language }}</h2>
-
+      <h1 class="main-header">{{ (listLive ? 'AVAILABLE_LOBBIES' : 'REPLAYS') | language }}</h1>
     </ion-card-header>
 
     <ion-card-content>
@@ -32,5 +36,4 @@
       </ion-list>
     </ion-card-content>
   </ion-card>
-  <app-global-modal></app-global-modal>
 </ion-content>

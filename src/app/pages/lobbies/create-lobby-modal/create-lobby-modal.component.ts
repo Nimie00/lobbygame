@@ -7,16 +7,18 @@ import {User} from "../../../shared/models/user.model";
 import {SubscriptionTrackerService} from "../../../shared/services/subscriptionTracker.service";
 import {Game} from "../../../shared/models/game.model";
 import {LanguageService} from "../../../shared/services/language.service";
+import {AlertService} from "../../../shared/services/alert.service";
 
 @Component({
   selector: 'app-create-lobby-modal',
   templateUrl: './create-lobby-modal.component.html',
   styleUrls: ['./create-lobby-modal.component.scss']
 })
+
 export class CreateLobbyModalComponent implements OnInit, OnDestroy {
   private CATEGORY = "create-lobby-modal"
-  @Input() currentUser: User; // Adat fogadása
-  @Input() lobby: Lobby | null; // Adat fogadása
+  @Input() currentUser: User;
+  @Input() lobby: Lobby | null;
   @ViewChild('createLobbyModal') modal: IonModal;
   @Output() createLobbyEvent = new EventEmitter<CreateLobbyData>();
   @Output() closeModal = new EventEmitter<void>();
@@ -31,6 +33,8 @@ export class CreateLobbyModalComponent implements OnInit, OnDestroy {
   enablePlayerNumbers: boolean = false;
   minPlayers: number = 2;
   maxPlayers: number = 2;
+  minGAMENumber = 2;
+  maxGAMENumber = 2;
   isButtonDisabled: boolean = false;
   cooldownTime: number = 500;
   lobbyId: string;
@@ -53,10 +57,10 @@ export class CreateLobbyModalComponent implements OnInit, OnDestroy {
 
   constructor(private lobbyService: LobbyService,
               private tracker: SubscriptionTrackerService,
-              private translateSerice: LanguageService,
-
-) {
-    this.games$ = this.lobbyService.getGames();
+              private languageService: LanguageService,
+              private alertService: AlertService,
+  ) {
+    this.games$ = this.lobbyService.getGameTypes();
 
   }
 
@@ -65,7 +69,6 @@ export class CreateLobbyModalComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    // Várunk egy ticket, hogy a ViewChild betöltődjön
     setTimeout(async () => {
       await this.initializeModal();
     });
@@ -73,7 +76,6 @@ export class CreateLobbyModalComponent implements OnInit, OnDestroy {
 
   private async initializeModal() {
     if (this.lobby) {
-      // Ha van lobby, akkor feltöltjük az adatokat
       this.lobbyId = this.lobby.id;
       this.lobbyName = this.lobby.name;
       this.ownerId = this.lobby.ownerId;
@@ -91,17 +93,17 @@ export class CreateLobbyModalComponent implements OnInit, OnDestroy {
       this.gameType = this.lobby.gameType;
       this.spectators = this.lobby.spectators;
       this.currentRound = this.lobby.currentRound;
-      this.gameModifiers = this.lobby.gameModifiers;
+      this.gameModifiers = this.lobby.gameModifiers || {};
       this.playerNames = this.lobby.playerNames;
       this.spectatorNames = this.lobby.spectatorNames;
       this.bannedPlayers = this.lobby.bannedPlayers;
       this.bannedPlayerNames = this.lobby.bannedPlayerNames;
       this.players = this.lobby.players;
 
-      // Kiválasztjuk a megfelelő játékot
-      this.gameModifiers["timed"] = 300;
       const games = await this.games$;
       this.selectedGame = games.find(game => game.name === this.lobby.gameType);
+      this.maxGAMENumber = this.selectedGame.maxPlayers;
+      this.minGAMENumber = this.selectedGame.minPlayers;
     }
 
     if (this.modal) {
@@ -112,10 +114,10 @@ export class CreateLobbyModalComponent implements OnInit, OnDestroy {
   }
 
   close() {
-    this.closeModal.emit();
     this.lobbyId = null;
     if (this.modal) {
-      this.modal.dismiss();
+      this.closeModal.emit();
+      this.modal.dismiss().then(() => {});
     }
   }
 
@@ -133,24 +135,48 @@ export class CreateLobbyModalComponent implements OnInit, OnDestroy {
     let shouldWarn = false;
 
 
-    // Összegyűjtjük az összes figyelmeztetést
     if (this.maxRounds % 2 === 0) {
-      warningMessages.push(`- ${this.translateSerice.translate("EVEN_ROUNDS_WARNING")}`);
+      warningMessages.push(`- ${this.languageService.translate("EVEN_ROUNDS_WARNING")}`);
       shouldWarn = true;
     }
 
     if (this.maxRounds > 5) {
-      warningMessages.push(`- ${this.translateSerice.translate("LONG_GAME_WARNING")}`);
+      warningMessages.push(`- ${this.languageService.translate("LONG_GAME_WARNING")}`);
       shouldWarn = true;
     }
 
+    if (this.minPlayers < this.selectedGame.minPlayers) {
+      warningMessages.push(`- ${this.languageService.translate("TOO_LITTLE_PLAYERS")} (${this.selectedGame.minPlayers})`);
+      shouldWarn = true;
+    }
+
+    if (this.maxPlayers > this.selectedGame.maxPlayers) {
+      warningMessages.push(`- ${this.languageService.translate("TOO_MANY_PLAYERS")} (${this.selectedGame.maxPlayers})`);
+      shouldWarn = true;
+    }
+
+    if (this.minPlayers > this.selectedGame.maxPlayers) {
+      warningMessages.push(`- ${this.languageService.translate("TOO_MANY_MIN_PLAYERS")} (${this.selectedGame.minPlayers})`);
+      shouldWarn = true;
+    }
+
+    if (this.maxPlayers < this.selectedGame.minPlayers) {
+      warningMessages.push(`- ${this.languageService.translate("TOO_MANY_PLAYERS")} (${this.selectedGame.maxPlayers})`);
+      shouldWarn = true;
+    }
+
+    if (this.maxPlayers < this.minPlayers) {
+      warningMessages.push(`- ${this.languageService.translate("PLAYER_NUMBERS_WRONG")} (${this.selectedGame.maxPlayers})`);
+      shouldWarn = true;
+    }
+
+
     if (shouldWarn) {
-      const message = `${this.translateSerice.translate("WARNINGS_NOTIFIER")}:\n\n`+
+      const message = `${this.languageService.translate("WARNINGS_NOTIFIER")}:\n\n` +
         warningMessages.join('\n') +
-        "\n\n"+`${this.translateSerice.translate("ARE_YOU_SURE_CREATION")}?`;
+        "\n\n" + `${this.languageService.translate("ARE_YOU_SURE_CREATION")}?`;
 
       if (confirm(message)) {
-        console.log("Elfogadva a figyelmeztetések");
         await this.proceedWithLobbyCreation();
       }
       return;
@@ -160,21 +186,24 @@ export class CreateLobbyModalComponent implements OnInit, OnDestroy {
   }
 
   private async proceedWithLobbyCreation() {
-    let minGAMENumber = this.selectedGame.minPlayers;
-    let maxGAMENumber = this.selectedGame.maxPlayers;
-    let minNumber = this.selectedGame.minPlayers;
-    let maxNumber = this.selectedGame.maxPlayers;
-
-    if (this.enablePlayerNumbers) {
-      if (this.minPlayers > 0) {
-        minNumber = this.minPlayers;
-      }
-      if (this.maxPlayers > 0) {
-        maxNumber = this.maxPlayers;
-      }
+    if (this.selectedGame == null || this.lobbyName == null || this.maxRounds == null) {
+      return false;
     }
-    minNumber = Math.min(this.minPlayers, minGAMENumber,2);
-    maxNumber = Math.max(this.maxPlayers, maxGAMENumber,8);
+
+    if (this.enablePassword && this.password.length < 6) {
+      await this.alertService.showAlert(
+        `${this.languageService.translate("ERROR")}`,
+        `${this.languageService.translate("WEAK_PASSWORD")}`);
+      return false;
+    }
+    this.minGAMENumber = this.selectedGame.minPlayers;
+    this.maxGAMENumber = this.selectedGame.maxPlayers;
+    let minNumber= Math.max(this.minPlayers, this.minGAMENumber, 2);
+    let maxNumber= Math.min(this.maxPlayers, this.maxGAMENumber, 8);
+
+    if (minNumber > maxNumber) {
+      minNumber = maxNumber;
+    }
 
     this.isButtonDisabled = true;
 
@@ -189,39 +218,38 @@ export class CreateLobbyModalComponent implements OnInit, OnDestroy {
       this.bannedPlayers = [];
       this.bannedPlayerNames = [];
       this.gameModifiers = {};
-
-
-      this.gameModifiers.timed = 300;
-      this.gameModifiers.endWhenOutOfTime = true;
     }
+
 
     const lobbyData: Omit<Lobby, 'id'> = {
       name: this.lobbyName,
       ownerName: this.currentUser.username,
       ownerId: this.currentUser.id,
-      players: this.players,
       status: this.status,
       maxRounds: this.maxRounds,
       gameType: this.selectedGame.name,
       minPlayers: minNumber,
       maxPlayers: maxNumber,
       hasBots: this.hasBots,
-      gameModifiers: {
-        timed: 50,
-        endWhenOutOfTime: true,
-      },
-      spectators: this.spectators,
+      gameModifiers: this.gameModifiers,
       currentRound: 0,
       password: this.enablePassword ? this.password : null,
       private: this.private,
       allowSpectators: this.allowSpectators,
+      players: this.players,
       playerNames: this.playerNames,
+      spectators:  this.spectators,
       spectatorNames: this.spectatorNames,
       bannedPlayers: this.bannedPlayers,
       bannedPlayerNames: this.bannedPlayerNames,
     };
 
-    // Lobby létrehozása a backendben
+    if(this.lobbyId && !this.allowSpectators && this.spectators.length > 0){
+      this.lobbyService.removeSpectatorsTags(lobbyData);
+      lobbyData.spectators = [];
+      lobbyData.spectatorNames = [];
+    }
+
     try {
       if (this.lobbyId) {
         await this.lobbyService.updateLobby(this.lobbyId, lobbyData);
@@ -231,7 +259,6 @@ export class CreateLobbyModalComponent implements OnInit, OnDestroy {
         console.log('Lobby created with ID:', docRef.id);
       }
 
-      // Event kibocsátása, ha szükséges
       setTimeout(() => {
         this.isButtonDisabled = false;
       }, this.cooldownTime);

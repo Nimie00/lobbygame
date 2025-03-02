@@ -1,27 +1,450 @@
-/**
- * Ionic Dark Theme
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
+:root {
+  font-size: 1.1rem;
 
-/*@import "@ionic/angular/css/core.css";*/
-/*@import "@ionic/angular/css/normalize.css";*/
-/*@import "@ionic/angular/css/structure.css";*/
-/*@import "@ionic/angular/css/typography.css";*/
-/*@import "@ionic/angular/css/display.css";*/
-/*@import "@ionic/angular/css/padding.css";*/
-/*@import "@ionic/angular/css/float-elements.css";*/
-/*@import "@ionic/angular/css/text-alignment.css";*/
-/*@import "@ionic/angular/css/text-transformation.css";*/
-/*@import "@ionic/angular/css/flex-utils.css";*/
+  --ion-border-radius: 8px;
+  --ion-background-color: rgba(242, 242, 242, 0.87);
+  --ion-background-opposite-color: rgba(40, 40, 40, 0.87);
+  --ion-text-color: rgba(0, 0, 0, 0.87);
+  --ion-text-color-rgb: 0, 0, 0;
+  --ion-black-text-color: rgba(0, 0, 0, 1);
+  --ion-white-text-color: rgba(255, 255, 255, 1);
+  --ion-color-primary: rgba(56, 128, 255, 1);
+  --ion-color-primary-rgb: 56, 128, 255;
+  --ion-color-secondary: rgba(61, 194, 255, 1);
+  --ion-color-secondary-rgb: 61, 194, 255;
+  --custom-card-bg: rgba(226, 226, 226, 0.9);
+  --custom-card-different-bg: rgba(205, 220, 206, 0.6);
+  --ion-border-color: rgba(0, 0, 0, 0.5);
+  --ion-toolbar-background: var(--ion-background-color);
+  --ion-item-background: rgba(255, 255, 255, 0.8);
+  --ion-card-background: var(--custom-card-bg);
+  --ion-big-font-size: 3em;
+  --ion-medium-font-size: 2em;
+  --ion-transition: all 0.3s ease;
+  --ion-logo-blue-color: rgba(126, 173, 235, 0.8);
+  --ion-logo-blue-darker-color: rgba(90, 148, 200, 0.7);
+  --ion-logo-blue-evendarker-color: rgba(70, 120, 127, 0.5);
+  --ion-replay-color: rgba(126, 173, 121, 0.8);
+  --ion-create-color: rgba(245, 167, 152, 0.9);
+  --ion-return-color: rgba(178, 252, 58, 0.9);
 
+  --player1-color: rgba(0, 114, 178, 0.71);
+  --player2-color: rgba(230, 159, 0, 0.56);
+  --player3-color: rgba(0, 158, 115, 0.9);
+  --player4-color: rgba(204, 121, 167, 0.71);
+  --player5-color: rgba(213, 94, 0, 0.71);
+  --player6-color: rgba(86, 180, 233, 0.71);
+  --player7-color: rgba(171, 171, 171, 0.67);
+  --player8-color: rgba(240, 228, 66, 0.8);
+
+  --player1-color-no-alpha: rgba(0, 114, 178, 1);
+  --player2-color-no-alpha: rgba(230, 159, 0, 1);
+  --player3-color-no-alpha: rgba(0, 158, 115, 1);
+  --player4-color-no-alpha: rgba(204, 121, 167, 1);
+  --player5-color-no-alpha: rgba(213, 94, 0, 1);
+  --player6-color-no-alpha: rgba(86, 180, 233, 1);
+  --player7-color-no-alpha: rgba(171, 171, 171, 1);
+  --player8-color-no-alpha: rgba(240, 228, 66, 1);
+
+  --animation-bg-color: rgba(125, 74, 52, 0.7);
+
+  --lobby-owner-bg: rgba(220, 215, 0, 0.7);
+  --lobby-started-bg: rgba(0, 123, 255, 0.7);
+  --lobby-private-bg: rgba(128, 0, 128, 0.6);
+  --lobby-ended-bg: rgba(105, 105, 105, 0.7);
+  --lobby-joined-bg: rgba(60, 179, 113, 0.78);
+  --lobby-banned-bg: rgba(255, 0, 0, 0.67);
+  --lobby-default-bg: rgba(226, 226, 226, 0.95);
+
+
+
+  --btn-view-game-bg: rgba(76, 175, 80, 0.74);
+  --btn-view-game-color: rgba(0, 0, 0, 1);
+
+  --btn-start-spectating-bg: rgba(33, 150, 243, 0.74);
+  --btn-start-spectating-color: rgba(0, 0, 0, 1);
+
+  --btn-stop-spectating-bg: rgba(255, 87, 34, 0.74);
+  --btn-stop-spectating-color: rgba(0, 0, 0, 1);
+
+  --btn-join-game-bg: rgba(103, 187, 183, 0.74);
+  --btn-join-game-color: rgba(0, 0, 0, 1);
+
+  --btn-leave-game-bg: rgba(244, 67, 54, 0.74);
+  --btn-leave-game-color: rgba(0, 0, 0, 1);
+
+  --btn-open-game-bg: rgba(3, 169, 244, 0.74);
+  --btn-open-game-color: rgba(0, 0, 0, 1);
+
+  --btn-edit-lobby-settings-bg: rgba(255, 193, 7, 0.74);
+  --btn-edit-lobby-settings-color: rgba(0, 0, 0, 1);
+
+  --btn-manage-users-bg: rgba(156, 120, 130, 0.74);
+  --btn-manage-users-color: rgba(0, 0, 0, 1);
+
+  --btn-delete-lobby-bg: rgba(233, 30, 99, 0.74);
+  --btn-delete-lobby-color: rgba(0, 0, 0, 1);
+
+  --btn-start-game-bg: rgba(0, 188, 212, 0.74);
+  --btn-start-game-color: rgba(0, 0, 0, 1);
+
+  --btn-ready-up-bg: rgba(139, 195, 74, 0.74);
+  --btn-ready-up-color: rgba(0, 0, 0, 1);
+
+  --btn-password-protected-bg: rgba(211, 47, 47, 0.74);
+  --btn-password-protected-color: rgba(0, 0, 0, 1);
+
+  --btn-join-with-password-bg: rgba(103, 90, 183, 0.74);
+  --btn-join-with-password-color: rgba(0, 0, 0, 1);
+
+  --btn-spectate-with-password-bg: rgba(33, 70, 243, 0.74);
+  --btn-spectate-with-password-color: rgba(0, 0, 0, 1);
+
+  --ion-red-color: rgba(255,0,0,0.8);
+}
+
+.dark-theme {
+  --ion-background-color: rgba(40, 40, 40, 0.87);
+  --ion-background-opposite-color: rgba(245, 246, 246, 0.87);
+  --ion-text-color: rgba(245, 245, 245, 0.87);
+  --ion-text-color-rgb: 245, 245, 245;
+  --ion-color-primary: rgba(76, 141, 255, 1);
+  --ion-color-primary-rgb: 76, 141, 255;
+  --ion-color-secondary: rgba(80, 200, 255, 1);
+  --ion-color-secondary-rgb: 80, 200, 255;
+  --custom-card-bg: rgba(45, 45, 45, 0.9);
+  --custom-card-different-bg: rgba(70, 70, 70, 0.9);
+  --ion-border-color: rgba(255, 255, 255, 0.5);
+  --ion-toolbar-background: rgba(34, 34, 34, 1);
+  --ion-item-background: rgba(45, 45, 45, 0.8);
+  --ion-card-background: var(--custom-card-bg);
+  --ion-big-font-size: 3em;
+  --ion-medium-font-size: 2em;
+  --ion-toolbar-background: #222222;
+  --ion-logo-blue-color: rgba(126, 173, 235, 0.8);
+  --ion-logo-blue-darker-color: rgba(90, 148, 200, 0.7);
+  --ion-logo-blue-evendarker-color: rgba(70, 120, 127, 0.5);
+  --ion-replay-color: rgba(126, 173, 121, 0.6);
+  --ion-create-color: rgba(245, 167, 152, 0.6);
+  --ion-return-color: rgba(178, 252, 58, 0.8);
+
+  --player1-color: rgba(0, 114, 178, 0.71);
+  --player2-color: rgba(230, 159, 0, 0.56);
+  --player3-color: rgba(0, 158, 115, 0.9);
+  --player4-color: rgba(204, 121, 167, 0.71);
+  --player5-color: rgba(213, 94, 0, 0.71);
+  --player6-color: rgba(86, 180, 233, 0.71);
+  --player7-color: rgba(171, 171, 171, 0.67);
+  --player8-color: rgba(240, 228, 66, 0.8);
+
+  --animation-bg-color: rgba(125, 74, 52, 0.7);
+
+  --lobby-owner-bg: rgba(220, 215, 0, 0.75);
+  --lobby-started-bg: rgba(0, 123, 255, 0.82);
+  --lobby-private-bg: rgba(128, 0, 128, 0.88);
+  --lobby-ended-bg: rgba(105, 105, 105, 0.7);
+  --lobby-joined-bg: rgba(60, 179, 113, 0.5);
+  --lobby-banned-bg: rgba(255, 0, 0, 0.67);
+  --lobby-default-bg: rgba(226, 226, 226, 0.7);
+  --ion-red-color: rgba(255,0,0,0.8);
+
+}
 
 html, body {
   height: 100%;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+ion-card {
+  overflow: auto;
+  max-width: 100%;
+  max-height: 100vh;
 }
 
 body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: var(--ion-background-color);
+  color: var(--ion-text-color);
+}
+
+
+:is(ion-alert::part(backdrop)) {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+:is(ion-alert::part(alert-wrapper)) {
+  background: var(--ion-background-color);
+  border-radius: var(--ion-border-radius);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  color: var(--ion-text-color);
+}
+
+
+.alert-title {
+  color: var(--ion-color-primary);
+  font-size: 1.2em;
+  font-weight: 600;
+}
+
+.alert-button {
+  color: var(--ion-color-primary);
+  font-weight: 500;
+
+  &:hover {
+    background: rgba(var(--ion-color-primary-rgb), 0.1);
+  }
+}
+
+.alert-message {
+  color: var(--ion-text-color);
+  opacity: 1;
+}
+
+.alert-wrapper {
+  --color: var(--ion-text-color);
+}
+
+:is(ion-button ) {
+  --border-radius: var(--ion-border-radius);
+  --transition: var(--ion-transition);
+  font-weight: 500;
+  letter-spacing: 1px;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+
+  &[disabled] {
+    opacity: 0.6;
+  }
+}
+
+
+:is(ion-input, ion-textarea ) {
+  --background: var(--ion-logo-blue-color);
+  --padding-start: 12px;
+  --padding-end: 12px;
+  border-radius: var(--ion-border-radius);
+  transition: var(--ion-transition);
+
+  &:focus-within {
+    --background: var(--custom-card-different-bg);
+  }
+
+  &::part(placeholder) {
+    color: var(--ion-text-color)
+  }
+
+  &::part(native) {
+    --background: #ffebcd;
+    transition: background-color 0.3s ease;
+  }
+
+  &:focus-within::part(native) {
+    --background: #ffebcd;
+  }
+
+}
+
+:is(ion-label) {
+  color: var(--ion-text-color);
+}
+
+
+
+
+.required-star::after {
+  content: " *";
+  color: var(--ion-red-color);
+  margin-left: 3px;
+}
+.label-wrapper {
+  margin-bottom: 5px;
+}
+
+ion-searchbar{
+  color: var(--ion-text-color);
+}
+
+.searchbar-input.sc-ion-searchbar-md{
+  color: var(--ion-text-color);
+}
+
+searchbar-input-container{
+  color: var(--ion-text-color);
+}
+
+:is(ion-card) {
+  --background: var(--ion-card-background);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--ion-border-color);
+  transition: var(--ion-transition);
+  border-radius: var(--ion-border-radius);
+
+  :is(ion-card-title) {
+    background-color: transparent;
+    padding: 20px;
+    color: var(--ion-text-color);
+    border-radius: var(--ion-border-radius);
+  }
+
+
+  :is(ion-card-header) {
+    padding: 20px;
+    background: none;
+    border-radius: var(--ion-border-radius);
+    font-size: var(--ion-big-font-size);
+    color: var(--ion-text-color);
+  }
+
+  :is(ion-card-content) {
+    padding: 20px;
+    background: none;
+    border-radius: var(--ion-border-radius);
+    font-size: var(--ion-big-font-size);
+    color: var(--ion-text-color);
+  }
+
+  &:hover {
+   /*
+   transform: translateY(+2px);
+    */
+  }
+}
+
+:is(ion-list) {
+  background: transparent;
+
+  :is(ion-item) {
+    --background: var(--ion-item-background);
+    --border-color: var(--ion-border-color);
+    margin-bottom: 8px;
+    border-radius: var(--ion-border-radius);
+
+    &::part(detail-icon) {
+      color: var(--ion-color-primary);
+      opacity: 1;
+    }
+  }
+}
+
+/* https://forum.ionicframework.com/t/how-to-set-alert-text-color-in-ion-select-option/196232 */
+ion-alert {
+  .alert-wrapper.sc-ion-alert-md {
+    background-color: var(--ion-background-color);
+  }
+
+  .alert-title.sc-ion-alert-md {
+    font-size: 25px;
+    font-weight: 600;
+    color: var(--ion-text-color);
+  }
+
+  .alert-radio-label.sc-ion-alert-md {
+    white-space: pre-line !important;
+    color: var(--ion-text-color);
+    font-weight: bold;
+  }
+
+  [aria-checked="true"].sc-ion-alert-md .alert-radio-label.sc-ion-alert-md {
+    white-space: pre-line !important;
+    color: var(--ion-text-color);
+    font-weight: bold;
+  }
+}
+
+
+:is(ion-toolbar) {
+  --background: var(--ion-toolbar-background);
+  --border-width: 0 0 1px 0;
+  --border-color: var(--ion-border-color);
+
+  :is(ion-title) {
+    font-size: 1.1em;
+    letter-spacing: 1px;
+  }
+}
+
+:is(ion-modal) {
+  --width: 90%;
+  --max-width: 600px;
+
+  --border-radius: var(--ion-border-radius);
+  --background: var(--ion-background-color);
+
+  &::part(backdrop) {
+    background: rgba(0, 0, 0, 0.5);
+  }
+}
+
+:is(ion-toggle) {
+  --background: rgba(var(--ion-color-primary-rgb), 0.7);
+  --background-checked: var(--ion-color-primary);
+  --handle-background-checked: var(--ion-color-primary-contrast);
+}
+
+:is(ion-progress-bar ) {
+  --progress-background: var(--ion-color-primary);
+  --background: rgba(var(--ion-color-primary-rgb), 0.1);
+  height: 6px;
+  border-radius: 3px;
+}
+
+
+@media (max-width: 768px) {
+  :is(ion-alert) {
+    --width: 90%;
+    --max-width: 400px;
+  }
+
+  :is(ion-modal) {
+    --width: 95%;
+  }
+}
+
+:is(ion-checkbox) {
+  --size: 20px;
+  --checkbox-background-checked: var(--ion-color-primary);
+
+  &::part(container) {
+    border-radius: 5px;
+  }
+}
+
+:is(ion-loading) {
+  --spinner-color: var(--ion-color-primary);
+  --background: rgba(0, 0, 0, 0.6);
+  --width: 90px;
+  --height: 90px;
+  --border-radius: var(--ion-border-radius);
+}
+
+:is(ion-toast) {
+  --background: var(--ion-color-primary);
+  --color: var(--ion-color-primary-contrast);
+  --border-radius: var(--ion-border-radius);
+  --button-color: var(--ion-color-primary-contrast);
+}
+
+:is(ion-segment) {
+  --background: rgba(var(--ion-color-primary-rgb), 0.1);
+  border-radius: var(--ion-border-radius);
+
+  :is(ion-segment-button) {
+    --color: var(--ion-text-color);
+    --color-checked: var(--ion-color-primary);
+    --indicator-color: var(--ion-color-primary);
+  }
+}
+
+ion-toggle::part(handle) {
+  opacity: 1 !important;
+  box-shadow: none !important;
+  filter: none !important;
+  transition: none !important;
 }

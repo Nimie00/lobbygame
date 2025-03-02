@@ -1,12 +1,9 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>{{ "EDIT_PROFILE" | language }}</ion-title>
-  </ion-toolbar>
-</ion-header>
-
 <ion-card>
+  <ion-card-header>
+    <ion-title>{{ "EDIT_PROFILE" | language }}</ion-title>
+  </ion-card-header>
   <ion-card-content>
-    <form #profileForm="ngForm">
+    <form #profileForm="ngForm" *ngIf="!user.inLobby">
       <div class="selection-groups">
         <div class="edit-group" [class.disabled]="isDeleteSelected">
           <ion-chip
@@ -27,9 +24,9 @@
       </div>
 
       <div *ngIf="!isDeleteSelected && selectedOptions.size === 0" class="empty-state">
-        <ion-text color="medium">
+        <ion-label>
           {{ "SELECT_MODIFICATION_TYPE" | language }}
-        </ion-text>
+        </ion-label>
       </div>
 
       <div *ngIf="selectedOptions.has('picture')" class="form-section">
@@ -55,21 +52,27 @@
 
         <div *ngIf="selectedOptions.has('username')">
           <ion-item>
-            <ion-label position="stacked">{{ "NEW_USERNAME" | language }}</ion-label>
+            <div class="label-wrapper">
+              <ion-label position="stacked">{{ "NEW_USERNAME" | language }}</ion-label>
+            </div>
             <ion-input [(ngModel)]="form.username" name="username" required></ion-input>
           </ion-item>
         </div>
 
         <div *ngIf="selectedOptions.has('password')">
           <ion-item>
-            <ion-label position="stacked">{{ "NEW_PASSWORD" | language }}</ion-label>
+            <div class="label-wrapper">
+              <ion-label position="stacked">{{ "NEW_PASSWORD" | language }}</ion-label>
+            </div>
             <ion-input [(ngModel)]="form.password" name="newPassword" type="password" required></ion-input>
           </ion-item>
         </div>
 
         <div>
           <ion-item>
-            <ion-label position="stacked" class="required-star">{{ "CONFIRM_PASSWORD" | language }}</ion-label>
+            <div class="label-wrapper">
+              <ion-label position="stacked" class="required-star">{{ "CONFIRM_PASSWORD" | language }}</ion-label>
+            </div>
             <ion-input [(ngModel)]="confirmPassword" name="confirmPassword" type="password" required></ion-input>
           </ion-item>
         </div>
@@ -77,25 +80,29 @@
       </div>
 
 
-      <!-- Törlés mezők -->
       <div *ngIf="isDeleteSelected" class="delete-fields">
         <ion-item>
-          <ion-label position="stacked" class="required-star">{{ "USERNAME" | language }}</ion-label>
+          <div class="label-wrapper">
+            <ion-label position="stacked" class="required-star">{{ "USERNAME" | language }}</ion-label>
+          </div>
           <ion-input [(ngModel)]="deleteData.username" name="deleteUsername" required></ion-input>
         </ion-item>
 
         <ion-item>
-          <ion-label position="stacked" class="required-star">{{ "EMAIL" | language }}</ion-label>
+          <div class="label-wrapper">
+            <ion-label position="stacked" class="required-star">{{ "EMAIL" | language }}</ion-label>
+          </div>
           <ion-input [(ngModel)]="deleteData.email" name="deleteEmail" type="email" required></ion-input>
         </ion-item>
 
         <ion-item>
-          <ion-label position="stacked" class="required-star">{{ "PASSWORD" | language }}</ion-label>
+          <div class="label-wrapper">
+            <ion-label position="stacked" class="required-star">{{ "PASSWORD" | language }}</ion-label>
+          </div>
           <ion-input [(ngModel)]="deleteData.password" name="deletePassword" type="password" required></ion-input>
         </ion-item>
       </div>
 
-      <!-- Gombok -->
       <div class="action-buttons">
         <div *ngIf="!isDeleteSelected && selectedOptions.size > 0">
           <ion-button type="submit" (click)="onSubmit()" [disabled]="!profileForm.valid">
@@ -110,5 +117,6 @@
         </div>
       </div>
     </form>
+    <ion-label>{{ "CANT_CHANGE_WHILE_IN_LOBBY" | language }}</ion-label>
   </ion-card-content>
 </ion-card>

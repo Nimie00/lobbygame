@@ -1,22 +1,33 @@
 <ion-item class="lobby-item">
-  <ion-card class="lobby-card" [style.background-color]="getLobbyBackgroundColor(lobby)">
-    <ion-card-header>
-      <ion-card-title><strong>{{ lobby.name }}</strong></ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <div class="lobby-info">
-        <ion-label><strong>{{ "GAME" | language }}: {{ lobby.gameType }}</strong></ion-label>
-        <ion-label><strong>{{ "OWNER" | language }}: {{ lobby.ownerName }}</strong></ion-label>
-        <ion-label><strong>{{ "PLAYERS" | language }}: {{ lobby.players.length }}</strong></ion-label>
-        <ion-label><strong>{{ "SPECTATORS" | language }}: {{ lobby.spectators.length }}</strong></ion-label>
-        <p *ngIf="lobby.private && lobby.ownerId === currentUser.id">
-          <strong>{{ "LOBBY_PRIVATE_NOTIFIER_OWNER" | language }}</strong></p>
-        <p *ngIf="lobby.private && lobby.ownerId !== currentUser.id">
-          <strong>{{ "LOBBY_PRIVATE_NOTIFIER" | language }}</strong></p>
+  <ng-container *ngIf="getLobbyStyle(lobby) as lobbyStyle">
+    <ion-card class="lobby-card" [style.background-color]="lobbyStyle.backgroundColor">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon [name]="lobbyStyle.icon" style="margin-right: 8px;"></ion-icon>
+          <strong>{{ lobby.name }}</strong>
+          <ion-icon *ngIf="lobby.private" name="shield" style="margin-left: 8px;"></ion-icon>
+          <ion-icon *ngIf="lobby.password != null" name="lock-closed" style="margin-left: 8px;"></ion-icon>
+          <ion-icon *ngIf="lobby.players.length >= lobby.maxPlayers" name="people" style="margin-left: 8px;"></ion-icon>
+          <ion-icon *ngIf="!lobby.allowSpectators" name="eye-off" style="margin-left: 8px;"></ion-icon>
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="lobby-info">
+          <ion-label><strong>{{ "ID" | language }}: {{ lobby.id | language}}</strong></ion-label>
+          <ion-label><strong>{{ "GAME" | language }}: {{ lobby.gameType | language}}</strong></ion-label>
+          <ion-label><strong>{{ "OWNER" | language }}: {{ lobby.ownerName }}</strong></ion-label>
+          <ion-label><strong>{{ "PLAYERS" | language }}: {{ lobby.players.length }}</strong></ion-label>
+          <ion-label><strong>{{ "SPECTATORS" | language }}: {{ lobby.spectators.length }}</strong></ion-label>
+          <p *ngIf="lobby.private && lobby.ownerId === currentUser.id">
+            <strong>{{ "LOBBY_PRIVATE_NOTIFIER_OWNER" | language }}</strong>
+          </p>
+          <p *ngIf="lobby.private && lobby.ownerId !== currentUser.id">
+            <strong>{{ "LOBBY_PRIVATE_NOTIFIER" | language }}</strong>
+          </p>
 
-      </div>
+        </div>
 
-      <span class="lobby-actions" *ngIf="actions && actions.length > 0">
+        <span class="lobby-actions" *ngIf="actions && actions.length > 0">
         <ng-container *ngFor="let action of actions">
           <ion-button *ngIf="action.condition"
                       [class]="action.class"
@@ -25,42 +36,9 @@
             {{ action.label | language }}
           </ion-button>
         </ng-container>
-      </span>
-    </ion-card-content>
-  </ion-card>
-</ion-item>
+        </span>
 
-<ion-modal #modal>
-  <ng-template>
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>{{ "ENTER_PASSWORD"| language }}</ion-title>
-        <ion-buttons slot="end">
-          <ion-button (click)="closePasswordModal()">Close</ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content class="ion-padding">
-      <ion-item>
-        <ion-label position="floating">{{ "PASSWORD" | language }}</ion-label>
-        <ion-input type="password" [(ngModel)]="password"></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-button
-          class='btn-join-with-password'
-          (click)="joinWithPassword(this.lobby.id)"
-        >{{ "JOIN_AS_PLAYER" | language }}
-        </ion-button>
-      </ion-item>
-      <ion-item>
-        <ion-button
-          class='btn-spectate-with-password'
-          (click)="joinWithPasswordAsSpectator(this.lobby.id)"
-          [disabled]="!lobby.allowSpectators">
-          {{ "START_SPECTATING" | language }}
-        </ion-button>
-        <ion-label *ngIf="!lobby.allowSpectators">{{ "SPECTATORS_NOT_ALLOWED" | language }}</ion-label>
-      </ion-item>
-    </ion-content>
-  </ng-template>
-</ion-modal>
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
+</ion-item>

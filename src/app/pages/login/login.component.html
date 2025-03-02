@@ -1,48 +1,67 @@
 <ion-content>
+  <div class="logincard">
   <ion-card>
     <ion-card-header>
-      <ion-img class="logo" src="../assets/logo.png"></ion-img>
       <ion-card-title>
-        <h1>{{ (isLogin ? 'LOGIN' : 'REGISTRATION') | language }}</h1>
+        <ion-img class="logo" src="../assets/logo.png"></ion-img>
+        <ion-label>{{ (isLogin ? 'LOGIN' : 'REGISTRATION') | language }}</ion-label>
       </ion-card-title>
     </ion-card-header>
     <ion-card-content>
 
-      <!-- Login form -->
       <form *ngIf="isLogin" (ngSubmit)="login()">
-        <ion-item>
-          <ion-label position="stacked">{{ "EMAIL" | language }}</ion-label>
-          <ion-input type="text" [(ngModel)]="email" name="email"></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="stacked">{{ "PASSWORD" | language }}</ion-label>
-          <ion-input type="password" [(ngModel)]="password" name="password"></ion-input>
-        </ion-item>
-        <ion-button expand="full" type="submit">{{ "LOGIN" | language }}</ion-button>
+        <div class="textfield">
+          <ion-item>
+            <div class="label-wrapper">
+            <ion-label position="stacked" class="required-star">{{ "EMAIL" | language }}</ion-label>
+            </div>
+            <ion-input type="text" [(ngModel)]="email" name="email"></ion-input>
+          </ion-item>
+          <ion-item>
+            <div class="label-wrapper">
+            <ion-label position="stacked" class="required-star">{{ "PASSWORD" | language }}</ion-label>
+            </div>
+            <ion-input type="password" [(ngModel)]="password" name="password"></ion-input>
+          </ion-item>
+        </div>
+        <ion-button expand="full"
+                    type="submit">{{ "LOGIN" | language }}</ion-button>
+        <br>
         <hr>
-        <ion-label class="Loginchange" (click)="forgotPassword()">{{ "FORGOT_PASSWORD" | language }}
-        </ion-label>
+        <ion-label class="Loginchange" (click)="forgotPassword()">{{ "FORGOT_PASSWORD" | language }}</ion-label>
         <ion-label class="Loginchange" (click)="toggleCard()">{{ "SWITCH_LOGIN_TO_REGISTER" | language }}</ion-label>
       </form>
 
-      <!-- Register form -->
       <form *ngIf="!isLogin" (ngSubmit)="register()">
-        <ion-item>
-          <ion-label position="stacked">{{ "USERNAME" | language }}</ion-label>
-          <ion-input [(ngModel)]="regUsername" name="regUsername"></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="stacked">{{ "EMAIL" | language }}</ion-label>
-          <ion-input type="email" [(ngModel)]="regEmail" name="regEmail"></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="stacked">{{ "PASSWORD" | language }}</ion-label>
-          <ion-input type="password" [(ngModel)]="regPassword" name="regPassword"></ion-input>
-        </ion-item>
-        <ion-button expand="full" type="submit">{{ 'REGISTRATION' | language }}</ion-button>
-          <hr>
-          <ion-label class="Loginchange" (click)="toggleCard()">{{ "SWITCH_REGISTER_TO_LOGIN" | language }}</ion-label>
+        <div class="textfield">
+          <ion-item>
+            <div class="label-wrapper">
+            <ion-label position="stacked" class="required-star">{{ "USERNAME" | language }}</ion-label>
+            </div>
+            <ion-input [(ngModel)]="regUsername" name="regUsername"></ion-input>
+          </ion-item>
+          <ion-item>
+            <div class="label-wrapper">
+            <ion-label position="stacked" class="required-star">{{ "EMAIL" | language }}</ion-label>
+            </div>
+            <ion-input type="email" [(ngModel)]="regEmail" name="regEmail"></ion-input>
+          </ion-item>
+          <ion-item>
+            <div class="label-wrapper">
+            <ion-label position="stacked" class="required-star">{{ "PASSWORD" | language }}</ion-label>
+            </div>
+            <ion-input type="password" [(ngModel)]="regPassword" name="regPassword"></ion-input>
+          </ion-item>
+        </div>
+        <ion-button expand="full"
+                    type="submit">{{ 'REGISTRATION' | language }}</ion-button>
+
+        <br>
+        <hr>
+        <ion-label class="Loginchange" (click)="toggleCard()">{{ "SWITCH_REGISTER_TO_LOGIN" | language }}</ion-label>
       </form>
     </ion-card-content>
   </ion-card>
+  </div>
 </ion-content>
+

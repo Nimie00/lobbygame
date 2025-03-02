@@ -7,7 +7,9 @@ import {map} from "rxjs/operators";
 import {User} from "../../shared/models/user.model";
 import {CreateLobbyModalComponent} from "./create-lobby-modal/create-lobby-modal.component";
 import {SubscriptionTrackerService} from "../../shared/services/subscriptionTracker.service";
-import {ModalService} from "../../shared/services/modal-services/modal.service";
+import {ModalService} from "../../shared/services/modal.service";
+import {LanguageService} from "../../shared/services/language.service";
+import {AudioService} from "../../shared/services/audio.service";
 
 
 @Component({
@@ -31,11 +33,15 @@ export class LobbiesComponent implements OnInit, OnDestroy {
   createModal: boolean = false;
   listLive: boolean = true;
 
+
   constructor(
     private lobbyService: LobbyService,
     private authService: AuthService,
     private tracker: SubscriptionTrackerService,
-    private modalService: ModalService) {
+    private languageService: LanguageService,
+    private modalService: ModalService,
+    private audioService: AudioService,
+  ) {
   }
 
   ngOnInit() {
@@ -52,7 +58,7 @@ export class LobbiesComponent implements OnInit, OnDestroy {
         }
 
         if (this.currentUser) {
-          this.loadAndFilterLobbies()
+          this.loadAndFilterLobbies().then();
         }
       }),
       catchError(error => {
@@ -66,15 +72,19 @@ export class LobbiesComponent implements OnInit, OnDestroy {
 
   async loadAndFilterLobbies(): Promise<void> {
     await this.checkInLiveLobby();
+    console.log(this.listLive);
     await this.loadLobbies(this.userId, this.listLive);
   }
 
   async checkInLiveLobby() {
     if (this.joinedLobby) {
       let lobby = await this.lobbyService.getLobbySnapshot(this.joinedLobby)
-      if(lobby.status){
-        this.listLive = lobby.status!=="ended";
+      if (lobby.status) {
+        this.listLive = lobby.status !== "ended";
       }
+    }
+    if(this.searchTerm.includes("replays:")){
+      this.listLive = false;
     }
   }
 
@@ -99,8 +109,15 @@ export class LobbiesComponent implements OnInit, OnDestroy {
     if (this.searchTerm) {
       const terms = this.searchTerm.split(':');
       if (terms.length === 2) {
-        const [key, value] = terms.map(t => t.trim().toLowerCase());
-        return lobby[key]?.toLowerCase().includes(value);
+        const [key, value] = terms.map(t => t.trim());
+        console.log(key, value);
+        if(key === "replays" && value.length > 0 && lobby.id === value) {
+          return true;
+        }
+        if(key === "owner" && value === lobby.ownerId) {
+          return true;
+        }
+        return key === "playerId" && lobby.players.includes(value);
       }
     }
 
@@ -121,7 +138,7 @@ export class LobbiesComponent implements OnInit, OnDestroy {
     return searched;
   }
 
-  trackByLobbyId(index: number, lobby: any): string {
+  trackByLobbyId(_: number, lobby: any): string {
     return lobby.id;
   }
 
@@ -136,11 +153,12 @@ export class LobbiesComponent implements OnInit, OnDestroy {
   changeFilteredLobbyStatus() {
     this.listLive = !this.listLive;
     if (this.currentUser) {
-      this.loadLobbies(this.userId, this.listLive)
+      this.loadLobbies(this.userId, this.listLive).then();
     }
   }
 
   ngOnDestroy(): void {
+    this.audioService.stopAllSounds()
     this.tracker.unsubscribeCategory(this.CATEGORY);
   }
 }

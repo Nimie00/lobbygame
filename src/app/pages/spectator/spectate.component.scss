@@ -1,0 +1,207 @@
+.timeline-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: fit-content;
+  background-color: var(--ion-background-color);
+  margin: 0 auto;
+  padding: 10px;
+}
+
+#visualization {
+  width: 100%;
+  height: fit-content;
+  background-color: rgba(128, 128, 128, 0.9);
+  border: 1px solid #add8e6;
+  margin-bottom: 20px;
+  overflow-y: auto;
+}
+
+
+
+ion-button{
+  text-align: center;
+  justify-content: center;
+}
+
+.controls {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 60%;
+  height: fit-content;
+  gap: 5px;
+  flex-wrap: wrap;
+  overflow-x: auto;
+  overflow-y: auto;
+  white-space: nowrap;
+}
+
+.controls ion-button {
+  flex: 0 0 auto;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+
+body {
+  background-color: var(--ion-background-color);
+}
+
+ion-card{
+  color: var(--ion-text-color);
+  padding: 5px;
+  border-radius: 15px;
+
+}
+
+ion-toolbar{
+  margin-top: 100px;
+}
+
+
+:host ::ng-deep .vis-custom-time {
+  pointer-events: none;
+}
+
+:host ::ng-deep .vis-item.vis-dot[class*="0"] {
+  border-color: var(--player1-color-no-alpha);
+  background-color: var(--player1-color-no-alpha);
+}
+
+:host ::ng-deep .vis-item.vis-dot[class*="1"] {
+  border-color: var(--player2-color-no-alpha);
+  background-color: var(--player2-color-no-alpha);
+}
+
+:host ::ng-deep .vis-item.vis-dot[class*="2"] {
+  border-color: var(--player3-color-no-alpha);
+  background-color: var(--player3-color-no-alpha);
+}
+
+:host ::ng-deep .vis-item.vis-dot[class*="3"] {
+  border-color: var(--player4-color-no-alpha);
+  background-color: var(--player4-color-no-alpha);
+}
+
+:host ::ng-deep .vis-item.vis-dot[class*="4"] {
+  border-color: var(--player5-color-no-alpha);
+  background-color: var(--player5-color-no-alpha);
+}
+
+:host ::ng-deep .vis-item.vis-dot[class*="5"] {
+  border-color: var(--player6-color-no-alpha);
+  background-color: var(--player6-color-no-alpha);
+}
+
+:host ::ng-deep .vis-item.vis-dot[class*="6"] {
+  border-color: var(--player7-color-no-alpha);
+  background-color: var(--player7-color-no-alpha);
+}
+
+:host ::ng-deep .vis-item.vis-dot[class*="7"] {
+  border-color: var(--player8-color-no-alpha);
+  background-color: var(--player8-color-no-alpha);
+}
+
+
+
+:host ::ng-deep .vis-item.vis-line[class*="0"] {
+  border-color: var(--player1-color-no-alpha);
+}
+
+:host ::ng-deep .vis-item.vis-line[class*="1"] {
+  border-color: var(--player2-color-no-alpha);
+}
+
+:host ::ng-deep .vis-item.vis-line[class*="2"] {
+  border-color: var(--player3-color-no-alpha);
+}
+
+:host ::ng-deep .vis-item.vis-line[class*="3"] {
+  border-color: var(--player4-color-no-alpha);
+}
+
+:host ::ng-deep .vis-item.vis-line[class*="4"] {
+  border-color: var(--player5-color-no-alpha);
+}
+
+:host ::ng-deep .vis-item.vis-line[class*="5"] {
+  border-color: var(--player6-color-no-alpha);
+}
+
+:host ::ng-deep .vis-item.vis-line[class*="6"] {
+  border-color: var(--player7-color-no-alpha);
+}
+
+:host ::ng-deep .vis-item.vis-line[class*="7"] {
+  border-color: var(--player8-color-no-alpha);
+}
+
+
+
+:host ::ng-deep .vis-item.vis-box[class*="0"] {
+  background-color: var(--player1-color-no-alpha);
+}
+
+:host ::ng-deep .vis-item.vis-box[class*="1"] {
+  background-color: var(--player2-color-no-alpha);
+}
+
+:host ::ng-deep .vis-item.vis-box[class*="2"] {
+  background-color: var(--player3-color-no-alpha);
+}
+
+:host ::ng-deep .vis-item.vis-box[class*="3"] {
+  background-color: var(--player4-color-no-alpha);
+}
+
+:host ::ng-deep .vis-item.vis-box[class*="4"] {
+  background-color: var(--player5-color-no-alpha);
+}
+
+:host ::ng-deep .vis-item.vis-box[class*="5"] {
+  background-color: var(--player6-color-no-alpha);
+}
+
+:host ::ng-deep .vis-item.vis-box[class*="6"] {
+  background-color: var(--player7-color-no-alpha);
+}
+
+:host ::ng-deep .vis-item.vis-box[class*="7"] {
+  background-color: var(--player8-color-no-alpha);
+}
+
+
+ion-button.start-button{
+  --background: var(--btn-ready-up-bg);
+  --color: var(--btn-ready-up-color);
+}
+ion-button.pause-button{
+  --background: var(--btn-password-protected-bg);
+  --color: var(--btn-password-protected-color);
+}
+ion-button.jump-to-start-button{
+  --background: var(--btn-open-game-bg);
+  --color: var(--btn-open-game-color);
+}
+ion-button.jump-to-first-event-button{
+  --background: var(--btn-join-with-password-bg);
+  --color: var(--btn-join-with-password-color);
+}
+ion-button.jump-to-real-time-button{
+  --background: var(--btn-delete-lobby-bg);
+  --color: var(--btn-delete-lobby-color);
+}
+ion-button.jump-to-next-event-button{
+  --background: var(--btn-start-spectating-bg);
+  --color: var(--btn-start-spectating-color);
+}
+
+@media (max-width: 500px) {
+  .button-text {
+    display: none;
+  }
+}
+

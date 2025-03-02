@@ -3,54 +3,57 @@
   margin: 0 auto;
   padding: 20px;
   text-align: center;
-  background-color: #dddddd;
+  background-color: var(ion-card-background);
+}
 
-  h2 {
-    color: black;
-  }
+main-header ion-searchbar {
+  color: var(--ion-text-color);
+}
 
-  .create-lobby-button {
-    background-color: #1e90ff;
-    color: black;
-    margin-bottom: 20px;
-    border-radius: 5px;
-    padding: 10px 20px;
-    text-transform: uppercase;
-    font-weight: bold;
-    cursor: pointer;
-  }
+ion-icon {
+  margin-right: 8px;
+}
 
-  .lobby-list {
-    border-radius: 10px;
-    padding: 40px;
-    color: black;
-    width: 100%;
-    height: fit-content;
-    margin: 15px auto;
-    text-align: left;
-    display: block;
-    box-sizing: border-box;
-  }
 
-  h3 {
-    margin: 0;
-    font-size: 1.2em;
-  }
+ion-button.create-lobby-button  ion-button.change-to-replays{
+  color: var(--ion-black-text-color);
+  text-transform: uppercase;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  width: fit-content;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  border-radius: 4p;
+}
 
-  p {
-    margin: 5px 0;
-    font-size: 0.9em;
-  }
 
-  button {
-    margin-top: 10px;
-    background-color: #007bff;
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    text-transform: uppercase;
-    font-weight: bold;
-  }
+ion-button.create-lobby-button {
+  --background: var(--ion-create-color);
+}
+
+ion-button.create-lobby-button[disabled]::part(native) {
+  text-decoration: line-through;
+}
+
+
+ion-button.change-to-replays {
+  --background: var(--ion-replay-color);
+}
+
+
+.lobby-list {
+  border-radius: 10px;
+  padding: 40px;
+  color: var(--ion-black-text-color);
+  width: 100%;
+  height: fit-content;
+  margin: 15px auto;
+  text-align: left;
+  display: block;
+  box-sizing: border-box;
 }

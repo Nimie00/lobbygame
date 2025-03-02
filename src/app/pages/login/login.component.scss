@@ -1,57 +1,104 @@
-ion-card {
-  margin: auto;
-  width: 100%;
-  max-width: 400px;
-  padding: 16px;
-  box-shadow: 0 4px 80px rgba(0, 0, 0, 0.3);
-  justify-content: center;
-  align-items: center;
-  border-radius: 25px;
-  background-color: #7EADEB;
-}
-
-ion-card-header {
-  text-align: center;
-}
-
-ion-card-content {
-  background-color: #7EADEB;
-}
-
-ion-img {
+:is(ion-img){
   display: block;
   margin: 0 auto 20px auto;
   width: 100%;
 }
 
-ion-item {
-  background-color: #7EADEB;
-  --ion-item-background:#7EADEB;
+.logincard{
+  margin-top: 10px;
+}
+
+:is(ion-card) {
+  --background: linear-gradient(to bottom,var(--ion-logo-blue-color), var(--ion-logo-blue-darker-color));
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--ion-border-color);
+  transition: var(--ion-transition);
+  border-radius: var(--ion-border-radius);
+  width: 100%;
+  max-width: 400px;
+  padding: 16px;
+  margin: 0 auto;
+  ion-card-header,
+  ion-card-title,
+  ion-card-content{
+    text-align: center;
+    color: var(--ion-black-text-color);
+    background-color: transparent;
+    border-radius: var(--ion-border-radius);
+  }
+}
+
+ion-card-title{
+  font-size: 1.5rem;
 }
 
 
-ion-label {
-  display: block;
-  font-weight: bold;
-  margin-top: 5px;
+ion-item {
+  --background: transparent;
+  border-bottom: none;
+  width: 100%;
+  --inner-border-width: 0;
 }
 
 ion-input {
-  width: 100%;
-  height: auto;
+  padding: 0.5rem;
+  --background: var(--ion-logo-blue-darker-color);
+  border-bottom: 1px solid var(--ion-black-text-color);
 }
 
-ion-button {
-  margin-top: 20px;
+ion-label,
+ion-input {
+  display: block;
+  font-weight: bold;
+  margin-top: 5px;
+  border-radius: 0;
+  width: 100%;
+  color: var(--ion-black-text-color);
+
+  &::part(placeholder) {
+    color: var(--ion-black-text-color);
+  }
+  &::part(label) {
+    color: var(--ion-black-text-color);
+  }
+
+  &:focus-within {
+    --background: var(--ion-logo-blue-evendarker-color);
+  }
+
 }
 
 form {
   display: flex;
   flex-direction: column;
+  padding: 16px;
 }
 
 .Loginchange{
   text-decoration: underline;
   cursor: pointer;
-  color: #723234;
+  color: var(--ion-black-text-color);
 }
+
+:is(ion-button) {
+  background-color: rgba(var(--ion-color-primary-rgb) 0.8);
+  color: var(--ion-black-text-color);
+  --transition: var(--ion-transition);
+  font-weight: bold;
+  width: 80%;
+  margin: 0 auto 0 auto;
+
+}
+
+/*A loginnál a belépési adatok mezőinek labeljei (Email ...)*/
+:is(ion-label).sc-ion-label-md-h.sc-ion-label-md-s{
+  color: var(--ion-black-text-color);
+}
+
+
+.textfield{
+  width: 100%;
+  margin-bottom: 40px;
+}
+
+

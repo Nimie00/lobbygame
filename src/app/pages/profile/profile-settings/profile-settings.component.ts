@@ -3,9 +3,10 @@ import {AuthService} from '../../../shared/services/auth.service';
 import {SubscriptionTrackerService} from "../../../shared/services/subscriptionTracker.service";
 import {User} from "../../../shared/models/user.model";
 import {HttpClient} from "@angular/common/http";
-import {AlertController} from "@ionic/angular";
 import {LanguageService} from "../../../shared/services/language.service";
 import {Router} from "@angular/router";
+import {AlertService} from "../../../shared/services/alert.service";
+import {AudioService} from "../../../shared/services/audio.service";
 
 @Component({
   selector: 'app-profile-settings',
@@ -31,7 +32,6 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
 
   form = {
     username: '',
-    email: '',
     password: '',
   };
 
@@ -41,20 +41,20 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
     password: ''
   };
 
-
   constructor(private authService: AuthService,
               private tracker: SubscriptionTrackerService,
               private http: HttpClient,
-              private alertController: AlertController,
-              private translateService: LanguageService,
-              private router: Router
+              private languageService: LanguageService,
+              private router: Router,
+              private alertService: AlertService,
+              private audioService: AudioService,
   ) {
   }
 
   ngOnInit() {
     this.loadProfilePictures();
     this.selectedPicture = this.user.picture || null;
-    this.userInLobby = this.user.inLobby === null || this.user.inLobby === '';
+    this.userInLobby = this.user.inLobby != null;
   }
 
   ngOnDestroy(): void {
@@ -88,7 +88,7 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
 
   async onDeleteProfile() {
     if (this.userInLobby) {
-      await this.showError(`${this.translateService.translate('CANT_DELETE_WHILE_IN_LOBBY')}`);
+      await this.showError(`${this.languageService.translate('CANT_DELETE_WHILE_IN_LOBBY')}`);
       return;
     }
 
@@ -96,29 +96,40 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
       await this.authService.reauthenticateUser(this.deleteData.email, this.deleteData.password);
 
       if (this.deleteData.username !== this.user.username) {
-        await this.showError(`${this.translateService.translate('INVALID_USERNAME')}`);
+        await this.showError(`${this.languageService.translate('INVALID_USERNAME')}`);
         return;
       }
       await this.authService.deleteUser();
       await this.router.navigate(['/login/']);
     } catch (error) {
-      await this.showError(`${this.translateService.translate('AUTH_FAILED')}`);
+      await this.showError(`${this.languageService.translate('AUTH_FAILED')}`);
     }
   }
 
   async onSubmit() {
+    if (this.userInLobby) {
+      await this.showError(`${this.languageService.translate('CANT_CHANGE_WHILE_IN_LOBBY')}`);
+      return;
+    }
+
     try {
       await this.authService.reauthenticateUser(this.user.email, this.confirmPassword);
 
       let updates: any = {};
 
       if (this.selectedOptions.has('username')) {
-        if (await this.isUserNameUsable()) {
-          updates.username = this.form.username;
+        if (!this.form.username.includes('#')) {
+          if (await this.isUserNameUsable()) {
+            updates.username = this.form.username;
+          } else {
+            await this.showError(`${this.languageService.translate('USERNAME_TAKEN')}`);
+            return;
+          }
         } else {
-          await this.showError(`${this.translateService.translate('USERNAME_TAKEN')}`);
+          await this.showError(`${this.languageService.translate('USERNAME_CONTAINS_ILLEGAL_CHARACTER')}`);
           return;
         }
+
       }
 
       if (this.selectedOptions.has('password')) {
@@ -134,7 +145,8 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
       }
 
 
-      await this.showSuccess(`${this.translateService.translate('CHANGES_SAVED')}`);
+      await this.showSuccess(`${this.languageService.translate('CHANGES_SAVED')}`);
+      this.resetFormValues();
     } catch (error) {
       await this.handleError(error);
     }
@@ -166,26 +178,20 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
       }
     }
 
-    let message = `${this.translateService.translate(errorMessage)}`
+    let message = `${this.languageService.translate(errorMessage)}`
     await this.showError(message);
   }
 
   private async showSuccess(changesSaved: string) {
-    const alert = await this.alertController.create({
-      header: `${this.translateService.translate('SUCCESS')}`,
-      message: changesSaved,
-      buttons: ['OK']
-    });
-    await alert.present();
+    await this.alertService.showAlert(
+      `${this.languageService.translate('SUCCESS')}`,
+      changesSaved);
   }
 
   private async showError(message: string) {
-    const alert = await this.alertController.create({
-      header: `${this.translateService.translate('ERROR')}`,
-      message: message,
-      buttons: ['OK']
-    });
-    await alert.present();
+    await this.alertService.showAlert(
+      `${this.languageService.translate('ERROR')}`,
+      message);
   }
 
   private loadProfilePictures() {
@@ -204,10 +210,16 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
     if (this.form.username === this.user.username) return false;
 
     try {
-      return !await this.authService.checkUsernameTaken(this.form.username);
+      return await this.authService.checkUsernameAvailable(this.form.username);
     } catch (error) {
       console.error('Error checking username:', error);
       return false;
     }
+  }
+
+  private resetFormValues() {
+    this.form.username = '';
+    this.form.password = '';
+    this.confirmPassword = '';
   }
 }

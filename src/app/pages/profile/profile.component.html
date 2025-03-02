@@ -24,16 +24,26 @@
           <div class="xp-bar">
             <div
               class="xp-bar-progress"
-              [style.width.%]="(currentUser.xp / nextLevel.xp) * 100">
+              [style.width.%]="(currentUser.xp / nextLevel) * 100">
             </div>
           </div>
-          <p class="xp-info">{{ currentUser.xp }} / {{ nextLevel.xp }} XP</p>
+          <p class="xp-info">{{ currentUser.xp }} / {{ nextLevel }} XP</p>
         </div>
 
         <!-- Gombok -->
         <div class="button-group">
-          <ion-button expand="block" color="primary" (click)="changeProfilePart()">Statisztika</ion-button>
-          <ion-button expand="block" color="secondary" (click)="changeProfilePart()">Módosítás</ion-button>
+          <ion-button
+            expand="block"
+            [color]="showStatistics ? 'primary' : 'medium'"
+            (click)="changeProfilePart(true)">
+            {{"STATS_PROFILE" | language}}
+          </ion-button>
+          <ion-button
+            expand="block"
+            [color]="!showStatistics ? 'secondary' : 'medium'"
+            (click)="changeProfilePart(false)">
+            {{"EDIT_PROFILE" | language}}
+          </ion-button>
         </div>
 
         <app-profile-settings *ngIf="!showStatistics" [user]=currentUser></app-profile-settings>
@@ -43,3 +53,4 @@
   </ng-container>
   <ion-toolbar class="large-title-fix"></ion-toolbar>
 </ion-content>
+

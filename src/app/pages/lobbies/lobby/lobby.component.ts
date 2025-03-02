@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   Input,
   OnChanges,
@@ -11,26 +10,29 @@ import {
 import {Lobby} from "../../../shared/models/lobby.model";
 import {User} from "../../../shared/models/user.model";
 import {LobbyService} from "../../../shared/services/lobby.service";
-import {Router} from "@angular/router";
-import {IonModal} from "@ionic/angular";
 import {CreateLobbyModalComponent} from "../create-lobby-modal/create-lobby-modal.component";
-import {LobbyPlayersManagingComponent} from "../lobby-players-managing-modal/lobby-players-managing.component";
+import {
+  LobbyPlayersManagingModalComponent
+} from "../lobby-players-managing-modal/lobby-players-managing-modal.component";
 import {SubscriptionTrackerService} from "../../../shared/services/subscriptionTracker.service";
 import {GameStartService} from "../../../shared/services/game-services/gameStart.service";
-import {ModalService} from "../../../shared/services/modal-services/modal.service";
+import {ModalService} from "../../../shared/services/modal.service";
+import {LanguageService} from "../../../shared/services/language.service";
+import {LobbyPasswordModalComponent} from "./password-modal/lobby-password-modal.component";
+import {AlertService} from "../../../shared/services/alert.service";
+import {Router} from "@angular/router";
+
 
 @Component({
   selector: 'app-lobby',
   templateUrl: './lobby.component.html',
   styleUrls: ['./lobby.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
-
 })
 export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
   private CATEGORY = "lobby"
-  @ViewChild('modal') passwordModal: IonModal;
   @ViewChild(CreateLobbyModalComponent) createLobbyModal: CreateLobbyModalComponent;
-  @ViewChild(LobbyPlayersManagingComponent) lobbyPlayersModal: LobbyPlayersManagingComponent;
+  @ViewChild(LobbyPlayersManagingModalComponent) lobbyPlayersModal: LobbyPlayersManagingModalComponent;
+  @ViewChild(LobbyPasswordModalComponent) lobbyPasswordModal: LobbyPasswordModalComponent;
   @Input() lobby: any;
   @Input() hasLobby: boolean = false;
   @Input() joinedLobby: string = null;
@@ -43,19 +45,21 @@ export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
   protected passwordModalOpen: boolean = false;
   protected isCreateLobbyModalVisible: boolean = false;
   protected isLobbyPlayersModalVisible: boolean = false;
-  isPlayersModalOpen: boolean;
 
 
   constructor(private lobbyService: LobbyService,
-              private router: Router,
               private tracker: SubscriptionTrackerService,
               private gameStartService: GameStartService,
-              private modalService: ModalService
+              private languageService: LanguageService,
+              private modalService: ModalService,
+              private alertService: AlertService,
+              private router: Router,
   ) {
+
   }
 
   async ngOnInit() {
-    //this.generateActions(this.listLive);
+
   }
 
   ngOnDestroy(): void {
@@ -68,23 +72,22 @@ export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  generateActions(listLive: boolean) {
+  generateActions(listLiveGames: boolean) {
     if (this.lobby.status !== 'test' && !this.isUserBanned()) {
       this.actions = [];
-      // Owner actions
-      if (listLive && (this.isOwner())) {
+      if (listLiveGames && (this.isOwner())) {
         this.actions.push({
           label: 'START_GAME',
           class: 'btn-start-game',
           command: () => this.startGame(this.lobby.id),
           condition: this.lobby.status !== 'started',
-          disabled: false // TODO: Ha megvalósítjuk azt, hogy a játékosoknak el kell fogadnia akkor addig ez disabled ( és akkor is ha nincs megfelelő számú játékos)
+          disabled: false
         });
         this.actions.push({
-          label: 'DELETE_LOBBY',
-          class: 'btn-delete-lobby',
-          command: () => this.destroyLobby(this.lobby.id),
-          condition: this.lobby.status !== 'started' || this.lobby.status === 'started'
+          label: 'OPEN_GAME',
+          class: 'btn-open-game',
+          command: () => this.gameStartService.openGameWindow(this.lobby.id),
+          condition: this.lobby.status === 'started',
         });
         this.actions.push({
           label: 'MANAGE_PLAYERS',
@@ -95,41 +98,49 @@ export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
         this.actions.push({
           label: 'EDIT_LOBBY_SETTINGS',
           class: 'btn-edit-lobby-settings',
-          command: () => this.modifyLobbySettings(this.lobby.id),
+          command: () => this.modifyLobbySettings(),
           condition: this.lobby.status !== 'started'
         });
+
         this.actions.push({
-          label: 'OPEN_GAME',
-          class: 'btn-open-game',
-          command: () => this.gameStartService.openGameWindow(this.lobby.id),
-          condition: this.lobby.status === 'started',
+          label: 'DELETE_LOBBY',
+          class: 'btn-delete-lobby',
+          command: () => this.destroyLobby(this.lobby.id),
+          // condition: true,
+          condition: this.lobby.status !== 'started' && this.lobby.status !== 'starting'
         });
       }
 
-      if (listLive && (!this.isOwner() && this.lobby.password == null)) {
+      if (listLiveGames && (!this.isOwner() && this.lobby.password == null)) {
         this.actions.push({
           label: 'JOIN_AS_PLAYER',
           class: 'btn-join-game',
           command: () => this.joinLobby(this.lobby.id),
-          condition: !this.isUserInLobby() && !this.isUserSpectatingLobby() && this.lobby.status !== 'started',
+          condition: !this.isUserInLobby() && !this.isUserSpectatingLobby() && (this.lobby.status !== 'started' &&
+            this.lobby.status !== 'starting') && this.lobby.maxPlayers > this.lobby.players.length && !this.currentUser.inLobby,
         });
         this.actions.push({
           label: 'START_SPECTATING',
           class: 'btn-start-spectating',
-          command: () => this.joinAsSpectator(this.lobby.id),
-          condition: !this.isUserInLobby() && !this.isUserSpectatingLobby() && this.lobby.status !== 'started' && this.lobby.allowSpectators === true,
+          command: () => this.joinAsSpectator(this.lobby.id, this.lobby.status === 'started'),
+          condition: !this.isUserInLobby() && !this.isUserSpectatingLobby() && this.lobby.allowSpectators === true && !this.currentUser.inLobby,
         });
+
         this.actions.push({
           label: 'LEAVE_GAME',
           class: 'btn-leave-game',
-          command: () => {this.leaveLobby(this.lobby.id); console.log("ELSO")},
-          condition: this.isUserInLobby() && !this.isUserSpectatingLobby() && this.lobby.status !== 'started',
+          command: () => {
+            this.leaveLobby(this.lobby.id);
+          },
+          condition: this.isUserInLobby() && !this.isUserSpectatingLobby() && this.lobby.status !== 'started' && this.lobby.status !== 'starting',
         });
         this.actions.push({
           label: 'STOP_SPECTATING',
           class: 'btn-stop-spectating',
-          command: () => this.leaveAsSpectator(this.lobby.id),
-          condition: this.isUserSpectatingLobby()
+          command: () => {
+            this.leaveAsSpectator(this.lobby.id);
+          },
+          condition: !this.isUserInLobby() && this.isUserSpectatingLobby()
         });
         this.actions.push({
           label: 'VIEW_GAME',
@@ -143,33 +154,31 @@ export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
           command: () => this.gameStartService.openGameWindow(this.lobby.id),
           condition: this.lobby.status === 'started' && !this.isUserSpectatingLobby() && this.isUserInLobby(),
         });
-        this.actions.push({
-          label: 'START_SPECTATING',
-          class: 'btn-start-spectating',
-          command: () => this.joinAsSpectator(this.lobby.id),
-          condition: this.lobby.status === 'started' && !this.isUserSpectatingLobby() && !this.isUserInLobby() && this.lobby.allowSpectators === true,
-        });
 
       }
 
       // Private non-owner actions with password
-      if (listLive && (!this.isOwner() && this.lobby.password != null)) {
+      if (listLiveGames && (!this.isOwner() && this.lobby.password != null)) {
         this.actions.push({
           label: 'PASSWORD_PROTECTED_LOBBY',
           class: 'btn-password-protected',
           command: () => this.openPasswordModal(),
-          condition: !this.isUserInLobby() && !this.isUserSpectatingLobby() && this.lobby.status !== 'started',
+          condition: !this.isUserInLobby() && !this.isUserSpectatingLobby()
+            && !(this.lobby.maxPlayers <= this.lobby.players.length && !this.lobby.allowSpectators)
+            && !this.currentUser.inLobby,
         });
         this.actions.push({
           label: 'LEAVE_GAME',
           class: 'btn-leave-game',
           command: () => this.leaveLobby(this.lobby.id),
-          condition: this.isUserInLobby() && this.lobby.status !== 'started',
+          condition: this.isUserInLobby() && this.lobby.status !== 'started' && this.lobby.status !== 'starting',
         });
         this.actions.push({
           label: 'STOP_SPECTATING',
           class: 'btn-stop-spectating',
-          command: () => this.leaveAsSpectator(this.lobby.id),
+          command: () => {
+            this.leaveAsSpectator(this.lobby.id);
+          },
           condition: this.isUserSpectatingLobby()
         });
         this.actions.push({
@@ -184,26 +193,22 @@ export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
           command: () => this.gameStartService.openSpectatorWindow(this.lobby.id),
           condition: this.lobby.status === 'started' && this.isUserSpectatingLobby(),
         });
-        this.actions.push({
-          label: 'START_SPECTATING',
-          class: 'btn-start-spectating',
-          command: () => this.joinAsSpectator(this.lobby.id),
-          condition: this.lobby.status === 'started' && !this.isUserSpectatingLobby() && !this.isUserInLobby() && this.lobby.allowSpectators === true,
-        });
       }
 
 
-      if (!listLive) {
+      if (!listLiveGames) {
         this.actions.push({
           label: 'START_SPECTATING',
           class: 'btn-start-spectating',
-          command: () => this.joinAsSpectator(this.lobby.id),
-          condition: !this.isUserSpectatingLobby() && this.lobby.allowSpectators === true,
+          command: () => this.joinAsSpectator(this.lobby.id, true),
+          condition: !this.isUserSpectatingLobby() && this.lobby.allowSpectators === true && !this.currentUser.inLobby,
         });
         this.actions.push({
           label: 'STOP_SPECTATING',
           class: 'btn-stop-spectating',
-          command: () => this.leaveAsSpectator(this.lobby.id),
+          command: () => {
+            this.leaveAsSpectator(this.lobby.id);
+          },
           condition: this.isUserSpectatingLobby(),
         });
         this.actions.push({
@@ -311,22 +316,28 @@ export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
   }
 
 
-  startGame(lobbyId: string) {
+  async startGame(lobbyId: string) {
     let players: string[];
     if (this.usersLobby) {
       if (this.usersLobby && this.usersLobby.players) {
         players = this.usersLobby.players;
         if (players.length < this.usersLobby.minPlayers) {
-          console.log('Nincs elég játékos a játék indításához. Minimum ' + this.usersLobby.minPlayers + ' játékos szükséges.');
+          await this.alertService.showAlert(
+            `${this.languageService.translate("ERROR")}`,
+            `${this.languageService.translate("INVALID_NUMBER_OF_USERS_LITTLE")}.`
+          );
           return;
         }
         if (players.length > this.usersLobby.maxPlayers) {
-          console.log('Maximum ' + this.usersLobby.minPlayers + ' játékos lehet a váróban, hogy elinduljon a játék.');
+          await this.alertService.showAlert(
+            `${this.languageService.translate("ERROR")}`,
+            `${this.languageService.translate("INVALID_NUMBER_OF_USERS_LOT")}.`
+          );
           return;
         }
         this.usersLobby.status = "starting";
         this.lobbyService.lobbyCooldown(this.lobby.id);
-        this.gameStartService.handleCountdown(() => this.lobbyService.startGame(this.usersLobby), lobbyId, false);
+        await this.gameStartService.handleCountdown(await this.lobbyService.startGame(this.usersLobby), lobbyId, false);
       }
     }
   }
@@ -339,115 +350,66 @@ export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
     });
   }
 
-  addBot(lobbyId: string) {
-    console.log('Később valósítjuk meg.');
-    this.lobbyService.addBot(lobbyId).then(() => {
-      console.log('Bot added to lobby');
-    });
-  }
-
+  //Password Modalban is benne van, csúnya, de bonyolult lenne összekötni
   joinLobby(lobbyId: string) {
     this.joinedLobby = lobbyId;
     this.lobbyService.joinLobby(lobbyId, this.currentUser).then(() => {
-
-      this.gameStartService.watchLobbyAsPlayer(lobbyId, this.currentUser.id);
-
-      console.log('Joined lobby');
     });
   }
 
-  joinAsSpectator(lobbyId: string) {
+  //Password Modalban is benne van, csúnya, de bonyolult lenne összekötni
+  async joinAsSpectator(lobbyId: string, started: boolean) {
     this.joinedLobby = lobbyId;
-    this.lobbyService.addSpectator(lobbyId, this.currentUser).then(() => {
-
-      this.gameStartService.watchLobbyAsPlayer(lobbyId, this.currentUser.id);
-
-      console.log('Joined as spectator');
+    this.lobbyService.addSpectator(lobbyId, this.currentUser, started).then(() => {
     });
   }
 
-  leaveAsSpectator(lobbyId: string) {
+  async leaveAsSpectator(lobbyId: string) {
     this.joinedLobby = null;
-    this.lobbyService.removeSpectator(lobbyId, this.currentUser).then(() => {
+    await this.lobbyService.removeSpectator(lobbyId, this.currentUser);
 
-      this.gameStartService.stopWatchingLobby(lobbyId);
+    if (this.router.url && this.router.url.includes('replays:')) {
+      await this.router.navigate(['/lobbies']);
+    }
 
-      console.log('stopped spectating');
-    });
   }
 
   leaveLobby(lobbyId: string) {
     this.joinedLobby = null;
+    console.log("Leave");
     this.lobbyService.leaveLobby(lobbyId, this.currentUser).then(() => {
-
-      this.gameStartService.stopWatchingLobby(lobbyId);
-
-      console.log('Left lobby');
+      this.gameStartService.stopWatchingLobby();
     });
   }
 
-  getLobbyBackgroundColor(lobby: Lobby): string {
-    if (this.isOwner()) {
-      return 'blue';
-    } else if (lobby.status === 'started') {
-      return 'gray';
-    } else if (lobby.private) {
-      return 'red';
+  getLobbyStyle(lobby: Lobby): { backgroundColor: string; icon: string } {
+    let backgroundColor: string;
+    let icon: string;
+
+    if (this.isUserBanned()) {
+      backgroundColor = 'var(--lobby-banned-bg)';
+      icon = 'ban';
     } else if (lobby.status === 'ended') {
-      return 'orange';
+      backgroundColor = 'var(--lobby-ended-bg)';
+      icon = 'stop';
+    } else if (this.isOwner()) {
+      backgroundColor = 'var(--lobby-owner-bg)';
+      icon = 'star';
+    } else if (lobby.status === 'started') {
+      backgroundColor = 'var(--lobby-started-bg)';
+      icon = 'play';
     } else if (lobby.id === this.currentUser.inLobby) {
-      return 'white';
-    } else if (this.isUserBanned()){
-      return 'magenta';
-    } else{
-      return 'green';
-    }
-  }
-
-
-  joinWithPassword(lobbyId: string) {
-    if (this.isPasswordCorrect(this.password)) {
-      this.joinLobby(lobbyId);
-      this.closePasswordModal();
+      backgroundColor = 'var(--lobby-joined-bg)';
+      icon = 'checkmark-circle';
+    } else if (lobby.private) {
+      backgroundColor = 'var(--lobby-private-bg)';
+      icon = 'shield';
     } else {
-      console.error('Incorrect password');
+      backgroundColor = 'var(--lobby-default-bg)';
+      icon = 'help-circle';
     }
-  }
 
-  joinWithPasswordAsSpectator(lobbyId: string) {
-    if (this.isPasswordCorrect(this.password)) {
-      this.joinAsSpectator(lobbyId);
-      this.closePasswordModal();
-    } else {
-      console.error('Incorrect password');
-    }
-  }
-
-  openPasswordModal() {
-    this.passwordModalOpen = true;
-    this.passwordModal.present();
-  }
-
-  closePasswordModal() {
-    this.passwordModalOpen = false;
-    this.passwordModal.dismiss();
-  }
-
-  closeCreateLobbyModal() {
-    this.isCreateLobbyModalVisible = false;
-  }
-
-  closeLobbyPlayersModal() {
-    this.isLobbyPlayersModalVisible = false;
-  }
-
-
-  private isPasswordCorrect(password: string): boolean {
-    return password === this.getLobbyPassword();
-  }
-
-  private getLobbyPassword(): string {
-    return this.lobby.password;
+    return {backgroundColor, icon};
   }
 
   managePlayers() {
@@ -458,9 +420,17 @@ export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
     });
   }
 
-  modifyLobbySettings(lobbyId: string) {
+  modifyLobbySettings() {
     this.isCreateLobbyModalVisible = true;
     this.modalService.openModal('createLobby', {
+      currentUser: this.currentUser,
+      lobby: this.lobby
+    });
+  }
+
+  openPasswordModal() {
+    this.passwordModalOpen = true;
+    this.modalService.openModal('lobbyPassword', {
       currentUser: this.currentUser,
       lobby: this.lobby
     });

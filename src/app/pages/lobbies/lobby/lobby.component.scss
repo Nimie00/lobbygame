@@ -12,28 +12,45 @@
   background: grey;
   border-radius: 5px;
   padding: 10px;
-  color: black;
+  color: var(--ion-black-text-color);
   text-align: left;
+}
+
+ion-card-header {
+  align-items: flex-start;
+
+}
+
+ion-card-title{
+  text-transform: uppercase;
+  color: var(--ion-black-text-color);
+  width: 100%;
+  border-radius: 0;
+  border-bottom: solid 1px var(--ion-black-text-color);
+
 }
 
 ion-card-content {
   flex-direction: column;
   width: 100%;
   align-items: flex-start;
+  color: var(--ion-black-text-color);
 }
 
 ion-card-header{
-  color: black;
+  color: var(--ion-black-text-color);
 }
 
 ion-button {
   --border-radius: 5px;
-  --padding-start: 10px;
-  --padding-end: 10px;
-  --padding-top: 8px;
-  --padding-bottom: 8px;
+  --padding-start: 20px;
+  --padding-end: 20px;
+  --padding-top: 14px;
+  --padding-bottom: 14px;
+  margin: 10px;
   font-weight: bold;
   transition: transform 0.2s ease, opacity 0.2s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }
 
 ion-button:hover {
@@ -44,76 +61,64 @@ ion-button:active {
   transform: scale(0.9);
   opacity: 0.8;
 }
-
 ion-button.btn-view-game {
-  --background: #4caf50; /* Zöld */
-  --color: white;
+  --background: var(--btn-view-game-bg);
+  --color: var(--btn-view-game-color);
 }
 
 ion-button.btn-start-spectating {
-  --background: #2196f3; /* Kék */
-  --color: white;
+  --background: var(--btn-start-spectating-bg);
+  --color: var(--btn-start-spectating-color);
 }
 
 ion-button.btn-stop-spectating {
-  --background: #ff5722; /* Narancssárga */
-  --color: white;
+  --background: var(--btn-stop-spectating-bg);
+  --color: var(--btn-stop-spectating-color);
 }
 
 ion-button.btn-join-game {
-  --background: #673ab7; /* Lila */
-  --color: white;
+  --background: var(--btn-join-game-bg);
+  --color: var(--btn-join-game-color);
 }
 
 ion-button.btn-leave-game {
-  --background: #f44336; /* Piros */
-  --color: white;
+  --background: var(--btn-leave-game-bg);
+  --color: var(--btn-leave-game-color);
 }
 
 ion-button.btn-open-game {
-  --background: #03a9f4; /* Világoskék */
-  --color: white;
+  --background: var(--btn-open-game-bg);
+  --color: var(--btn-open-game-color);
 }
 
 ion-button.btn-edit-lobby-settings {
-  --background: #ffc107; /* Sárga */
-  --color: white;
+  --background: var(--btn-edit-lobby-settings-bg);
+  --color: var(--btn-edit-lobby-settings-color);
 }
 
 ion-button.btn-manage-users {
-  --background: #9c27b0; /* Mélylila */
-  --color: white;
+  --background: var(--btn-manage-users-bg);
+  --color: var(--btn-manage-users-color);
 }
 
 ion-button.btn-delete-lobby {
-  --background: #e91e63; /* Rózsaszín */
-  --color: white;
+  --background: var(--btn-delete-lobby-bg);
+  --color: var(--btn-delete-lobby-color);
 }
 
 ion-button.btn-start-game {
-  --background: #00bcd4; /* Türkiz */
-  --color: white;
+  --background: var(--btn-start-game-bg);
+  --color: var(--btn-start-game-color);
 }
 
 ion-button.btn-ready-up {
-  --background: #8bc34a; /* Világoszöld */
-  --color: white;
+  --background: var(--btn-ready-up-bg);
+  --color: var(--btn-ready-up-color);
 }
 
 ion-button.btn-password-protected {
-  --background: #d32f2f; /* Sötétebb piros */
-  --color: white;
+  --background: var(--btn-password-protected-bg);
+  --color: var(--btn-password-protected-color);
 }
 
-ion-button.btn-join-with-password {
-  padding: 30px;
-  --background: #675ab7; /* Lila */
-  --color: white;
-}
-
-ion-button.btn-spectate-with-password {
-  padding: 30px;
-  --background: #2146f3; /* Kék */
-  --color: white;
-}
 

@@ -1,14 +1,18 @@
-import {Component} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {AuthService} from '../../shared/services/auth.service';
 import {Router} from '@angular/router';
-import {AlertController} from "@ionic/angular";
+import {LanguageService} from "../../shared/services/language.service";
+import {SubscriptionTrackerService} from "../../shared/services/subscriptionTracker.service";
+import {AlertService} from "../../shared/services/alert.service";
+import {AudioService} from "../../shared/services/audio.service";
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit, OnDestroy {
+  private CATEGORY = "login"
   isLogin = true;
   email: string;
   password: string;
@@ -16,10 +20,29 @@ export class LoginComponent {
   regEmail: string;
   regPassword: string;
 
+
   constructor(private authService: AuthService,
               private router: Router,
-              private alertController: AlertController,
-              ) {
+              private languageService: LanguageService,
+              private tracker: SubscriptionTrackerService,
+              private alertService: AlertService,
+              private audioService: AudioService,
+  ) {
+  }
+
+  async ngOnInit() {
+    const watchSubscription = this.authService.getUserObservable().subscribe(user => {
+      if (user) {
+        this.router.navigate(['/profile']);
+      }
+    });
+
+    this.tracker.add(this.CATEGORY, "getGameAndUserSub", watchSubscription);
+  }
+
+  async ngOnDestroy() {
+    this.tracker.unsubscribeCategory(this.CATEGORY);
+    this.audioService.stopAllSounds();
   }
 
   toggleCard() {
@@ -27,64 +50,80 @@ export class LoginComponent {
   }
 
   async login() {
-    this.authService.login(this.email, this.password)
-      .then(() => {
-        console.log('Bejelentkezve');
-        this.router.navigate(['/profile'], { queryParams: { reload: Date.now() } });
-      })
-      .catch(error => {
-        console.error('Bejelentkezési hiba:', error);
-        this.showAlert('Hiba', 'Helytelen felhasználónév vagy jelszó.');
-      });
+    try {
+      await this.authService.login(this.email, this.password);
+      await this.router.navigate(['/profile'], {queryParams: {reload: Date.now()}});
+    } catch (error) {
+      await this.alertService.showAlert(
+        `${this.languageService.translate("ERROR")}`,
+        `${this.languageService.translate("INVALID_LOGIN_CREDENTIALS")}.`
+      );
+    }
   }
 
   async register() {
     if (this.regPassword.length < 6) {
-      await this.showAlert('Hiba', 'A jelszónak legalább 6 karakter hosszúnak kell lennie.');
+      await this.alertService.showAlert(
+        `${this.languageService.translate("ERROR")}`,
+        `${this.languageService.translate("WEAK_PASSWORD")}.`);
       return;
     }
 
+    if (this.regUsername.includes('#')) {
+      console.log('#');
+      await this.alertService.showAlert(
+        `${this.languageService.translate("ERROR")}`,
+        `${this.languageService.translate("BAD_USERNAME")}.`);
+      return;
+    }
+
+
     this.authService.register(this.regEmail, this.regPassword, this.regUsername)
-      .then(() => {
-        console.log('Regisztráció sikeres');
-        this.showAlert('Sikeres', 'Regisztráció sikeres!');
+      .then(async () => {
+        await this.alertService.showAlert(
+          `${this.languageService.translate("SUCCESS")}`,
+          `${this.languageService.translate("REGISTRATION_SUCCESSFUL")}!`);
         this.toggleCard();
-        this.router.navigate(['/profile']);
+        await this.router.navigate(['/profile']);
       })
-      .catch(error => {
+      .catch(async error => {
         console.error('Regisztrációs hiba:', error);
         if (error.code === 'auth/email-already-in-use') {
-          this.showAlert('Hiba', 'Ez az email cím már használatban van.');
+          await this.alertService.showAlert(
+            `${this.languageService.translate("ERROR")}`,
+            `${this.languageService.translate("EMAIL_IN_USE")}.`);
         } else if (error.code === 'auth/invalid-email') {
-          this.showAlert('Hiba', 'Érvénytelen email cím.');
+          await this.alertService.showAlert(
+            `${this.languageService.translate("ERROR")}`,
+            `${this.languageService.translate("INVALID_EMAIL")}.`);
         } else {
-          this.showAlert('Hiba', 'Regisztrációs hiba történt. Kérjük, próbálja újra később.');
+          await this.alertService.showAlert(
+            `${this.languageService.translate("ERROR")}`,
+            `${this.languageService.translate("UNKNOWN_ERROR")}.`);
         }
       });
   }
 
-  forgotPassword() {
-    if (this.email == null ||  this.email.length < 6) {
-      console.log("Az email nem megfelelő!")
-      this.showAlert('Hiba', 'Érvénytelen email cím.');
+  async forgotPassword() {
+    if (this.email == null || this.email.length < 6) {
+      await this.alertService.showAlert(
+        `${this.languageService.translate("ERROR")}`,
+        `${this.languageService.translate("INVALID_EMAIL")}.`);
       return;
     }
+
     this.authService.resetPassword(this.email)
-      .then(() => {
+      .then(async () => {
+        await this.alertService.showAlert(
+          `${this.languageService.translate("SUCCESS")}`,
+          `${this.languageService.translate("REMINDER_EMIL_SENT")}.`);
         console.log('Jelszó emlékeztető email elküldve');
       })
-      .catch(error => {
+      .catch(async error => {
+        await this.alertService.showAlert(
+          `${this.languageService.translate("ERROR")}`,
+          `${this.languageService.translate("RESET_PASSWORD_ERROR")}.`);
         console.error('Hiba a jelszó visszaállításánál:', error);
       });
-  }
-
-  async showAlert(header: string, message: string) {
-    const alert = await this.alertController.create({
-      header,
-      message,
-      buttons: ['OK']
-    });
-
-    await alert.present();
   }
 }

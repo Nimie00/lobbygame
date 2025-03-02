@@ -1,6 +1,8 @@
 export interface User {
   email: string;
   inLobby: string;
+  inGame: string;
+  inSpectate: string;
   lastLoginAt: Date;
   registeredAt: Date;
   picture:string;

@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { ModalService } from './modal.service';
+import {Component, EventEmitter, Output} from '@angular/core';
+import {ModalService} from '../services/modal.service';
 import {distinctUntilChanged} from "rxjs";
 
 @Component({
@@ -14,14 +14,27 @@ import {distinctUntilChanged} from "rxjs";
         </app-create-lobby-modal>
       </ng-container>
 
-      <!-- Lobby játékosok kezelése modal -->
       <ng-container *ngIf="modalData.type === 'managePlayers'">
-        <app-lobby-players-managing
+        <app-lobby-players-managing-modal
           [currentUser]="modalData.data.currentUser"
           [lobbyId]="modalData.data.lobbyId"
           [isModalOpen]="true"
           (closeModal)="closeModal()">
-        </app-lobby-players-managing>
+        </app-lobby-players-managing-modal>
+      </ng-container>
+
+      <ng-container *ngIf="modalData.type === 'settings'">
+        <app-settings-modal
+          (closeModal)="closeModal()">
+        </app-settings-modal>
+      </ng-container>
+
+      <ng-container *ngIf="modalData.type === 'lobbyPassword'">
+        <app-lobby-password-modal
+          [currentUser]="modalData.data.currentUser"
+          [lobby]="modalData.data.lobby"
+          (closeModal)="closeModal()">
+        </app-lobby-password-modal>
       </ng-container>
     </ng-container>
   `,
@@ -29,16 +42,17 @@ import {distinctUntilChanged} from "rxjs";
 })
 export class GlobalModalComponent {
   modalData: any = null;
+  @Output() modalClosed: EventEmitter<void> = new EventEmitter<void>();
+
 
   constructor(private modalService: ModalService) {
     this.modalService.modal$.pipe(distinctUntilChanged()).subscribe((modal) => {
-      console.log("Modal: ", modal)
       this.modalData = modal;
     });
   }
 
-  // Modális bezárása
   closeModal() {
     this.modalService.closeModal();
+    this.modalClosed.emit();
   }
 }

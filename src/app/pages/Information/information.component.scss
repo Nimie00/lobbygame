@@ -1,0 +1,37 @@
+
+ion-searchbar {
+  margin: 16px;
+}
+
+ion-list {
+  margin: 0;
+  padding: 0;
+
+  ion-item {
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: var(--background);
+    }
+
+    &.selected {
+      background-color: var(--ion-logo-blue-color);
+      font-weight: bold;
+    }
+  }
+}
+
+ion-col {
+  padding: 16px;
+}
+
+h2 {
+  margin-top: 0;
+  color: var(--ion-text-color);
+}
+
+p {
+  line-height: 1.6;
+  color: var(--ion-text-color);
+}

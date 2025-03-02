@@ -1,9 +1,6 @@
 import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
-import {combineLatest, Observable} from "rxjs";
-import {map} from "rxjs/operators";
-import {AngularFireAuth} from "@angular/fire/compat/auth";
-import {AuthService} from "../auth.service";
+import {Observable} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -11,11 +8,10 @@ import {AuthService} from "../auth.service";
 export class RpsService {
   constructor(
     private firestore: AngularFirestore,
-    private auth: AngularFireAuth,
-    private authService: AuthService,
   ) {
     // setLogLevel('debug');
   }
+
 
 
   getGameState(lobbyId: string): Observable<any> {
@@ -25,7 +21,6 @@ export class RpsService {
   makeChoice(lobbyId: string, choice: string, userId: string, currentRound: number): boolean {
     try {
       const gameDocRef = this.firestore.collection('gameplay').doc(lobbyId);
-
       const choicePath = `rounds.${currentRound}.choices.${userId}`;
       const updateData = {
         [choicePath]: {
@@ -33,21 +28,11 @@ export class RpsService {
           timestamp: new Date()
         }
       };
-      gameDocRef.update(updateData);
+      gameDocRef.update(updateData).then();
       return true;
     } catch (error) {
       console.error('Error during choice saving:', error);
       return false;
     }
-  }
-
-
-  getCurrentUserAndGame(lobbyId: string): Observable<{ user: any, game: any }> {
-    return combineLatest([
-      this.authService.getUserData(),
-      this.getGameState(lobbyId)
-    ]).pipe(
-      map(([user, game]) => ({user, game}))
-    );
   }
 }

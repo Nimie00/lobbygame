@@ -1,0 +1,39 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Információs oldal</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-searchbar
+    placeholder="Keresés..."
+    [(ngModel)]="searchTerm"
+    (ionInput)="filterTopics()">
+  </ion-searchbar>
+
+  <ion-grid>
+    <ion-row>
+      <ion-col size="3">
+        <ion-list>
+          <ion-item
+            *ngFor="let topic of filteredTopics"
+            (click)="selectTopic(topic)"
+            [class.selected]="selectedTopic === topic">
+            {{ topic.title }}
+          </ion-item>
+        </ion-list>
+      </ion-col>
+
+      <!-- Jobb oldali tartalom: kiválasztott téma leírása -->
+      <ion-col size="9">
+        <div *ngIf="selectedTopic; else noSelection">
+          <h2>{{ selectedTopic.title }}</h2>
+          <p>{{ selectedTopic.description }}</p>
+        </div>
+        <ng-template #noSelection>
+          <p>Kérem válasszon egy témát a bal oldali listából!</p>
+        </ng-template>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

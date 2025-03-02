@@ -1,12 +1,11 @@
 import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {firstValueFrom, Observable} from "rxjs";
-import {setLogLevel} from "@angular/fire/firestore";
 
 @Injectable({
   providedIn: 'root'
 })
-export class SpectatorSerice {
+export class SpectatorService {
   constructor(
     private firestore: AngularFirestore,
   ) {

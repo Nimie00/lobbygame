@@ -49,6 +49,7 @@ export class AuthService {
     return this.afAuth.authState.pipe(map(user => !!user));
   }
 
+  /*
   getCurrentUserIdObservable(): Observable<string | null> {
     return this.afAuth.authState.pipe(
       map(user => user ? user.uid : null)
@@ -58,6 +59,8 @@ export class AuthService {
   getAuthStateObservable(): Observable<any> {
     return this.afAuth.authState;
   }
+
+   */
 
   getUserObservable(): Observable<any> {
     return this.user$;
@@ -77,37 +80,39 @@ export class AuthService {
       } else {
       }
     } catch (error) {
-      console.error('Bejelentkezési hiba:', error);
+      throw error;
     }
   }
 
   async register(email: string, password: string, username: string) {
-    try {
-      const userCredential = await this.afAuth.createUserWithEmailAndPassword(email, password);
-      if (userCredential.user) {
-        const user = userCredential.user;
-        const id = user.uid;
-        const now = new Date();
-        await this.afs.collection('users').doc(id).set({
-          id: id,
-          username: username,
-          email: email,
-          registeredAt: now,
-          lastLoginAt: now,
-          inLobby: "",
-          roles: ['user'],
-          xp: 0,
-          level: 0,
-          badges: ['registered'],
-          picture: "picture0.png",
-        });
-        return userCredential;
-      } else {
-        throw new Error('User creation failed');
-      }
-    } catch (error) {
-      console.error('Registration error:', error);
-      throw error;
+    if (username.includes('#')) {
+      return;
+    }
+
+    const userCredential = await this.afAuth.createUserWithEmailAndPassword(email, password);
+    if (userCredential.user) {
+      const user = userCredential.user;
+      const id = user.uid;
+      const now = new Date();
+      await this.afs.collection('users').doc(id).set({
+        id: id,
+        username: username,
+        email: email,
+        registeredAt: now,
+        lastLoginAt: now,
+        inLobby: null,
+        inGame: null,
+        inSpectate: null,
+        roles: ['user'],
+        xp: 0,
+        level: 0,
+        badges: ['registered'],
+        picture: "picture_3",
+        xpForNextLevel: 100
+      });
+      return userCredential;
+    } else {
+      throw new Error('User creation failed');
     }
   }
 
@@ -140,7 +145,7 @@ export class AuthService {
     });
   }
 
-  async checkUsernameTaken(username: string): Promise<boolean> {
+  async checkUsernameAvailable(username: string): Promise<boolean> {
     try {
       const snapshot = await firstValueFrom(
         this.afs.collection('users', ref =>
@@ -164,4 +169,6 @@ export class AuthService {
       throw error;
     }
   }
+
+
 }

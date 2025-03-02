@@ -5,13 +5,15 @@ import {LobbyService} from "../../../shared/services/lobby.service";
 import {SubscriptionTrackerService} from "../../../shared/services/subscriptionTracker.service";
 import {AngularFirestore} from "@angular/fire/compat/firestore";
 import {AuthService} from "../../../shared/services/auth.service";
-import {switchMap} from "rxjs/operators";
+import {debounceTime, filter} from "rxjs/operators";
 import {LanguageService} from "../../../shared/services/language.service";
 import {animate, keyframes, state, style, transition, trigger} from '@angular/animations';
 import {BaseGame} from "../../../shared/models/games.gameplaydata.model";
 import {ProcessedRound} from "../../../shared/models/ProcessedRound";
 import {RoundData} from "../../../shared/models/RoundData";
 import {User} from "../../../shared/models/user.model";
+import {distinctUntilChanged, interval, Subscription, take} from "rxjs";
+import {AudioService} from "../../../shared/services/audio.service";
 
 type RoundEntry = [string, RoundData];
 
@@ -21,7 +23,6 @@ type RoundEntry = [string, RoundData];
   templateUrl: './rps.component.html',
   styleUrls: ['./rps.component.scss'],
   animations: [
-
     trigger('countdownAnimation', [
       transition(':enter', [
         style({opacity: 0, transform: 'scale(0.3)'}),
@@ -62,14 +63,11 @@ type RoundEntry = [string, RoundData];
       ])
     ]),
 
-    trigger('enemyChosenCycle', [
-      transition('* => *', [
-        animate('1.05s ease-in-out', keyframes([
-          style({transform: 'translateX(100%) translateY(-50%)', opacity: 0, offset: 0}),
-          style({transform: 'translateX(50%) translateY(-50%)', opacity: 0, offset: 0.2}),
-          style({transform: 'translateX(-50%) translateY(-50%)', opacity: 0.7, offset: 0.7}),
-          style({transform: 'translateX(-100%) translateY(-50%)', opacity: 0, offset: 1})
-        ]))
+    trigger('cycleAnimation', [
+      transition(':enter', [
+        style({transform: 'translateX(+100%) translateY(-50%)', opacity: 0}),
+        animate('1s ease-out', style({transform: 'translateX(-100%) translateY(-50%)', opacity: 0.8})),
+        animate('0.2s ease-out', style({transform: 'translateX(-105%) translateY(-50%)', opacity: 0}))
       ])
     ]),
 
@@ -77,14 +75,10 @@ type RoundEntry = [string, RoundData];
       transition('* => *', [
         animate('1.5s cubic-bezier(0.2, 1, 0.5, 1)',
           keyframes([
-            // Start position
-            style({ transform: 'translateY(-50%)', offset: 0 }),
-            // Move partial distance to center
-            style({ transform: 'translateX(calc(25vw))  translateY(-50%)', offset: 0.5 }),
-            // Brief stop
-            style({ transform: 'translateX(calc(25vw))  translateY(-50%)', offset: 0.6}),
-            // Return towards start
-            style({ transform: 'translateX(-50%) translateY(-50%)', offset: 1 })
+            style({transform: 'translateY(-50%)', offset: 0}),
+            style({transform: 'translateX(calc(25vw))  translateY(-50%)', offset: 0.5}),
+            style({transform: 'translateX(calc(25vw))  translateY(-50%)', offset: 0.6}),
+            style({transform: 'translateX(-50%) translateY(-50%)', offset: 1})
           ])
         )
       ])
@@ -94,14 +88,10 @@ type RoundEntry = [string, RoundData];
       transition('* => *', [
         animate('1.5s cubic-bezier(0.2, 1, 0.5, 1)',
           keyframes([
-            // Start position
-            style({ transform: 'translateY(-50%)', offset: 0 }),
-            // Move partial distance to center
-            style({ transform: 'translateX(calc(-25vw)) translateY(-50%)', offset: 0.5 }),
-            // Brief stop
-            style({ transform: 'translateX(calc(-25vw)) translateY(-50%)', offset: 0.6 }),
-            // Return towards start
-            style({ transform: 'translateX(+50%) translateY(-50%)', offset: 1 })
+            style({transform: 'translateY(-50%)', offset: 0}),
+            style({transform: 'translateX(calc(-25vw)) translateY(-50%)', offset: 0.5}),
+            style({transform: 'translateX(calc(-25vw)) translateY(-50%)', offset: 0.6}),
+            style({transform: 'translateX(+50%) translateY(-50%)', offset: 1})
           ])
         )
       ])
@@ -109,7 +99,7 @@ type RoundEntry = [string, RoundData];
 
     trigger('spriteAnimation', [
       transition(':enter', [
-        animate('4s steps(39)', keyframes([
+        animate('2.5s steps(39)', keyframes([
           style({
             objectPosition: '-7800px 0',
             offset: 1,
@@ -122,43 +112,44 @@ type RoundEntry = [string, RoundData];
 
 export class RpsComponent implements OnInit, OnDestroy {
   private CATEGORY = "rps-game"
-  game: BaseGame;
-  currentUser: User;
-  lobbyId: string;
-  debug: boolean;
-  countdown: number = 3;
-  roundTimer = 0;
-  timerInterval: any;
-
   playerAnimationDone = new EventEmitter<void>();
   opponentAnimationDone = new EventEmitter<void>();
+  game: BaseGame;
+  currentUser: User;
 
-  otherPlayer: string;
-  gameStarted: boolean = false;
-  playerChoice: string | null = null;
-  gameEnded: boolean = false;
-  winner: string | null = null;
+
+  lobbyId: string;
+  otherPlayerId: string;
+
   endReason: string;
+  playerChoice: string = null;
+  winner: string = null;
+  opponentChoice: string = null;
+  losingChoice: string = null;
+  currentCyclingChoice: string = 'papir';
+  animationState: string = 'initial';
+  choices: string[] = ['ko', 'papir', 'ollo'];
+  animationPhase: 'moving' | 'showing-loser' | 'resetting' = 'moving';
+  gameStarted: boolean = false;
+  gameEnded: boolean = false;
+  opponentChosen: boolean = false;
+  debug: boolean;
   isPlayer: boolean;
   isSpectator: boolean;
+  countdown: number = 3;
+  roundTimer: number = 0;
+  selectedRound: number = 0;
+  currentRound: number = 0;
+  youWon: boolean = false;
   drawCount: number;
-  opponentChosen: boolean = false;
-  opponentChoice: string = null;
   playerScore: number;
   opponentScore: number;
   requiredWins: number;
   roundLength: number;
-
-
-  selectedRound: number = 0;
-  currentRound: number = 0;
-  realRoundNumber: number;
-
-  cyclingState: number = 0;
-  currentCyclingChoice: string = 'papir';
-  choices: string[] = ['ko', 'papir', 'ollo'];
+  timerInterval: any;
   cyclingInterval: any;
-  youWon: boolean = false;
+  showCycle = true;
+  countDownShown = false;
 
   protected rounds: {
     roundNumber: number;
@@ -179,13 +170,20 @@ export class RpsComponent implements OnInit, OnDestroy {
       ollo: 'scissorsVsScissors'
     }
   };
-
-  animationPhase: 'moving' | 'showing-loser' | 'resetting' = 'moving';
-  loserPosition: 'left' | 'right' = 'left';
-  losingChoice: string = null;
-  animationState: string = 'initial';
-  isInteractionDisabled: boolean = false;
-
+  protected otherPlayerRequired: number;
+  protected PlayerRequired: number;
+  protected otherPlayerName: string;
+  protected userName: string;
+  protected requiredWinsArray: number[];
+  private aiChoiceExecuted: boolean = false;
+  private aiChoiceTimer: any = null;
+  private aiChoiceFallbackTimer: any = null;
+  private cyclingSubscription: Subscription;
+  private cycleStartTime: number;
+  lastUserChoiceTime: any;
+  private playmusic: boolean;
+  private playOnce: boolean = true;
+  private winnerTimeout: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -195,196 +193,187 @@ export class RpsComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private firestore: AngularFirestore,
     private router: Router,
-    protected translateService: LanguageService,
-    private renderer: Renderer2
+    protected languageService: LanguageService,
+    private renderer: Renderer2,
+    private audioService: AudioService,
   ) {
     this.lobbyId = this.route.snapshot.paramMap.get('lobbyId') || '';
   }
 
-  //TODO: Megoldani, hogyha a játék véget ér és valaki spectator volt a játékban akkor kilépjen a váró nézőiből? (ezt még ki kell találni)
-  //TODO: MEGOLDANI, HOGY AZ ELLENFÉL választása is látszódjon és legyen egy 3mp-es időtartam utánna amikor kiírjuk, hogy ki nyerte a kört
+  //TODO: for later :) Ha a felhasználónak nincs megnyitva az oldal és közben letelik a kör akkor utánna problémák lehetnek
 
-
-  ngOnInit() {
+  async ngOnInit() {
     this.debug = localStorage.getItem('debug') === 'true';
-    this.startInitialCountdown();
 
-    const rpsSubscription = this.authService.getUserData()
-      .pipe(
-        switchMap((user) => {
-          this.currentUser = user;
-          return this.rpsService.getGameState(this.lobbyId); // Várakozás a játék állapotára
-        })
-      )
-      .subscribe({
-        next: async (game) => {
-          this.game = game;
+    this.authService.getUserData().pipe(
+      take(1)
+    ).subscribe(user => {
+      this.currentUser = user;
 
-          this.isPlayer = this.game.players.includes(this.currentUser.id);
-          this.isSpectator = this.game.spectators.includes(this.currentUser.id);
-          this.winner = this.game.winner;
-          this.otherPlayer = this.game.players.filter((_ele: any, idx: any) => idx !== this.game.players.indexOf(this.currentUser.id))[0];
-          this.rounds = this.getRounds();
-          this.roundLength = this.game.gameModifiers?.timed ?? 0;
-          this.game.startedAt = game.startedAt.toDate()
+      const rpsSubscription = this.rpsService.getGameState(this.lobbyId)
+        .pipe(
+          filter(game => !!game),
+          distinctUntilChanged(),
+          debounceTime(1)
+        )
+        .subscribe({
+          next: async game => {
+            this.game = game;
 
-          this.roundTimer = this.calculateRemainingTimeAtStart(this.game.startedAt, this.roundLength);
-
-          await this.redirectPlayer()
-
-          if (this.game.status === 'ended' || this.game.winner !== null) {
-            this.gameEnded = true;
-            rpsSubscription.unsubscribe();
-            return;
-          }
-
-
-          if (this.game && this.isPlayer) {
-
-            this.currentRound = this.game.currentRound;
-            const currentRoundData = this.game.rounds?.[this.currentRound];
-
-            if (this.selectedRound <= this.currentRound) {
-              if (this.currentRound >= 1) {
-                this.roundTimer = this.calculateRemainingTimeMidRound(this.game.rounds?.[this.currentRound - 1], this.roundLength);
-                this.startRoundTimer();
-              }
-
+            if (this.game.winner != null) {
+              this.gameStarted = true;
+              this.countDownShown = true;
             }
 
-            this.updateDrawCountAndRealRoundNumber();
-            this.updatePlayerScores()
+            if (!this.gameStarted) {
+              this.startInitialCountdown();
+            }
 
-            if (currentRoundData) {
-              this.playerChoice = currentRoundData.choices?.[this.currentUser.id]?.choice || null;
-              this.opponentChoice = currentRoundData.choices?.[this.otherPlayer]?.choice || null;
 
-              if (this.opponentChoice !== null && this.playerChoice === null) {
-                this.opponentChosen = true;
-                this.startChoiceCycling();
+            this.isPlayer = this.game.players.includes(this.currentUser.id);
+            this.isSpectator = this.game.spectators.includes(this.currentUser.id);
+
+            await this.redirectPlayer()
+
+            this.winner = this.game.winner;
+            this.otherPlayerId = this.game.players.filter((_ele: any, idx: any) => idx !== this.game.players.indexOf(this.currentUser.id))[0];
+
+            this.rounds = this.getRounds();
+            this.roundLength = this.game.gameModifiers?.timed ?? 0;
+            this.game.startedAt = game.startedAt.toDate()
+            this.roundTimer = this.calculateRemainingTimeAtStart(this.game.startedAt, this.roundLength);
+
+
+            if (this.game.status === 'ended' || this.game.winner !== null) {
+              this.gameEnded = true;
+              rpsSubscription.unsubscribe();
+              return;
+            }
+
+
+            if (this.game && this.isPlayer) {
+              if (this.aiChoiceTimer) {
+                clearInterval(this.aiChoiceTimer);
+                this.aiChoiceTimer = null;
+              }
+              if (this.aiChoiceFallbackTimer) {
+                clearTimeout(this.aiChoiceFallbackTimer);
+                this.aiChoiceFallbackTimer = null;
               }
 
-              if (this.playerChoice && this.opponentChoice) {
+              this.aiChoiceExecuted = false;
+
+              if (this.otherPlayerId.includes('#') && this.game.winner == null && !this.aiChoiceExecuted) {
+                const randomIndex = Math.floor(Math.random() * 3);
+                const chosenChoice = this.choices[randomIndex];
+                const baseDelay = Math.floor(Math.random() * (5000 - 2000 + 1)) + 2000;
+
+                const userJustMadeChoice = this.lastUserChoiceTime && (Date.now() - this.lastUserChoiceTime < 1000);
+
+                const extraDelay = userJustMadeChoice ? Math.floor(Math.random() * 2000) + 1000 : 0;
+
+                const totalDelay = baseDelay + extraDelay;
+                const targetTime = Date.now() + totalDelay;
+
+                this.aiChoiceTimer = setInterval(() => {
+                  if (Date.now() >= targetTime) {
+                    if (!this.aiChoiceExecuted && !this.opponentChoice) {
+                      this.makeAIChoice(chosenChoice, this.otherPlayerId);
+                      this.aiChoiceExecuted = true;
+                      clearInterval(this.aiChoiceTimer);
+                      this.aiChoiceTimer = null;
+                      if (this.aiChoiceFallbackTimer) {
+                        clearTimeout(this.aiChoiceFallbackTimer);
+                        this.aiChoiceFallbackTimer = null;
+                      }
+                    }
+                  }
+                }, 100);
+
+                this.aiChoiceFallbackTimer = setTimeout(() => {
+                  if (!this.aiChoiceExecuted && !this.opponentChoice) {
+                    this.makeAIChoice(chosenChoice, this.otherPlayerId);
+                    this.aiChoiceExecuted = true;
+                    clearInterval(this.aiChoiceTimer);
+                    this.aiChoiceTimer = null;
+                  }
+                  clearTimeout(this.aiChoiceFallbackTimer);
+                  this.aiChoiceFallbackTimer = null;
+                }, totalDelay + 100);
+              }
+
+              this.currentRound = this.game.currentRound;
+              const currentRoundData = this.game.rounds?.[this.currentRound];
+
+              this.drawCount = Object.values(this.game.rounds).filter((round: any) => round.winner === "draw").length;
+              this.requiredWins = Math.ceil((this.game.bestOfRounds + 1) / 2);
+
+              this.updateDrawCount();
+              this.updatePlayerScores();
+
+              this.requiredWinsArray = this.getScoreCircles(this.requiredWins);
+
+
+              this.otherPlayerRequired = this.getRemainingWins(this.otherPlayerId);
+              this.PlayerRequired = this.getRemainingWins(this.currentUser.id);
+
+              this.otherPlayerName = this.getPlayerName(this.otherPlayerId);
+              this.userName = this.getPlayerName(this.currentUser.id);
+
+
+              if (this.selectedRound <= this.currentRound) {
+                if (this.currentRound >= 1) {
+                  this.roundTimer = this.calculateRemainingTimeMidRound(this.game.rounds?.[this.currentRound - 1], this.roundLength);
+                  await this.startRoundTimer();
+                }
+
+              }
+
+              this.updateDrawCount();
+              this.updatePlayerScores();
+              // this.checkLastRoundStatus();
+
+
+              if (currentRoundData != null) {
+                this.playerChoice = currentRoundData.choices?.[this.currentUser.id]?.choice || null;
+                this.opponentChoice = currentRoundData.choices?.[this.otherPlayerId]?.choice || null;
+
+                if (this.opponentChoice !== null && this.playerChoice === null) {
+                  this.opponentChosen = true;
+                  this.startChoiceCycling();
+                }
+
+
+                if (currentRoundData.winner && this.winnerTimeout) {
+                  clearTimeout(this.winnerTimeout);
+                  this.winnerTimeout = null;
+                }
+                const allPlayersChosen = currentRoundData.choices[this.currentUser.id] != null && currentRoundData.choices[this.otherPlayerId] != null;
+
+                if (allPlayersChosen && !this.gameEnded) {
+                  if (this.game.ownerId === this.currentUser.id) {
+                    await this.determineWinner(this.game);
+                  } else {
+
+                    if (!this.winnerTimeout) {
+                      this.winnerTimeout = setTimeout(async () => {
+                        if (currentRoundData && !currentRoundData.winner) {
+                          await this.determineWinner(this.game);
+                        }
+                        this.winnerTimeout = null;
+                      }, 3450);
+                    }
+                  }
+                }
                 await this.evaluateRound();
                 await this.handleAnimations();
               }
-
-
-              if (this.currentUser.id === this.game.ownerId) {
-                const allPlayersChosen = this.game.players.every(
-                  (playerId: string) => !!currentRoundData.choices?.[playerId]?.choice
-                );
-
-
-                if (allPlayersChosen && !this.gameEnded) {
-                  await this.determineWinner(this.game);
-                }
-              }
             }
-          }
-        }
-      });
-
-
-    this.tracker.add(this.CATEGORY, "getGameAndUserSub", rpsSubscription);
-  }
-
-
-  private async handleAnimations(): Promise<void> {
-    this.animationPhase = 'moving';
-
-    await Promise.all([
-      new Promise<void>(resolve => {
-        const sub = this.playerAnimationDone.subscribe(() => {
-          sub.unsubscribe();
-          resolve();
+          },
+          error: err => console.error('Game state error: ', err)
         });
-      }),
-      new Promise<void>(resolve => {
-        const sub = this.opponentAnimationDone.subscribe(() => {
-          sub.unsubscribe();
-          resolve();
-        });
-      })
-    ]);
-
-    this.animationPhase = 'showing-loser';
-
-    await new Promise(resolve => setTimeout(resolve, 0));
-    this.positionSprite()
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
-    this.animationPhase = 'resetting';
-    this.resetPlayersChoice();
-  }
-
-
-  private positionSprite() {
-    const sprite = document.querySelector('.loser-sprite') as HTMLElement;
-    const loserElementType = this.youWon ? 'opponent' : 'player';
-    const loserElement = document.querySelector(`.${loserElementType}-choice`) as HTMLElement;
-
-    if (sprite && loserElement) {
-
-      this.renderer.setStyle(loserElement, 'opacity', '0');
-      this.renderer.setStyle(sprite, 'opacity', '0');
-
-      const container = document.querySelector('.animation-container');
-      const containerRect = container.getBoundingClientRect();
-
-      const loserRect = loserElement.getBoundingClientRect();
-
-      const x = loserRect.left - containerRect.left + (loserRect.width / 2);
-      const y = loserRect.top - containerRect.top + (loserRect.height / 2);
-
-
-      this.renderer.setStyle(sprite, 'position', 'absolute');
-      this.renderer.setStyle(sprite, 'left', `${x}px`);
-      this.renderer.setStyle(sprite, 'top', `${y}px`);
-
-      this.renderer.setStyle(sprite, 'opacity', '1');
-      sprite.classList.add('animate');
-    }
-  }
-
-
-  private async evaluateRound(): Promise<void> {
-    if (!this.playerChoice || !this.opponentChoice) return;
-
-    const matchup = `${this.playerChoice}:${this.opponentChoice}`;
-
-    if (this.outcomeRules.winStates[matchup]) {
-      this.animationState = this.outcomeRules.winStates[matchup];
-      this.youWon = true;
-    } else if (this.outcomeRules.winStates[`${this.opponentChoice}:${this.playerChoice}`]) {
-      this.animationState = this.outcomeRules.winStates[`${this.opponentChoice}:${this.playerChoice}`];
-      this.youWon = false;
-    } else {
-      this.animationState = this.outcomeRules.drawStates[this.playerChoice];
-      this.youWon = null;
-    }
-
-    this.loserPosition = this.youWon ? 'right' : 'left';
-    this.losingChoice = this.youWon ? this.opponentChoice : this.playerChoice;
-    if (this.youWon === null) {
-      this.losingChoice = null;
-    }
-
-  }
-
-  private resetPlayersChoice(): void {
-    this.playerChoice = null;
-    this.opponentChoice = null;
-    this.opponentChosen = false;
-    this.animationState = 'initial';
-    this.youWon = null;
-    this.losingChoice = null;
-    this.animationPhase = 'moving';
-    this.isInteractionDisabled = false;
-    this.selectedRound = this.currentRound;
-    if (this.cyclingInterval) {
-      clearInterval(this.cyclingInterval);
-    }
+      this.tracker.add(this.CATEGORY, "getGameAndUserSub", rpsSubscription);
+    });
   }
 
   calculateRemainingTimeMidRound(currentRoundData: any, roundDuration: number): number {
@@ -397,7 +386,7 @@ export class RpsComponent implements OnInit, OnDestroy {
     for (const playerId in currentRoundData.choices) {
       const choice = currentRoundData.choices[playerId];
       if (choice?.timestamp) {
-        const choiceDate = choice.timestamp.toDate(); // Firestore .toDate() metódus
+        const choiceDate = choice.timestamp.toDate();
         if (!latestTimestamp || choiceDate.getTime() > latestTimestamp) {
           latestTimestamp = choiceDate.getTime();
         }
@@ -410,18 +399,15 @@ export class RpsComponent implements OnInit, OnDestroy {
     return Math.max(0, Math.floor(remainingTime / 1000));
   }
 
-  startRoundTimer() {
+  async startRoundTimer() {
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
     }
-    this.timerInterval = setInterval(() => {
+    this.timerInterval = setInterval(async () => {
       if (this.roundTimer > 0) {
         this.roundTimer--;
       } else {
         clearInterval(this.timerInterval);
-        console.log("Lejárt az idő >:(");
-        console.log("A felhasználó ezt választotta: ", this.playerChoice);
-        console.log("Az ellenfél ezt választotta: ", this.opponentChoice);
       }
     }, 1000);
   }
@@ -432,22 +418,70 @@ export class RpsComponent implements OnInit, OnDestroy {
       if (this.countdown > 1) {
         this.countdown--;
       } else {
+        this.countDownShown = true;
         clearInterval(countdownInterval);
         this.gameStarted = true;
         if (this.currentRound === 0) {
-          this.startRoundTimer();
+          this.startRoundTimer().then();
         }
       }
     }, 1000);
   }
 
-  private updateDrawCountAndRealRoundNumber(): void {
+  makeChoice(choice: string) {
+    if (!this.playerChoice && this.currentUser) {
+      this.playerChoice = choice;
+      this.userMadeChoice();
+      this.rpsService.makeChoice(this.lobbyId, choice, this.currentUser.id, this.currentRound);
+    }
+  }
+
+  makeAIChoice(choice: string, AIId: string) {
+    if (!this.opponentChoice && this.currentUser) {
+      this.rpsService.makeChoice(this.lobbyId, choice, AIId, this.currentRound);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.tracker.unsubscribeCategory(this.CATEGORY);
+    if (this.cyclingInterval) {
+      clearInterval(this.cyclingInterval);
+    }
+    this.audioService.stopAllSounds()
+    this.stopChoiceCycling();
+  }
+
+  getRemainingWins(playerId: string): number {
+    if (!this.game || !this.game.rounds) {
+      return -1;
+    }
+
+    const playerWins = Object.values(this.game.rounds).filter((round: any) => round.winner === playerId).length;
+    return this.requiredWins - playerWins
+  }
+
+  getPlayerName(playerId: string): string {
+    const index = this.game.players.indexOf(playerId);
+    return index !== -1 ? this.game.playerNames[index] : `${this.languageService.translate("UNKNOWN_PLAYER")}: (${playerId})`;
+  }
+
+  getScoreCircles(requiredWins: number): number[] {
+    return Array(requiredWins).fill(0);
+  }
+
+  calculateRemainingTimeAtStart(startedAt: Date, roundDuration: number) {
+    const now = new Date().getTime();
+    const startTime = new Date(startedAt).getTime() + 5000;
+    const endTime = startTime + roundDuration * 1000;
+    return Math.max(0, Math.floor((endTime - now) / 1000));
+  };
+
+  private updateDrawCount(): void {
     if (this.game?.rounds) {
       this.drawCount = Object.values(this.game.rounds).filter(
         (round: any) => round.winner === "draw"
       ).length;
     }
-    this.realRoundNumber = this.rounds.length - this.drawCount + 1; //Azért van itt a +1 hogy ne 0-tól legyenek indexelve a körök
   }
 
   private calculateRoundWinner(player1Choice: string, player2Choice: string, player1Id: string, player2Id: string): string {
@@ -516,6 +550,9 @@ export class RpsComponent implements OnInit, OnDestroy {
 
   private async determineWinner(gameData: any) {
     let {currentRound, maxRounds} = gameData;
+    if (!gameData.rounds[currentRound]) {
+      return;
+    }
     let roundWinner: string;
     const players = Object.keys(gameData.rounds[currentRound]?.choices);
     const [choice1, choice2] = [
@@ -523,12 +560,10 @@ export class RpsComponent implements OnInit, OnDestroy {
       gameData.rounds[currentRound].choices[players[1]]?.choice,
     ];
 
-
     roundWinner = this.calculateRoundWinner(choice1, choice2, players[0], players[1])
 
 
     const {potentialWinner, remainingWinsDict} = this.calculatePotentialWinner(players, roundWinner)
-
 
     const roundUpdate = this.prepareRoundUpdates(
       currentRound,
@@ -538,47 +573,12 @@ export class RpsComponent implements OnInit, OnDestroy {
       potentialWinner,
     );
 
-
     await this.updateGameState(gameData.lobbyId, roundUpdate, !!potentialWinner || this.endReason == 'Drew');
-  }
-
-  makeChoice(choice: string) {
-    if (!this.playerChoice && this.currentUser) {
-      this.playerChoice = choice;
-      this.rpsService.makeChoice(this.lobbyId, choice, this.currentUser.id, this.currentRound);
-    }
-  }
-
-  ngOnDestroy(): void {
-    this.tracker.unsubscribeCategory(this.CATEGORY);
-    if (this.cyclingInterval) {
-      clearInterval(this.cyclingInterval);
-    }
-  }
-
-  getRemainingWins(playerId: string): number {
-    if (!this.game || !this.game.rounds || this.game.gameEnded == true) {
-      return -1;
-    }
-
-    this.drawCount = Object.values(this.game.rounds).filter((round: any) => round.winner === "draw").length;
-    this.requiredWins = Math.ceil((this.game.maxRounds - this.drawCount + 1) / 2);
-    const playerWins = Object.values(this.game.rounds).filter((round: any) => round.winner === playerId).length;
-    return this.requiredWins - playerWins
-  }
-
-  getPlayerName(playerId: string): string {
-    const index = this.game.players.indexOf(playerId);
-    return index !== -1 ? this.game.playerNames[index] : `${this.translateService.translate("UNKNOWN_PLAYER")}: (${playerId})`;
-  }
-
-  getScoreCircles(requiredWins: number): number[] {
-    return Array(requiredWins).fill(0);
   }
 
   private async endGame() {
     try {
-      await this.lobbyService.endLobby(this.lobbyId, this.winner, this.endReason);
+      await this.lobbyService.endLobby(this.lobbyId, this.winner, this.endReason, this.game);
       this.gameEnded = true;
     } catch (error) {
       console.error('Error ending the game:', error);
@@ -613,26 +613,185 @@ export class RpsComponent implements OnInit, OnDestroy {
   }
 
   private updatePlayerScores() {
-    this.playerScore = Object.values(this.game.rounds).filter((round: any) => round.winner === this.currentUser.id).length;
-    this.opponentScore = Object.values(this.game.rounds).filter((round: any) => round.winner === this.otherPlayer).length;
+    this.playerScore = Object.values(this.game.rounds)
+      .filter((round: any) => round.winner === this.currentUser.id).length;
+    this.opponentScore = Object.values(this.game.rounds)
+      .filter((round: any) => round.winner === this.otherPlayerId).length;
   }
 
-  calculateRemainingTimeAtStart(startedAt: Date, roundDuration: number) {
-    const now = new Date().getTime();
-    const startTime = new Date(startedAt).getTime() + 3000;
-    const endTime = startTime + roundDuration * 1000;
-    return Math.max(0, Math.floor((endTime - now) / 1000));
-  };
+  private async handleAnimations(): Promise<void> {
+    this.animationPhase = 'moving';
+
+    await Promise.all([
+      new Promise<void>(resolve => {
+        const sub = this.playerAnimationDone.subscribe(() => {
+          sub.unsubscribe();
+          resolve();
+        });
+      }),
+      new Promise<void>(resolve => {
+        const sub = this.opponentAnimationDone.subscribe(() => {
+          sub.unsubscribe();
+          resolve();
+        });
+      })
+    ]);
+
+    this.animationPhase = 'showing-loser';
+    this.positionSprite()
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    this.animationPhase = 'resetting';
+    this.resetPlayersChoice();
+
+  }
+
+  private positionSprite() {
+
+    if (this.losingChoice && this.animationPhase === 'showing-loser') {
+      if (this.playmusic && this.playOnce) {
+        this.playOnce = false;
+        this.audioService.playSoundByName("explosion.wav");
+      }
+      setTimeout(() => {
+        const sprite = document.querySelector('.loser-sprite') as HTMLElement;
+        const loserElementType = this.youWon ? 'opponent' : 'player';
+        const loserElement = document.querySelector(`.${loserElementType}-choice`) as HTMLElement;
+
+        this.renderer.setStyle(loserElement, 'opacity', '0');
+        this.renderer.setStyle(sprite, 'opacity', '0');
+
+        const container = document.querySelector('.animation-container');
+        const containerRect = container.getBoundingClientRect();
+
+        const loserRect = loserElement.getBoundingClientRect();
+
+        const x = loserRect.left - containerRect.left + (loserRect.width / 2);
+        const y = loserRect.top - containerRect.top + (loserRect.height / 2);
+
+
+        this.renderer.setStyle(sprite, 'position', 'absolute');
+        this.renderer.setStyle(sprite, 'left', `${x}px`);
+        this.renderer.setStyle(sprite, 'top', `${y}px`);
+
+        this.renderer.setStyle(sprite, 'opacity', '1');
+        sprite.classList.add('animate');
+      }, 1);
+    }
+  }
+
+  private evaluateRound(): Promise<void> {
+    if (!this.playerChoice || !this.opponentChoice) return;
+
+    const matchup = `${this.playerChoice}:${this.opponentChoice}`;
+
+    if (this.outcomeRules.winStates[matchup]) {
+      this.animationState = this.outcomeRules.winStates[matchup];
+      this.youWon = true;
+      this.playmusic = true;
+    } else if (this.outcomeRules.winStates[`${this.opponentChoice}:${this.playerChoice}`]) {
+      this.animationState = this.outcomeRules.winStates[`${this.opponentChoice}:${this.playerChoice}`];
+      this.youWon = false;
+      this.playmusic = true;
+    } else {
+      this.animationState = this.outcomeRules.drawStates[this.playerChoice];
+      this.youWon = null;
+    }
+
+    this.losingChoice = this.youWon ? this.opponentChoice : this.playerChoice;
+    if (this.youWon === null) {
+      this.losingChoice = null;
+    }
+
+  }
+
+  private resetPlayersChoice(): void {
+    this.playerChoice = null;
+    this.opponentChoice = null;
+    this.opponentChosen = false;
+    this.animationState = 'initial';
+    this.youWon = null;
+    this.playOnce = true;
+    this.playmusic = false;
+    this.losingChoice = null;
+    this.animationPhase = 'moving';
+    this.selectedRound = this.currentRound;
+    this.aiChoiceExecuted = false;
+    this.showCycle = false;
+
+    this.stopChoiceCycling();
+  }
 
   private startChoiceCycling() {
-    let index = 0;
-    this.cyclingInterval = setInterval(() => {
-      this.currentCyclingChoice = this.choices[index];
-      this.cyclingState++;
-      this.cyclingState = this.cyclingState % 5;
-      index = (index + 1) % this.choices.length;
-    }, 1000);
+    if (this.cyclingSubscription) {
+      this.cyclingSubscription.unsubscribe();
+    }
+
+    this.cycleStartTime = Date.now();
+
+    this.cyclingSubscription = interval(50).subscribe(() => {
+      const elapsed = Date.now() - this.cycleStartTime;
+      if (elapsed >= 1150) {
+        this.showCycle = false;
+
+        setTimeout(() => {
+          const currentIndex = this.choices.indexOf(this.currentCyclingChoice);
+          const nextIndex = (currentIndex + 1) % this.choices.length;
+          this.currentCyclingChoice = this.choices[nextIndex];
+          this.showCycle = true;
+        }, 50);
+
+        this.cycleStartTime = Date.now();
+      }
+    });
+  }
+
+  private stopChoiceCycling() {
+    if (this.cyclingSubscription) {
+      this.cyclingSubscription.unsubscribe();
+    }
+  }
+
+  async goToLobby() {
+    await this.router.navigate(['/lobbies/']);
+  }
+
+  async goToWatchingReplay() {
+    await this.router.navigate(['/lobbies/' + 'replays:' + this.lobbyId]);
   }
 
 
+  roundsWon(): number {
+    return this.rounds.filter(round => round.winner === this.currentUser.id).length;
+  }
+
+  roundsLost(): number {
+    return this.rounds.filter(round => round.winner != this.currentUser.id && round.winner != null).length;
+  }
+
+  roundsDrawn(): number {
+    return this.rounds.filter(round => round.winner === "draw").length;
+  }
+
+  totalRounds(): number {
+    return this.rounds.length;
+  }
+
+
+  finalResult(): string {
+    if (this.game.winner != null && this.game.winner === this.currentUser.id) {
+      return this.languageService.translate('YOU_WON');
+    }
+    if (this.game.winner != null && this.game.winner === this.otherPlayerId) {
+      return this.languageService.translate('YOU_LOST');
+    }
+    if (this.game.winner != null && this.game.winner === "#Drew") {
+      return this.languageService.translate('DRAW');
+    }
+
+  }
+
+  userMadeChoice() {
+    this.lastUserChoiceTime = Date.now();
+  }
 }
+

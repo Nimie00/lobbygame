@@ -22,36 +22,56 @@
                 {{ lobbyData.playerNames[i] }}
                 <span *ngIf="currentUser.username === lobbyData.playerNames[i]">
                   ({{ "YOU" | language }})
-                  <h5 *ngIf="currentUser.id === lobbyData.ownerId">--{{ "OWNER" | language }}</h5>
+                  <span *ngIf="currentUser.id === lobbyData.ownerId"><h5>--{{ "OWNER" | language }}</h5></span>
                 </span>
               </h2>
-              <p class="player-id">{{ "ID" | language }}: {{ playerId }}</p>
+              <p class="player-id" *ngIf="debug">{{ "ID" | language }}: {{ playerId }}</p>
+
             </ion-label>
 
-            <ion-buttons slot="end" *ngIf="playerId !== lobbyData.ownerId && lobbyData.ownerId === currentUser.id" >
-              <ion-button (click)="renamePlayer(playerId, lobbyData.playerNames[i])" color="primary">
+            <ion-buttons slot="end" *ngIf="playerId !== lobbyData.ownerId && lobbyData.ownerId === currentUser.id">
+              <ion-button (click)="renamePlayer(playerId)" color="primary"
+                          *ngIf="lobbyData.status === 'setup' && !playerId.includes('#')">
                 <ion-icon name="create-outline"></ion-icon>
               </ion-button>
-              <ion-button (click)="kickPlayer(playerId, lobbyData.playerNames[i])" color="warning">
+              <ion-button (click)="kickPlayer(playerId, lobbyData.playerNames[i])" color="warning"
+                          *ngIf="lobbyData.status === 'setup' && !playerId.includes('#')">
                 <ion-icon name="exit-outline"></ion-icon>
               </ion-button>
-              <ion-button (click)="banPlayer(playerId, lobbyData.playerNames[i])" color="danger">
+              <ion-button (click)="banPlayer(playerId, lobbyData.playerNames[i])" color="danger"
+                          *ngIf="lobbyData.status === 'setup' && !playerId.includes('#')">
                 <ion-icon name="ban-outline"></ion-icon>
               </ion-button>
-              <ion-button (click)="promotePlayer(playerId, lobbyData.playerNames[i])" color="danger">
+              <ion-button (click)="promotePlayer(playerId, lobbyData.playerNames[i])" color="danger"
+                          *ngIf="lobbyData.status === 'setup' && !playerId.includes('#')">
                 <ion-icon name="diamond-outline"></ion-icon>
+              </ion-button>
+              <ion-button (click)="kickAI(playerId, lobbyData.playerNames[i])" color="warning"
+                          *ngIf="lobbyData.status === 'setup' && playerId.includes('#')">
+                <ion-icon name="exit-outline"></ion-icon>
               </ion-button>
             </ion-buttons>
           </ion-item>
+
+          <ion-button (click)="addBot()" *ngIf="lobbyData.players.length < lobbyData.maxPlayers">
+            <ion-label>{{ "ADD_BOT" | language }}  </ion-label>
+            <ion-icon name="add-circle-outline"></ion-icon>
+          </ion-button>
         </ion-list>
 
         <!-- Invite Link -->
         <ion-item>
           <ion-label>{{ "INVITE_LINK" | language }}</ion-label>
-          <ion-text>{{ routerText + lobbyData?.id }}</ion-text>
           <ion-button (click)="copyToClipboard(routerText + lobbyData?.id)" class="padding-left">
             <ion-icon name="copy-outline"></ion-icon>
           </ion-button>
+          <ion-text
+            (click)="spoilerRevealed = !spoilerRevealed"
+            [ngClass]="{'spoiler-hidden': !spoilerRevealed}"
+            style="cursor: pointer;"
+          >
+            {{ routerText + lobbyData?.id }}
+          </ion-text>
         </ion-item>
 
         <!-- Banned Players Section -->
