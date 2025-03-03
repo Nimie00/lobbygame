@@ -46,7 +46,7 @@
                 <div class="loser-sprite-container" *ngIf="losingChoice && animationPhase === 'showing-loser'">
                   <img class="loser-sprite"
                        [ngSrc]="'assets/rpsPictures/'+losingChoice+'-sheet.png'"
-                       [@spriteAnimation]="animationPhase"
+                       [@spriteAnimationShort]="animationPhase"
                        [width]="200"
                        [height]="200"
                        [alt]="losingChoice">

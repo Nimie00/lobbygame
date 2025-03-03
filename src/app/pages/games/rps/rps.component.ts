@@ -7,13 +7,23 @@ import {AngularFirestore} from "@angular/fire/compat/firestore";
 import {AuthService} from "../../../shared/services/auth.service";
 import {debounceTime, filter} from "rxjs/operators";
 import {LanguageService} from "../../../shared/services/language.service";
-import {animate, keyframes, state, style, transition, trigger} from '@angular/animations';
+
 import {BaseGame} from "../../../shared/models/games.gameplaydata.model";
 import {ProcessedRound} from "../../../shared/models/ProcessedRound";
 import {RoundData} from "../../../shared/models/RoundData";
 import {User} from "../../../shared/models/user.model";
 import {distinctUntilChanged, interval, Subscription, take} from "rxjs";
 import {AudioService} from "../../../shared/services/audio.service";
+import {
+  countdownAnimation,
+  playerChoiceAnimation,
+  resultAnimation,
+  finalChoice,
+  cycleAnimation,
+  playerMoveToCenter,
+  moveToCenterOpponent,
+  spriteAnimation
+} from './rps.component-animations';
 
 type RoundEntry = [string, RoundData];
 
@@ -23,104 +33,25 @@ type RoundEntry = [string, RoundData];
   templateUrl: './rps.component.html',
   styleUrls: ['./rps.component.scss'],
   animations: [
-    trigger('countdownAnimation', [
-      transition(':enter', [
-        style({opacity: 0, transform: 'scale(0.3)'}),
-        animate('0.5s ease-out', style({opacity: 1, transform: 'scale(1)'})),
-      ]),
-      transition(':leave', [
-        animate('0.5s ease-in', style({opacity: 0, transform: 'scale(0.3)'}))
-      ])
-    ]),
-
-    trigger('playerChoiceAnimation', [
-      state('void', style({opacity: 0})),
-      state('*', style({opacity: 1})),
-      transition('void => *', [
-        animate('0.3s ease-out', keyframes([
-          style({opacity: 0, transform: 'translateY(50%)', offset: 0}),
-          style({opacity: 1, transform: 'translateY(-20%)', offset: 0.7}),
-          style({opacity: 1, transform: 'translateY(0)', offset: 1})
-        ]))
-      ])
-    ]),
-
-    trigger('resultAnimation', [
-      transition(':enter', [
-        style({opacity: 0}),
-        animate('0.3s ease-out', style({opacity: 1}))
-      ]),
-      transition(':leave', [
-        animate('0.3s ease-in', style({opacity: 0}))
-      ])
-    ]),
-
-    trigger('finalChoice', [
-      state('shown', style({transform: 'translateX(0)', opacity: 1})),
-      transition(':enter', [
-        style({transform: 'translateX(45%)', opacity: 0}),
-        animate('0.3s ease-out')
-      ])
-    ]),
-
-    trigger('cycleAnimation', [
-      transition(':enter', [
-        style({transform: 'translateX(+100%) translateY(-50%)', opacity: 0}),
-        animate('1s ease-out', style({transform: 'translateX(-100%) translateY(-50%)', opacity: 0.8})),
-        animate('0.2s ease-out', style({transform: 'translateX(-105%) translateY(-50%)', opacity: 0}))
-      ])
-    ]),
-
-    trigger('playerMoveToCenter', [
-      transition('* => *', [
-        animate('1.5s cubic-bezier(0.2, 1, 0.5, 1)',
-          keyframes([
-            style({transform: 'translateY(-50%)', offset: 0}),
-            style({transform: 'translateX(calc(25vw))  translateY(-50%)', offset: 0.5}),
-            style({transform: 'translateX(calc(25vw))  translateY(-50%)', offset: 0.6}),
-            style({transform: 'translateX(-50%) translateY(-50%)', offset: 1})
-          ])
-        )
-      ])
-    ]),
-
-    trigger('moveToCenterOpponent', [
-      transition('* => *', [
-        animate('1.5s cubic-bezier(0.2, 1, 0.5, 1)',
-          keyframes([
-            style({transform: 'translateY(-50%)', offset: 0}),
-            style({transform: 'translateX(calc(-25vw)) translateY(-50%)', offset: 0.5}),
-            style({transform: 'translateX(calc(-25vw)) translateY(-50%)', offset: 0.6}),
-            style({transform: 'translateX(+50%) translateY(-50%)', offset: 1})
-          ])
-        )
-      ])
-    ]),
-
-    trigger('spriteAnimation', [
-      transition(':enter', [
-        animate('2.5s steps(39)', keyframes([
-          style({
-            objectPosition: '-7800px 0',
-            offset: 1,
-          })
-        ]))
-      ])
-    ])
-  ],
+    countdownAnimation,
+    playerChoiceAnimation,
+    resultAnimation,
+    finalChoice,
+    cycleAnimation,
+    playerMoveToCenter,
+    moveToCenterOpponent,
+    spriteAnimation
+  ]
 })
 
 export class RpsComponent implements OnInit, OnDestroy {
-  private CATEGORY = "rps-game"
-  playerAnimationDone = new EventEmitter<void>();
-  opponentAnimationDone = new EventEmitter<void>();
+  private CATEGORY: string = "rps-game"
+  playerAnimationDone: EventEmitter<void> = new EventEmitter<void>();
+  opponentAnimationDone: EventEmitter<void> = new EventEmitter<void>();
   game: BaseGame;
   currentUser: User;
-
-
   lobbyId: string;
   otherPlayerId: string;
-
   endReason: string;
   playerChoice: string = null;
   winner: string = null;
@@ -148,8 +79,22 @@ export class RpsComponent implements OnInit, OnDestroy {
   roundLength: number;
   timerInterval: any;
   cyclingInterval: any;
-  showCycle = true;
-  countDownShown = false;
+  showCycle: boolean = true;
+  countDownShown: boolean = false;
+  protected otherPlayerRequired: number;
+  protected PlayerRequired: number;
+  protected otherPlayerName: string;
+  protected userName: string;
+  protected requiredWinsArray: number[];
+  private aiChoiceExecuted: boolean = false;
+  private aiChoiceTimer: any = null;
+  private aiChoiceFallbackTimer: any = null;
+  private cyclingSubscription: Subscription;
+  private cycleStartTime: number;
+  private lastUserChoiceTime: any;
+  private playMusic: boolean;
+  private playOnce: boolean = true;
+  private winnerTimeout: any;
 
   protected rounds: {
     roundNumber: number;
@@ -163,27 +108,12 @@ export class RpsComponent implements OnInit, OnDestroy {
       'papir:ko': 'paperBeatsRock',
       'ollo:papir': 'scissorsBeatsPaper'
     },
-
     drawStates: {
       ko: 'rockVSRock',
       papir: 'paperVsPaper',
       ollo: 'scissorsVsScissors'
     }
   };
-  protected otherPlayerRequired: number;
-  protected PlayerRequired: number;
-  protected otherPlayerName: string;
-  protected userName: string;
-  protected requiredWinsArray: number[];
-  private aiChoiceExecuted: boolean = false;
-  private aiChoiceTimer: any = null;
-  private aiChoiceFallbackTimer: any = null;
-  private cyclingSubscription: Subscription;
-  private cycleStartTime: number;
-  lastUserChoiceTime: any;
-  private playmusic: boolean;
-  private playOnce: boolean = true;
-  private winnerTimeout: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -201,6 +131,7 @@ export class RpsComponent implements OnInit, OnDestroy {
   }
 
   //TODO: for later :) Ha a felhasználónak nincs megnyitva az oldal és közben letelik a kör akkor utánna problémák lehetnek
+
 
   async ngOnInit() {
     this.debug = localStorage.getItem('debug') === 'true';
@@ -232,12 +163,10 @@ export class RpsComponent implements OnInit, OnDestroy {
 
             this.isPlayer = this.game.players.includes(this.currentUser.id);
             this.isSpectator = this.game.spectators.includes(this.currentUser.id);
-
             await this.redirectPlayer()
 
             this.winner = this.game.winner;
             this.otherPlayerId = this.game.players.filter((_ele: any, idx: any) => idx !== this.game.players.indexOf(this.currentUser.id))[0];
-
             this.rounds = this.getRounds();
             this.roundLength = this.game.gameModifiers?.timed ?? 0;
             this.game.startedAt = game.startedAt.toDate()
@@ -312,11 +241,8 @@ export class RpsComponent implements OnInit, OnDestroy {
               this.updatePlayerScores();
 
               this.requiredWinsArray = this.getScoreCircles(this.requiredWins);
-
-
               this.otherPlayerRequired = this.getRemainingWins(this.otherPlayerId);
               this.PlayerRequired = this.getRemainingWins(this.currentUser.id);
-
               this.otherPlayerName = this.getPlayerName(this.otherPlayerId);
               this.userName = this.getPlayerName(this.currentUser.id);
 
@@ -331,7 +257,6 @@ export class RpsComponent implements OnInit, OnDestroy {
 
               this.updateDrawCount();
               this.updatePlayerScores();
-              // this.checkLastRoundStatus();
 
 
               if (currentRoundData != null) {
@@ -648,7 +573,7 @@ export class RpsComponent implements OnInit, OnDestroy {
   private positionSprite() {
 
     if (this.losingChoice && this.animationPhase === 'showing-loser') {
-      if (this.playmusic && this.playOnce) {
+      if (this.playMusic && this.playOnce) {
         this.playOnce = false;
         this.audioService.playSoundByName("explosion.wav");
       }
@@ -687,11 +612,11 @@ export class RpsComponent implements OnInit, OnDestroy {
     if (this.outcomeRules.winStates[matchup]) {
       this.animationState = this.outcomeRules.winStates[matchup];
       this.youWon = true;
-      this.playmusic = true;
+      this.playMusic = true;
     } else if (this.outcomeRules.winStates[`${this.opponentChoice}:${this.playerChoice}`]) {
       this.animationState = this.outcomeRules.winStates[`${this.opponentChoice}:${this.playerChoice}`];
       this.youWon = false;
-      this.playmusic = true;
+      this.playMusic = true;
     } else {
       this.animationState = this.outcomeRules.drawStates[this.playerChoice];
       this.youWon = null;
@@ -711,20 +636,17 @@ export class RpsComponent implements OnInit, OnDestroy {
     this.animationState = 'initial';
     this.youWon = null;
     this.playOnce = true;
-    this.playmusic = false;
+    this.playMusic = false;
     this.losingChoice = null;
     this.animationPhase = 'moving';
     this.selectedRound = this.currentRound;
     this.aiChoiceExecuted = false;
     this.showCycle = false;
-
     this.stopChoiceCycling();
   }
 
   private startChoiceCycling() {
-    if (this.cyclingSubscription) {
-      this.cyclingSubscription.unsubscribe();
-    }
+    this.stopChoiceCycling();
 
     this.cycleStartTime = Date.now();
 
@@ -758,7 +680,6 @@ export class RpsComponent implements OnInit, OnDestroy {
   async goToWatchingReplay() {
     await this.router.navigate(['/lobbies/' + 'replays:' + this.lobbyId]);
   }
-
 
   roundsWon(): number {
     return this.rounds.filter(round => round.winner === this.currentUser.id).length;

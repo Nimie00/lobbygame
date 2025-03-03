@@ -22,7 +22,7 @@ export class GameStartService {
     this.subscriptionTracker.unsubscribeCategory(this.CATEGORY);
   }
 
-  handleCountdown(onComplete: () => void, lobbyId: string, isPlayer: boolean): Promise<void> {
+  handleCountdown(_onComplete: () => void, lobbyId: string, isPlayer: boolean): Promise<void> {
     return new Promise((resolve) => {
       let countdown = 3;
       const countdownInterval = setInterval(() => {
@@ -31,7 +31,6 @@ export class GameStartService {
           countdown--;
         } else {
           clearInterval(countdownInterval);
-          onComplete();
           resolve();
           isPlayer ? this.openGameWindow(lobbyId): this.openSpectatorWindow(lobbyId);
         }
@@ -41,18 +40,16 @@ export class GameStartService {
   }
 
   private showCountdownMessage(message: string) {
-    // Létrehozunk egy teljes képernyős overlay elemet
     const overlayElement = document.createElement('div');
     overlayElement.style.position = 'fixed';
     overlayElement.style.top = '0';
     overlayElement.style.left = '0';
     overlayElement.style.width = '100%';
     overlayElement.style.height = '100%';
-    overlayElement.style.backgroundColor = 'rgba(0, 0, 0, 0.5)'; // Szötétebb, de áttetsző overlay
-    overlayElement.style.zIndex = '999'; // Az overlay a háttérben, de minden elem fölött van
+    overlayElement.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    overlayElement.style.zIndex = '999';
     document.body.appendChild(overlayElement);
 
-    // Létrehozunk egy countdown üzenet elemet
     const countdownElement = document.createElement('div');
     countdownElement.innerText = message;
     countdownElement.style.position = 'fixed';
@@ -62,12 +59,11 @@ export class GameStartService {
     countdownElement.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
     countdownElement.style.color = 'white';
     countdownElement.style.padding = '20px';
-    countdownElement.style.zIndex = '1000'; // Az üzenet az overlay fölött legyen
+    countdownElement.style.zIndex = '1000';
     countdownElement.style.borderRadius = '10px';
     countdownElement.style.fontSize = '24px';
     document.body.appendChild(countdownElement);
 
-    // 1 másodperc elteltével eltávolítjuk az overlay-t és az üzenetet is
     setTimeout(() => {
       document.body.removeChild(countdownElement);
       document.body.removeChild(overlayElement);

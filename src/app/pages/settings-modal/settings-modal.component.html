@@ -33,19 +33,21 @@
       </ion-item>
 
       <ion-item>
-        <ion-label>
-          {{ 'VOLUME' | language }} ({{ volume }}%)
-        </ion-label>
-        <ion-range min="0" max="100" [(ngModel)]="volume" (ionChange)="updateVolume($event)">
-        </ion-range>
+        <div class="responsive-item">
+          <ion-label>
+            {{ 'VOLUME' | language }} ({{ volume }}%)
+          </ion-label>
+          <ion-range min="0" max="100" [(ngModel)]="volume" (ionChange)="updateVolume($event)"></ion-range>
+          <ion-button (click)="playRandomSound()">
+            {{ 'PLAY_RANDOM_SOUND' | language }}
+          </ion-button>
 
-        <ion-button (click)="playRandomSound()">
-          {{ 'PLAY_RANDOM_SOUND' | language }}
-        </ion-button>
+        </div>
       </ion-item>
     </ion-content>
   </ng-template>
 </ion-modal>
 
 
+<div class="bottom-spacer"></div>
 

@@ -4,3 +4,9 @@
   justify-content: center;
   height: 100%;
 }
+
+.responsive-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}

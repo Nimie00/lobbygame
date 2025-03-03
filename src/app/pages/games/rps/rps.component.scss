@@ -509,6 +509,7 @@ ion-button.replay-button {
 }
 
 .tooltip-content {
+  overflow: auto;
   max-height: 100%;
 }
 
@@ -521,8 +522,8 @@ ion-button.replay-button {
 
 @media screen and (max-height: 500px) and (max-width: 768px) {
   .tooltip-content {
+    overflow: auto;
     max-height: 150px;
-    overflow-y: auto
   }
 }
 
@@ -534,4 +535,16 @@ ion-button.replay-button {
   width: 50%;
   background-color: var(--ion-card-background);
   color: var(--ion-text-color);
+}
+
+
+@media (max-width: 600px) {
+  ion-label {
+    font-size: 0.8rem;
+  }
+
+  img {
+    width: 100px;
+    height: 100px;
+  }
 }

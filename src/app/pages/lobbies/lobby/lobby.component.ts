@@ -45,6 +45,7 @@ export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
   protected passwordModalOpen: boolean = false;
   protected isCreateLobbyModalVisible: boolean = false;
   protected isLobbyPlayersModalVisible: boolean = false;
+  debug: boolean;
 
 
   constructor(private lobbyService: LobbyService,
@@ -58,15 +59,14 @@ export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
 
   }
 
-  async ngOnInit() {
-
-  }
+  ngOnInit() {}
 
   ngOnDestroy(): void {
     this.tracker.unsubscribeCategory(this.CATEGORY);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    this.debug = localStorage.getItem('debug') == 'true';
     if (changes['listLive'] && changes['listLive'].firstChange || changes['lobby']) {
       this.generateActions(this.listLive);
     }
@@ -106,8 +106,7 @@ export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
           label: 'DELETE_LOBBY',
           class: 'btn-delete-lobby',
           command: () => this.destroyLobby(this.lobby.id),
-          // condition: true,
-          condition: this.lobby.status !== 'started' && this.lobby.status !== 'starting'
+          condition: ((this.lobby.status !== 'started' && this.lobby.status !== 'starting') || this.debug),
         });
       }
 

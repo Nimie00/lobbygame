@@ -175,7 +175,7 @@
   "TOO_LITTLE_MAX_PLAYERS": "A minimum játékosok száma kevesebb mint a játék által megengedett minimum, ezért a játékosok száma át lesz állatva a játék által engedélyezett minimumra",
   "PLAYER_NUMBERS_WRONG": "A minimum játékosok száma nem lehet több a maximum játékosok számánál, a két érték egyenlő lesz",
   "WRONG_PASSWORD": "Helytelen jelszó",
-  "EMAIL_NOT_REGISTERED":"Jelenleg nem rendelkezik egy felhasználó sem a megadott email címmel, kérjük ellenőrizd, hogy megfelelően adtad-e meg az email címet",
+  "EMAIL_NOT_REGISTERED": "Jelenleg nem rendelkezik egy felhasználó sem a megadott email címmel, kérjük ellenőrizd, hogy megfelelően adtad-e meg az email címet",
   "REMINDER_EMIL_SENT": "Elfelejtett jelszó emlkézetető email elküldve",
   "RESET_PASSWORD_ERROR": "Hiba történt a jelszó visszaállítása közben",
   "BAD_USERNAME": "A felhasználónév nem tartalmazhatja a '#' karaktert, kérjük azt törölje ki",
@@ -198,5 +198,7 @@
   "PLAY_RANDOM_SOUND": "Random Hangeffekt Lejátszása",
   "VOLUME": "hangerő",
   "YOU_ARE_BANNED_FROM_LOBBY": "Ebből a váróból kitiltottak téged",
-  "MAX_PLAYERS_REACHED": "A váró tele van"
+  "MAX_PLAYERS_REACHED": "A váró tele van",
+  "SEARCHING": "Keresés...",
+  "CHOOSE_A_THEME": "Kérem válasszon egy témát a listából!"
 }

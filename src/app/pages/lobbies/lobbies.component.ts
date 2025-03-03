@@ -32,6 +32,7 @@ export class LobbiesComponent implements OnInit, OnDestroy {
   hasLobby: boolean = false;
   createModal: boolean = false;
   listLive: boolean = true;
+  protected debug: boolean;
 
 
   constructor(

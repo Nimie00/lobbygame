@@ -198,5 +198,7 @@
   "PLAY_RANDOM_SOUND": "Play a random sound effect",
   "VOLUME": "Volume",
   "YOU_ARE_BANNED_FROM_LOBBY": "You are banned from this lobby",
-  "MAX_PLAYERS_REACHED": "The lobby is full"
+  "MAX_PLAYERS_REACHED": "The lobby is full",
+  "SEARCHING": "Search...",
+  "CHOOSE_A_THEME": "Please choose a theme from the list"
 }

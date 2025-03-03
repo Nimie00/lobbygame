@@ -41,6 +41,9 @@ export class AppComponent implements OnInit, OnDestroy {
   ) {
   }
 
+  //TODO: A gamewatch az nem dobott be a replaynál telefonon (tulajdonosként)
+  //todo: info oldal : ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value: 'true'. Current value: 'false'. Expression location: AppComponent
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();

@@ -52,8 +52,11 @@ export class InformationComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (localStorage.getItem('infoOpened') !== 'true') {
-      localStorage.setItem('infoOpened', 'true');
+      setTimeout(() => {
+        localStorage.setItem('infoOpened', 'true');
+      });
     }
+
     this.filteredTopics = this.topics;
   }
 

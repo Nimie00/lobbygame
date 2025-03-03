@@ -11,78 +11,27 @@ import {
 } from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {SubscriptionTrackerService} from "../../../../shared/services/subscriptionTracker.service";
-import {animate, keyframes, state, style, transition, trigger} from "@angular/animations";
 import {LanguageService} from "../../../../shared/services/language.service";
 import {KeyValue} from "@angular/common";
 import {AudioService} from "../../../../shared/services/audio.service";
+import {
+  playerChoiceAnimation,
+  finalChoice,
+  player1MoveToCenter,
+  player2MoveToCenter,
+  spriteAnimationShort,
+} from '../../../games/rps/rps.component-animations';
 
 @Component({
   selector: 'app-rps-spectate',
   templateUrl: './rps-spectate.component.html',
   styleUrls: ['./rps-spectate.component.scss'],
   animations: [
-    trigger('playerChoiceAnimation', [
-      state('void', style({opacity: 0})),
-      state('*', style({opacity: 1})),
-      transition('void => *', [
-        animate('0.3s ease-out', keyframes([
-          style({opacity: 0, transform: 'translateY(50%)', offset: 0}),
-          style({opacity: 1, transform: 'translateY(-20%)', offset: 0.7}),
-          style({opacity: 1, transform: 'translateY(0)', offset: 1})
-        ]))
-      ])
-    ]),
-
-    trigger('finalChoice', [
-      state('shown', style({transform: 'translateX(0)', opacity: 1})),
-      transition(':enter', [
-        style({transform: 'translateX(45%)', opacity: 0}),
-        animate('0.3s ease-out')
-      ]),
-      state('shownPlayer', style({transform: 'translateX(0)', opacity: 1})),
-      transition(':enter', [
-        style({transform: 'translateX(-45%)', opacity: 0}),
-        animate('0.3s ease-out')
-      ])
-    ]),
-
-    trigger('player1MoveToCenter', [
-      transition('* => *', [
-        animate('1.5s cubic-bezier(0.2, 1, 0.5, 1)',
-          keyframes([
-            style({transform: 'translateY(-50%)', offset: 0}),
-            style({transform: 'translateX(calc(25vw)) translateY(-50%)', offset: 0.5}),
-            style({transform: 'translateX(calc(25vw)) translateY(-50%)', offset: 0.6}),
-            style({transform: 'translateX(-50%) translateY(-50%)', offset: 1})
-          ])
-        )
-      ])
-    ]),
-
-    trigger('player2MoveToCenter', [
-      transition('* => *', [
-        animate('1.5s cubic-bezier(0.2, 1, 0.5, 1)',
-          keyframes([
-            style({transform: 'translateY(0) translateY(-50%)', offset: 0}),
-            style({transform: 'translateX(calc(-25vw)) translateY(-50%)', offset: 0.5}),
-            style({transform: 'translateX(calc(-25vw)) translateY(-50%)', offset: 0.6}),
-            style({transform: 'translateX(+50%) translateY(-50%)', offset: 1})
-          ])
-        )
-      ])
-    ]),
-
-    trigger('spriteAnimation', [
-      transition(':enter', [
-        animate('1.3s steps(39)', keyframes([
-          style({
-            objectPosition: '-7800px 0',
-            offset: 1,
-          })
-        ]))
-      ])
-    ])
-  ],
+    playerChoiceAnimation,
+    finalChoice,
+    player1MoveToCenter,
+    player2MoveToCenter,
+    spriteAnimationShort]
 })
 
 export class RpsSpectateComponent implements OnInit, OnDestroy, OnChanges {
@@ -125,6 +74,19 @@ export class RpsSpectateComponent implements OnInit, OnDestroy, OnChanges {
   player2Score: number = 0;
   requiredWins: number;
   roundLength: number;
+  player1Required: number = 0;
+  player2Required: number = 0;
+  player1Remaining: number = 0;
+  player2Remaining: number = 0;
+  player1Won: boolean = false;
+
+  player1WONALLGAME: boolean = false;
+  gameEnded: boolean = false;
+  totalRounds: number = 0;
+  player1WonRounds: number;
+  player2WonRounds: number;
+  private playmusic: boolean;
+  private playOnce: boolean = true;
 
 
   protected rounds: {
@@ -146,19 +108,7 @@ export class RpsSpectateComponent implements OnInit, OnDestroy, OnChanges {
       ollo: 'scissorsVsScissors'
     }
   };
-  player1Required: number = 0;
-  player2Required: number = 0;
-  player1Remaining: number = 0;
-  player2Remaining: number = 0;
-  player1Won: boolean = false;
 
-  player1WONALLGAME: boolean = false;
-  gameEnded: boolean = false;
-  totalRounds: number = 0;
-  player1WonRounds: number;
-  player2WonRounds: number;
-  private playmusic: boolean;
-  private playOnce: boolean = true;
 
 
   constructor(
@@ -260,10 +210,10 @@ export class RpsSpectateComponent implements OnInit, OnDestroy, OnChanges {
     this.player2Remaining = this.requiredWins - player2Wins;
 
 
-    if(this.player1Remaining == 0 && this.player2Remaining >0 )
+    if (this.player1Remaining == 0 && this.player2Remaining > 0)
       this.player1WONALLGAME = true
 
-    if(this.player2Remaining == 0 && this.player1Remaining >0 )
+    if (this.player2Remaining == 0 && this.player1Remaining > 0)
       this.player1WONALLGAME = false
 
     this.gameEnded = (this.player2Remaining == 0 || this.player1Remaining == 0) && !this.playingAnimations;

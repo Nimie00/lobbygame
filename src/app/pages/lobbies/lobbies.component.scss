@@ -1,7 +1,6 @@
 .container {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 20px;
   text-align: center;
   background-color: var(ion-card-background);
 }
@@ -48,12 +47,17 @@ ion-button.change-to-replays {
 
 .lobby-list {
   border-radius: 10px;
-  padding: 40px;
+  padding: 2px;
   color: var(--ion-black-text-color);
   width: 100%;
   height: fit-content;
-  margin: 15px auto;
+  margin: 2px auto;
   text-align: left;
   display: block;
   box-sizing: border-box;
+}
+
+.bottom-spacer {
+  height: 100px;
+  visibility: hidden;
 }
