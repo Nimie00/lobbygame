@@ -1,4 +1,4 @@
-export interface BaseGame {
+export interface RPSGame {
   lobbyName: string;
   status: string;
   startedAt: Date | null;

@@ -17,7 +17,9 @@
             <ion-label position="stacked" class="required-star">{{ "SELECT_GAME" | language }}</ion-label>
             </div>
             <ion-select [(ngModel)]="selectedGame" name="gameType" required>
-              <ion-select-option *ngFor="let game of games$ | async" [value]="game">
+              <ion-select-option
+                *ngFor="let game of games$ | async"
+                [value]="game">
                 {{ game.name | language }}
               </ion-select-option>
             </ion-select>

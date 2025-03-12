@@ -8,6 +8,8 @@ import {SubscriptionTrackerService} from "../../../shared/services/subscriptionT
 import {Game} from "../../../shared/models/game.model";
 import {LanguageService} from "../../../shared/services/language.service";
 import {AlertService} from "../../../shared/services/alert.service";
+import * as bcrypt from 'bcryptjs';
+
 
 @Component({
   selector: 'app-create-lobby-modal',
@@ -85,7 +87,7 @@ export class CreateLobbyModalComponent implements OnInit, OnDestroy {
       this.allowSpectators = this.lobby.allowSpectators;
       this.private = this.lobby.private;
       this.enablePassword = !!this.lobby.password;
-      this.password = this.lobby.password || '';
+      this.password = '';
       this.enablePlayerNumbers = this.lobby.minPlayers !== this.lobby.maxPlayers;
       this.minPlayers = this.lobby.minPlayers;
       this.maxPlayers = this.lobby.maxPlayers;
@@ -233,7 +235,7 @@ export class CreateLobbyModalComponent implements OnInit, OnDestroy {
       hasBots: this.hasBots,
       gameModifiers: this.gameModifiers,
       currentRound: 0,
-      password: this.enablePassword ? this.password : null,
+      password: this.enablePassword ? await this.hashPassword(this.password) : null,
       private: this.private,
       allowSpectators: this.allowSpectators,
       players: this.players,
@@ -268,5 +270,10 @@ export class CreateLobbyModalComponent implements OnInit, OnDestroy {
       console.error('Error creating/updating lobby:', error);
     }
     await this.modal.dismiss();
+  }
+
+  private async hashPassword(password: string) {
+    const salt = bcrypt.genSaltSync(10);
+    return bcrypt.hashSync(password, salt);
   }
 }

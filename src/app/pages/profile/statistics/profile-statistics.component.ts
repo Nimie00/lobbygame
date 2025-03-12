@@ -2,7 +2,7 @@ import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {SubscriptionTrackerService} from "../../../shared/services/subscriptionTracker.service";
 import {User} from "../../../shared/models/user.model";
 import {LanguageService} from "../../../shared/services/language.service";
-import {BaseGame} from "../../../shared/models/games.gameplaydata.model";
+import {RPSGame} from "../../../shared/models/games.gameplaydata.model";
 import {overallGameService} from "../../../shared/services/game-services/overallGame.service";
 import {firstValueFrom} from "rxjs";
 import {Router} from "@angular/router";
@@ -18,8 +18,8 @@ export class ProfileStatisticsComponent implements OnInit, OnDestroy {
   private CATEGORY = "profileStats"
   @Input() user: User;
   selectedSegment = 'overall';
-  games: BaseGame[];
-  displayedGames: BaseGame[] = [];
+  games: RPSGame[];
+  displayedGames: RPSGame[] = [];
   currentPage = 0;
   pageSize = 5;
   totalPages = 0;
@@ -52,7 +52,7 @@ export class ProfileStatisticsComponent implements OnInit, OnDestroy {
   ) {
   }
 
-  get selectedGame(): BaseGame | undefined {
+  get selectedGame(): RPSGame | undefined {
     return this.games.find(g => g.lobbyId === this.selectedSegment);
   }
 
@@ -94,7 +94,7 @@ export class ProfileStatisticsComponent implements OnInit, OnDestroy {
     this.overallStats.avgDuration = totalDuration / (this.overallStats.totalGames != 0 ? this.overallStats.totalGames : 1);
   }
 
-  getGameStats(game: BaseGame) {
+  getGameStats(game: RPSGame) {
     const userId = this.user.id;
     const rounds = Object.values(game.rounds);
 
@@ -152,6 +152,10 @@ export class ProfileStatisticsComponent implements OnInit, OnDestroy {
 
   async goToGamePage() {
     await this.router.navigate(['/game/' + this.selectedGame.lobbyId]);
+  }
+
+  async goToWatchingReplay() {
+    await this.router.navigate(['/lobbies/' + 'replays:' + this.selectedGame.lobbyId]);
   }
 
 }

@@ -330,6 +330,5 @@ export class RpsSpectateComponent implements OnInit, OnDestroy, OnChanges {
   sortByRoundNumber(a: KeyValue<string, any>, b: KeyValue<string, any>): number {
     return a.value.roundNumber - b.value.roundNumber;
   }
-
 }
 

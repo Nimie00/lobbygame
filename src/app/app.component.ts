@@ -41,8 +41,12 @@ export class AppComponent implements OnInit, OnDestroy {
   ) {
   }
 
-  //TODO: A gamewatch az nem dobott be a replaynál telefonon (tulajdonosként)
-  //todo: info oldal : ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value: 'true'. Current value: 'false'. Expression location: AppComponent
+
+
+  // todo: Info ablak megcsinálása, hogy ne változóba legyenek a szövegek, hanem egy megfelelő wiki megoldás legyen, úgy, hogy képeket is tudjunk megjeleníteni Ezeknek a szövegeknek a megírása, és képek gyűjtése
+  // todo: Hangok ( profil törlésénél, módosításnál, játék indításánál (visszaszámlálás), játék közben a választásnál és az animáció közben )
+  // todo: A kitűzőknek lehetne egy lenyíló menü, vagy modal ahol megjelenik az összes és egyet ki lehetne választani megjelenített kitűzőnek, legyenek mondjuk 50x50 esek és rajzolva legyenek, legyenek természet témájúak
+
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -89,7 +93,8 @@ export class AppComponent implements OnInit, OnDestroy {
       this.gameStartService.stopWatchingLobby();
       this.isLoggedIn = false;
       this.user = null;
-      this.router.navigate(['/login']).then(() => {});
+      this.router.navigate(['/login']).then(() => {
+      });
     });
   }
 

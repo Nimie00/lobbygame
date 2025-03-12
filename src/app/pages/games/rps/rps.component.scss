@@ -48,11 +48,12 @@
 
 .player-area {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   padding: 0.2rem;
   flex: 2;
   background-color: var(--player1-color);
+  flex-direction: column;
 }
 
 .center-area {
@@ -109,12 +110,14 @@
 }
 
 .opponent-area {
-  justify-content: center;
-  align-items: center;
-  display: flex;
   padding: 0.2rem;
   flex: 2;
   background-color: var(--player2-color);
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  display: flex;
+  overflow: hidden;
 }
 
 
@@ -123,16 +126,13 @@
   height: 100%;
   display: flex;
   justify-content: center;
+  flex-direction: column;
   align-items: center;
   pointer-events: none;
   background-color: var(--custom-card-bg);
 
   .result-text-wrapper {
-    position: absolute;
-    bottom: 20%;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 3;
+    z-index: 3000;
 
     .result-text {
       font-size: 2.5rem;
@@ -141,21 +141,18 @@
       text-align: center;
 
       &.won {
-        background: rgba(0, 255, 136, 0.5);
+        background: rgba(0, 255, 136, 0.7);
         border: 2px solid #00ff88;
-        text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
       }
 
       &.lost {
-        background: rgba(255, 68, 68, 0.5);
+        background: rgba(255, 68, 68, 0.7);
         border: 2px solid #ff4444;
-        text-shadow: 0 0 15px rgba(255, 68, 68, 0.5);
       }
 
       &.draw {
-        background: rgba(42, 33, 10, 0.3);
+        background: rgba(42, 33, 10, 0.67);
         border: 2px solid #423310;
-        text-shadow: 0 0 15px rgba(42, 33, 10, 0.5);
       }
     }
   }
@@ -208,6 +205,13 @@
       transform: scale(1.5);
     }
   }
+}
+
+.bottom-element {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 
@@ -319,8 +323,6 @@ img.disabled {
 }
 
 .score-indicator {
-  position: absolute;
-  top: 20px;
   text-align: center;
   gap: 6px;
 
@@ -438,7 +440,7 @@ ion-button.replay-button {
   background-color: var(--player2-color);
 }
 
-.player1-color{
+.player1-color {
   color: var(--player1-color);
   --color: var(--player1-color);
 }
@@ -506,6 +508,7 @@ ion-button.replay-button {
   left: 50%;
   transform: translateX(-50%);
   margin-bottom: 10px;
+  overflow: auto;
 }
 
 .tooltip-content {
@@ -514,16 +517,70 @@ ion-button.replay-button {
 }
 
 @media screen and (max-width: 768px) {
-  .tooltip {
-    max-width: 250px;
-    white-space: normal;
+  ion-label {
+    font-size: 0.8rem;
   }
-}
+  .tooltip {
+    max-width: 300px;
+    max-height: 300px;
+    white-space: normal;
+    overflow: auto;
+  }
 
-@media screen and (max-height: 500px) and (max-width: 768px) {
+  .result-text {
+    font-size: 0.8rem;
+  }
+
+  img {
+    width: 70px;
+    height: 70px;
+  }
+
+
   .tooltip-content {
     overflow: auto;
-    max-height: 150px;
+    max-width: 300px;
+    max-height: 300px;
+  }
+  .waiting-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.2rem;
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      background-color: #333;
+      border-radius: 50%;
+      animation: bounce 1s infinite;
+
+      &:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+
+      &:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+    }
+  }
+  .choice {
+    position: absolute;
+    top: 50%;
+    z-index: 6500;
+    max-width: 70px;
+    max-height: 70px;
+    transition: opacity 0.3s ease-out;
+
+    &.player-choice {
+      left: 20%;
+      transform: translate(-50%, -50%);
+    }
+
+    &.opponent-choice {
+      right: 20%;
+      transform: translate(50%, -50%);
+    }
+
   }
 }
 
@@ -537,14 +594,3 @@ ion-button.replay-button {
   color: var(--ion-text-color);
 }
 
-
-@media (max-width: 600px) {
-  ion-label {
-    font-size: 0.8rem;
-  }
-
-  img {
-    width: 100px;
-    height: 100px;
-  }
-}

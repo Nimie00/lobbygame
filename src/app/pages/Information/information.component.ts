@@ -40,16 +40,6 @@ export class InformationComponent implements OnInit, OnDestroy {
   ];
 
 
-  constructor(private themeService: ThemeService,
-              private languageService: LanguageService,
-              private audioService: AudioService,) {
-  }
-
-
-  ngOnDestroy(): void {
-    this.audioService.stopAllSounds()
-  }
-
   ngOnInit(): void {
     if (localStorage.getItem('infoOpened') !== 'true') {
       setTimeout(() => {
@@ -74,5 +64,15 @@ export class InformationComponent implements OnInit, OnDestroy {
 
   selectTopic(topic: Topic) {
     this.selectedTopic = topic;
+  }
+
+  constructor(private themeService: ThemeService,
+              private languageService: LanguageService,
+              private audioService: AudioService,) {
+  }
+
+
+  ngOnDestroy(): void {
+    this.audioService.stopAllSounds()
   }
 }

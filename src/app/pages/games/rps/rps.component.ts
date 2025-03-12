@@ -8,7 +8,7 @@ import {AuthService} from "../../../shared/services/auth.service";
 import {debounceTime, filter} from "rxjs/operators";
 import {LanguageService} from "../../../shared/services/language.service";
 
-import {BaseGame} from "../../../shared/models/games.gameplaydata.model";
+import {RPSGame} from "../../../shared/models/games.gameplaydata.model";
 import {ProcessedRound} from "../../../shared/models/ProcessedRound";
 import {RoundData} from "../../../shared/models/RoundData";
 import {User} from "../../../shared/models/user.model";
@@ -48,7 +48,7 @@ export class RpsComponent implements OnInit, OnDestroy {
   private CATEGORY: string = "rps-game"
   playerAnimationDone: EventEmitter<void> = new EventEmitter<void>();
   opponentAnimationDone: EventEmitter<void> = new EventEmitter<void>();
-  game: BaseGame;
+  game: RPSGame;
   currentUser: User;
   lobbyId: string;
   otherPlayerId: string;
@@ -131,6 +131,7 @@ export class RpsComponent implements OnInit, OnDestroy {
   }
 
   //TODO: for later :) Ha a felhasználónak nincs megnyitva az oldal és közben letelik a kör akkor utánna problémák lehetnek
+  canChoose: boolean = true;
 
 
   async ngOnInit() {
@@ -239,6 +240,7 @@ export class RpsComponent implements OnInit, OnDestroy {
 
               this.updateDrawCount();
               this.updatePlayerScores();
+              this.canChoose = true;
 
               this.requiredWinsArray = this.getScoreCircles(this.requiredWins);
               this.otherPlayerRequired = this.getRemainingWins(this.otherPlayerId);
@@ -272,6 +274,7 @@ export class RpsComponent implements OnInit, OnDestroy {
                 if (currentRoundData.winner && this.winnerTimeout) {
                   clearTimeout(this.winnerTimeout);
                   this.winnerTimeout = null;
+                  this.canChoose = true;
                 }
                 const allPlayersChosen = currentRoundData.choices[this.currentUser.id] != null && currentRoundData.choices[this.otherPlayerId] != null;
 
@@ -281,12 +284,14 @@ export class RpsComponent implements OnInit, OnDestroy {
                   } else {
 
                     if (!this.winnerTimeout) {
+                      this.canChoose = false;
                       this.winnerTimeout = setTimeout(async () => {
+                        this.canChoose = true;
                         if (currentRoundData && !currentRoundData.winner) {
                           await this.determineWinner(this.game);
                         }
                         this.winnerTimeout = null;
-                      }, 3450);
+                      }, 3000);
                     }
                   }
                 }
@@ -538,6 +543,7 @@ export class RpsComponent implements OnInit, OnDestroy {
   }
 
   private updatePlayerScores() {
+
     this.playerScore = Object.values(this.game.rounds)
       .filter((round: any) => round.winner === this.currentUser.id).length;
     this.opponentScore = Object.values(this.game.rounds)

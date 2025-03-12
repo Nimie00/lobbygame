@@ -11,7 +11,8 @@
           <ion-grid class="game-grid">
 
             <div class="result-overlay" [class.active]="animationState"
-                 *ngIf="animationState !== 'initial' && !skipAnimations">
+                 *ngIf="animationState !== 'initial' && !skipAnimations"
+                 [class]=" player1Won ? 'player1won' : 'player2won'">
 
               <div class="result-text-wrapper">
                 <div class="result-text" [class]=" player1Won ? 'player1' : 'player2'" *ngIf="player1Won !== null">
@@ -21,12 +22,12 @@
                   {{ 'ROUND_DRAWN' | language }}
                 </div>
               </div>
-              <div class="animation-container">
 
+              <div class="animation-container">
                 <div class="choice player1-choice"
                      [@player1MoveToCenter]="animationState"
                      (@player1MoveToCenter.done)="playerAnimationDone.emit()">
-                  <img [ngSrc]="'assets/rpsPictures/' + player1choice + '.png'"
+                  <img class="small-img" [ngSrc]="'assets/rpsPictures/' + player1choice + '.png'"
                        [class.winner]="player1Won"
                        [width]="200"
                        [height]="200"
@@ -36,7 +37,7 @@
                 <div class="choice player2-choice"
                      [@player2MoveToCenter]="animationState"
                      (@player2MoveToCenter.done)="opponentAnimationDone.emit()">
-                  <img [ngSrc]="'assets/rpsPictures/' + player2choice + '.png'"
+                  <img class="small-img" [ngSrc]="'assets/rpsPictures/' + player2choice + '.png'"
                        [class.winner]="player1Won!= null && !player1Won"
                        [width]="200"
                        [height]="200"
@@ -44,7 +45,7 @@
                 </div>
 
                 <div class="loser-sprite-container" *ngIf="losingChoice && animationPhase === 'showing-loser'">
-                  <img class="loser-sprite"
+                  <img class="loser-sprite small-img"
                        [ngSrc]="'assets/rpsPictures/'+losingChoice+'-sheet.png'"
                        [@spriteAnimationShort]="animationPhase"
                        [width]="200"
@@ -76,7 +77,7 @@
 
                 </div>
 
-                <div [@playerChoiceAnimation]="player1choice">
+                <div  class="bottom-element" [@playerChoiceAnimation]="player1choice">
                   <div *ngIf="!player1choice">
                     <div class="waiting-dots">
                       <div class="dot"></div>
@@ -130,7 +131,7 @@
                   </ng-template>
                 </div>
 
-                <div>
+                <div class="bottom-element">
                   <ng-container *ngIf="player2choice">
                     <img class="opponentItem choice-image"
                          [ngSrc]="'assets/rpsPictures/' + player2choice + '.png'"
@@ -203,13 +204,13 @@
                 <p><span class="player1-color">{{ name1 }} {{ ('CHOICE' | language) }} </span>
                   : {{ round.value.choices[player1Id].choice | language }}
                 </p>
-                <p><span class="player1-color">{{ name1 }} {{ ('TIME' | language) }} </span>
+                <p><span class="player1-color">{{ ('TIME' | language) }} </span>
                   : {{ round.value.choices[player1Id].timestamp | firebaseDate | date:'yyyy MM dd, HH:mm:ss' }}
                 </p>
                 <p><span class="player2-color">{{ name2 }} {{ ('CHOICE' | language) }} </span>
                   : {{ round.value.choices[player2Id].choice | language }}
                 </p>
-                <p><span class="player2-color">{{ name2 }} {{ ('TIME' | language) }} </span>
+                <p><span class="player2-color">{{ ('TIME' | language) }} </span>
                   : {{ round.value.choices[player2Id].timestamp | firebaseDate | date:'yyyy MM dd, HH:mm:ss' }}
                 </p>
               </div>

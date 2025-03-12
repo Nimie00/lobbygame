@@ -197,7 +197,7 @@ export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
 
       if (!listLiveGames) {
         this.actions.push({
-          label: 'START_SPECTATING',
+          label: 'START_REPLAY',
           class: 'btn-start-spectating',
           command: () => this.joinAsSpectator(this.lobby.id, true),
           condition: !this.isUserSpectatingLobby() && this.lobby.allowSpectators === true && !this.currentUser.inLobby,
@@ -334,6 +334,15 @@ export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
           );
           return;
         }
+
+        if (this.usersLobby.gameType!== "RPS") {
+          await this.alertService.showAlert(
+            `${this.languageService.translate("ERROR")}`,
+            `${this.languageService.translate("GAMETYPE_NOT_IMPLEMENTED")}.`
+          );
+          return;
+        }
+
         this.usersLobby.status = "starting";
         this.lobbyService.lobbyCooldown(this.lobby.id);
         await this.gameStartService.handleCountdown(await this.lobbyService.startGame(this.usersLobby), lobbyId, false);

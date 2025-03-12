@@ -6,7 +6,7 @@ import {HttpClient} from "@angular/common/http";
   providedIn: 'root'
 })
 export class AudioService {
-  private volume: number = 1;
+  private volume: number = 0;
   private soundEffects: string[] = [];
   private activeAudios: HTMLAudioElement[] = [];
 

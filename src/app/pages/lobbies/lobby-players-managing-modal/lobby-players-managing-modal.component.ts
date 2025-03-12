@@ -80,36 +80,36 @@ export class LobbyPlayersManagingModalComponent implements OnInit, OnDestroy {
     if (playerId.includes('#')) {//Az AI játékosoknak van # az id-ben ezért őket ne tudjuk befolyásolni
       return;
     }
-    this.lobbyService.renameUser(this.lobbyData.id, playerId).then();
+    this.lobbyService.renameUser(this.lobbyData.id, playerId);
   }
 
   kickPlayer(playerId: string, playerName: string) {
     if(playerId.includes('#')){//Az AI játékosoknak van # az id-ben ezért őket ne tudjuk befolyásolni
       return;
     }
-    this.lobbyService.kickUser(this.lobbyData.id, playerId, playerName).then();
+    this.lobbyService.kickUser(this.lobbyData.id, playerId, playerName);
   }
 
   banPlayer(playerId: string, playerName: string) {
-    if (playerId.includes('#')) {//Az AI játékosoknak van # az id-ben ezért őket ne tudjuk befolyásolni
+    if (playerId.includes('#')) { //Az AI játékosoknak van # az id-ben ezért őket ne tudjuk befolyásolni
       return;
     }
-    this.lobbyService.banPlayer(this.lobbyData.id, playerId, playerName).then();
+    this.lobbyService.banPlayer(this.lobbyData.id, playerId, playerName);
   }
 
   unbanPlayer(playerId: string, playerName: string) {
-    if (playerId.includes('#')) {//Az AI játékosoknak van # az id-ben ezért őket ne tudjuk befolyásolni
+    if (playerId.includes('#')) { //Az AI játékosoknak van # az id-ben ezért őket ne tudjuk befolyásolni
       return;
     }
-    this.lobbyService.unbanPlayer(this.lobbyData.id, playerId, playerName).then();
+    this.lobbyService.unbanPlayer(this.lobbyData.id, playerId, playerName);
   }
 
   promotePlayer(playerId: string, playerName: string) {
-    if (playerId.includes('#')) {//Az AI játékosoknak van # az id-ben ezért őket ne tudjuk befolyásolni
+    if (playerId.includes('#')) { //Az AI játékosoknak van # az id-ben ezért őket ne tudjuk befolyásolni
       return;
     }
-    this.lobbyService.promotePlayer(this.lobbyData.id, playerId, playerName).then();
-    this.close().then();
+    this.lobbyService.promotePlayer(this.lobbyData.id, playerId, playerName);
+    this.close();
   }
 
   copyToClipboard(text: string): void {
@@ -125,7 +125,7 @@ export class LobbyPlayersManagingModalComponent implements OnInit, OnDestroy {
   }
 
   kickAI(AIId: string, AIName: string) {
-    if(!AIId.includes('#')){// Gátoljuk, hogy nem ai játékosokat ki tudjunk kickelni
+    if(!AIId.includes('#')){// Gátoljuk, hogy NEM AI játékosokat ki tudjunk kickelni
       return;
     }
     this.lobbyService.kickAI(this.lobbyData.id, AIId, AIName).then();

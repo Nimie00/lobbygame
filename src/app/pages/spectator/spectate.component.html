@@ -15,37 +15,52 @@
 
     <div class="timeline-container">
       <div #visualization id="visualization"></div>
-      <div *ngIf="barId === null"> <ion-label>{{ "NO_TIME_BAR" | language }}</ion-label></div>
+      <div *ngIf="barId === null">
+        <ion-label>{{ "NO_TIME_BAR" | language }}</ion-label>
+      </div>
       <div class="controls" *ngIf="game">
 
-        <ion-button (click)="startTimeline(false)" [disabled]="playingAnimations || disablebuttons" class="start-button">
-          <ion-icon slot="start" name="play"></ion-icon>
-          <span class="button-text">{{ "START" | language }}</span>
+        <ion-button (click)="startTimeline(false)" [disabled]="playingAnimations || disablebuttons"
+                    class="start-button">
+          <span><ion-icon slot="start" name="play"></ion-icon>
+             <span class="button-text">{{ "START" | language }}</span>
+          </span>
         </ion-button>
 
         <ion-button (click)="stopTimeline()" [disabled]="playingAnimations || disablebuttons" class="pause-button">
-          <ion-icon slot="start" name="pause"></ion-icon>
-          <span class="button-text">{{ "PAUSE" | language }}</span>
+          <span><ion-icon slot="start" name="pause"></ion-icon>
+            <span class="button-text">{{ "PAUSE" | language }}</span>
+          </span>
         </ion-button>
 
-        <ion-button (click)="jumpToStart()" [disabled]="playingAnimations || disablebuttons " class="jump-to-start-button">
-          <ion-icon slot="start" name="play-back"></ion-icon>
-          <span class="button-text">{{ "JUMP_TO_START" | language }}</span>
+        <ion-button (click)="jumpToStart()" [disabled]="playingAnimations || disablebuttons "
+                    class="jump-to-start-button">
+          <span><ion-icon slot="start" name="play-back"></ion-icon>
+            <span class="button-text">{{ "JUMP_TO_START" | language }}</span>
+          </span>
         </ion-button>
 
-        <ion-button (click)="jumpToFirstEvent()" [disabled]="playingAnimations || disablebuttons" class="jump-to-first-event-button">
-          <ion-icon slot="start" name="play-skip-back"></ion-icon>
-          <span class="button-text">{{ "JUMP_TO_FIRST_EVENT" | language }}</span>
+        <ion-button (click)="jumpToFirstEvent()" [disabled]="playingAnimations || disablebuttons"
+                    class="jump-to-first-event-button">
+          <span>
+            <ion-icon slot="start" name="play-skip-forward" *ngIf="beforeFirstEvent"></ion-icon>
+            <ion-icon slot="start" name="play-skip-back" *ngIf="!beforeFirstEvent"></ion-icon>
+            <span class="button-text">{{ "JUMP_TO_FIRST_EVENT" | language }}</span>
+          </span>
         </ion-button>
 
-        <ion-button (click)="jumpToRealTime()" [disabled]="playingAnimations || disablebuttons" class="jump-to-real-time-button">
-          <ion-icon slot="start" name="time-outline"></ion-icon>
+        <ion-button (click)="jumpToRealTime()" [disabled]="playingAnimations || disablebuttons"
+                    class="jump-to-real-time-button">
+          <span><ion-icon slot="start" name="time-outline"></ion-icon>
           <span class="button-text">{{ "JUMP_TO_REAL_TIME" | language }}</span>
+            </span>
         </ion-button>
 
-        <ion-button (click)="jumpToNextEvent()" [disabled]="playingAnimations || lastEvent || disablebuttons" class="jump-to-next-event-button">
-          <ion-icon slot="start" name="chevron-forward"></ion-icon>
-          <span class="button-text">{{ "JUMP_TO_NEXT_EVENT" | language }}</span>
+        <ion-button (click)="jumpToNextEvent()" [disabled]="playingAnimations || lastEvent || disablebuttons"
+                    class="jump-to-next-event-button">
+          <span><ion-icon slot="start" name="chevron-forward"></ion-icon>
+            <span class="button-text">{{ "JUMP_TO_NEXT_EVENT" | language }}</span>
+          </span>
         </ion-button>
 
         <ion-label *ngIf="!playingAnimations">{{ "SKIP_ANIMATIONS" | language }}</ion-label>

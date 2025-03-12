@@ -7,6 +7,7 @@ import {ModalService} from "../../../../shared/services/modal.service";
 import {SubscriptionTrackerService} from "../../../../shared/services/subscriptionTracker.service";
 import {LobbyService} from "../../../../shared/services/lobby.service";
 import {AlertService} from "../../../../shared/services/alert.service";
+import * as bcrypt from 'bcryptjs';
 
 @Component({
   selector: 'app-lobby-password-modal',
@@ -43,12 +44,13 @@ export class LobbyPasswordModalComponent implements AfterViewInit, OnDestroy {
   }
 
   private async isPasswordCorrect(password: string): Promise<boolean> {
-    if (password !== this.getLobbyPassword()) {
+    if (!bcrypt.compareSync(password, this.getLobbyPassword())) {
       await this.alertService.showAlert(
         `${this.languageService.translate("PASSWORD")}`,
         `${this.languageService.translate("WRONG_PASSWORD")}.`);
       return false;
     }
+
     return true;
   }
 

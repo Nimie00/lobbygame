@@ -1,6 +1,7 @@
 {
   "VIEW_GAME": "Megtekintés",
   "START_SPECTATING": "Csatlakozás nézőként",
+  "START_REPLAY": "Csatlakozás visszanézésre",
   "STOP_SPECTATING": "Nézés befejezése",
   "JOIN_AS_PLAYER": "Csatlakozás játékosként",
   "LEAVE_GAME": "Kilépés a játékból",
@@ -115,7 +116,7 @@
   "OPPONENT": "Ellenfél",
   "YOU_WON_ROUND": "Megnyerted ezt a kört",
   "YOU_LOST_ROUND": "Elvesztetted ezt a kört",
-  "ROUND_DRAWN": "Ez a kör döntetlen lett",
+  "ROUND_DRAWN": "Döntetlen",
   "EMAIL_IN_USE": "Ez az email már használatban van",
   "REAUTHENTICATION_REQUIRED": "Kérlek lépj be újra",
   "WEAK_PASSWORD": "A jelszónak legalább 6 karakternek kell lennie",
@@ -191,7 +192,7 @@
   "OPPONENT_CHOICE": "Az ellenfél választása",
   "PLAYER_TIME": "A választásod időpontja",
   "OPPONENT_TIME": "Az ellenfél választásának időpontja",
-  "TIME": " ideje",
+  "TIME": "Időpontja",
   "PLAYED_ROUNDS_DISTRIBUTION": "Körökre lebontott információk",
   "BACK_TO_GAME": "Visszatérés a játék oldalára",
   "BUTTONS": "Gombok",
@@ -200,5 +201,7 @@
   "YOU_ARE_BANNED_FROM_LOBBY": "Ebből a váróból kitiltottak téged",
   "MAX_PLAYERS_REACHED": "A váró tele van",
   "SEARCHING": "Keresés...",
-  "CHOOSE_A_THEME": "Kérem válasszon egy témát a listából!"
+  "CHOOSE_A_THEME": "Kérem válasszon egy témát a listából!",
+  "FINALISING_ROUND": "Kör véglegesítése",
+  "GAMETYPE_NOT_IMPLEMENTED": "Ez a játéktípus nem lett implementálva"
 }

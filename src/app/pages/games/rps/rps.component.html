@@ -77,7 +77,7 @@
             </ng-template>
           </div>
 
-          <div [@playerChoiceAnimation]="playerChoice">
+          <div class="bottom-element"  [@playerChoiceAnimation]="playerChoice">
             <ng-container *ngIf="!playerChoice">
               <div class="waiting-dots">
                 <div class="dot"></div>
@@ -108,7 +108,7 @@
             </ion-label>
           </div>
 
-          <div class="choices-section">
+          <div class="choices-section" *ngIf="canChoose">
             <div *ngFor="let choice of ['ko', 'papir', 'ollo']"
                  class="choice-item"
                  [class.selected]="playerChoice === choice"
@@ -122,6 +122,10 @@
                   (click)="makeChoice(choice)">
               </div>
             </div>
+          </div>
+          <div *ngIf="!canChoose">
+            <p>{{"FINALISING_ROUND" | language}}</p>
+            <ion-spinner></ion-spinner>
           </div>
         </ion-col>
         <ion-col class="opponent-area"
@@ -138,13 +142,12 @@
               <div class="circle-container">
                 <div class="circle"
                      *ngFor="let circle of requiredWinsArray; let i = index"
-                     [class.filled]="i < opponentScore"
-                >
+                     [class.filled]="i < opponentScore">
                 </div>
               </div>
             </ng-template>
           </div>
-          <div>
+          <div  class="bottom-element">
             <ng-container *ngIf="opponentChosen && !playerChoice">
               <div class="cycling-choices">
                 <img

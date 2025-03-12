@@ -4,7 +4,7 @@ import {firstValueFrom, Observable, shareReplay} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {Lobby} from '../models/lobby.model';
 import {User} from '../models/user.model';
-import {BaseGame} from "../models/games.gameplaydata.model";
+import {RPSGame} from "../models/games.gameplaydata.model";
 import {Game} from "../models/game.model";
 import {arrayUnion, arrayRemove, writeBatch, collection, doc} from '@angular/fire/firestore';
 import {AlertService} from "./alert.service";
@@ -301,7 +301,7 @@ export class LobbyService {
 
   async startGame(lobby: Lobby): Promise<any> {
     const now = new Date();
-    const baseData: BaseGame = {
+    const baseData: RPSGame = {
       status: 'in-progress',
       startedAt: now,
       endedAt: null,
@@ -323,13 +323,16 @@ export class LobbyService {
       gameType: lobby.gameType,
     };
 
-    let gameData: BaseGame;
+    let gameData: RPSGame;
     switch (lobby.gameType) {
       case 'RPS':
         gameData = baseData;
         break;
       default:
-        throw new Error(`Unsupported game type: ${lobby.gameType}`);
+        await this.alertService.showAlert(
+          `${this.languageService.translate("ERROR")}`,
+          `${this.languageService.translate("GAMETYPE_NOT_IMPLEMENTED")}`);
+        return;
     }
 
     const lobbyRef = this.firestore.collection('lobbies').doc(lobby.id);
@@ -406,7 +409,7 @@ export class LobbyService {
     lobbyId: string,
     winner: string,
     endReason: string,
-    game: BaseGame
+    game: RPSGame
   ): Promise<void> {
     const lobbyRef = this.firestore.doc('lobbies/' + lobbyId);
     const lobbySnap = await firstValueFrom(lobbyRef.get());

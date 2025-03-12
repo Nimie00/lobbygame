@@ -44,6 +44,7 @@ export class SpectateComponent implements OnInit, AfterViewInit, OnDestroy {
   protected playerChoices: { [username: string]: string } = {};
   protected skipAnimations: boolean = false;
   protected playingAnimations: boolean = false;
+  protected beforeFirstEvent: boolean = true;
 
 
   constructor(private route: ActivatedRoute,
@@ -79,6 +80,11 @@ export class SpectateComponent implements OnInit, AfterViewInit, OnDestroy {
       });
       this.tracker.add(this.CATEGORY, "getGameAndUserSub", gameSub);
     }
+
+    if (!this.timer) {
+      this.beforeFirstEvent = true;
+    }
+
   }
 
   ngOnDestroy(): void {
@@ -167,6 +173,9 @@ export class SpectateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.processedEvents.add(String(new Date(event.start).getTime()));
         }
       });
+      if(this.processedEvents.size > 0){
+        this.beforeFirstEvent = false;
+      }
     }, 25);
 
   }
@@ -190,6 +199,7 @@ export class SpectateComponent implements OnInit, AfterViewInit, OnDestroy {
       this.currentTime = new Date(new Date(sortedEvents[0].start.getTime() - 1000).getTime() - 1000);
       this.setBarTime(this.currentTime)
       this.stopTimeline();
+      this.beforeFirstEvent = true;
     } else {
       console.warn("Nincs event")
     }
@@ -206,6 +216,8 @@ export class SpectateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.currentTime = new Date(this.startDate.getTime());
     this.setBarTime(this.currentTime)
     this.stopTimeline();
+    this.beforeFirstEvent = true;
+
   }
 
   protected async jumpToNextEvent() {
@@ -294,6 +306,10 @@ export class SpectateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.disablebuttons = true;
     await this.delay(100);
     this.disablebuttons = false;
+
+    if(this.processedEvents.size > 0){
+      this.beforeFirstEvent = false;
+    }
   }
 
   protected async jumpToRealTime() {
@@ -490,9 +506,7 @@ export class SpectateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.skipAnimations = originalskipAnimations;
     this.timeline.redraw();
 
-    console.log(this.items.length);
-    console.log(this.processedEvents.size);
-    if(this.game.winner != null && this.items.length == this.processedEvents.size){
+    if (this.game.winner != null && this.items.length == this.processedEvents.size) {
       this.lastEvent = true;
     }
   }

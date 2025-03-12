@@ -1,6 +1,7 @@
 {
   "VIEW_GAME": "View Game",
   "START_SPECTATING": "Start Spectating",
+  "START_REPLAY": "Join replay",
   "STOP_SPECTATING": "Stop Spectating",
   "JOIN_AS_PLAYER": "Join as Player",
   "LEAVE_GAME": "Leave Game",
@@ -115,7 +116,7 @@
   "OPPONENT": "Opponent",
   "YOU_WON_ROUND": "You won this round",
   "YOU_LOST_ROUND": "You lost this round",
-  "ROUND_DRAWN": "This round was a draw",
+  "ROUND_DRAWN": "Draw",
   "EMAIL_IN_USE": "This email is already registered",
   "REAUTHENTICATION_REQUIRED": "Please re-login to perform this action",
   "WEAK_PASSWORD": "Password must be at least 6 characters",
@@ -161,7 +162,7 @@
   "LOSE": "Lose",
   "LAST_ROUND_DIDNT_END": "The last round didn't end for some reason",
   "ROUND_COUNTER": "Current Round",
-  "WON_THE_ROUND": "won the round",
+  "WON_THE_ROUND": "wins the round",
   "SKIP_ANIMATIONS": "Skip animations",
   "REGISTRATION_SUCCESSFUL": "The registration was successful",
   "INVALID_EMAIL": "Invalid email format",
@@ -191,7 +192,7 @@
   "OPPONENT_CHOICE": "Opponent's choice",
   "PLAYER_TIME": "Your choice time",
   "OPPONENT_TIME": "Opponent's choice time",
-  "TIME": "'s time",
+  "TIME": "Timestamp",
   "PLAYED_ROUNDS_DISTRIBUTION": "Distribution of the rounds played",
   "BACK_TO_GAME": "Return to the game's page",
   "BUTTONS": "Action buttons",
@@ -200,5 +201,7 @@
   "YOU_ARE_BANNED_FROM_LOBBY": "You are banned from this lobby",
   "MAX_PLAYERS_REACHED": "The lobby is full",
   "SEARCHING": "Search...",
-  "CHOOSE_A_THEME": "Please choose a theme from the list"
+  "CHOOSE_A_THEME": "Please choose a theme from the list",
+  "FINALISING_ROUND": "Finalising round",
+  "GAMETYPE_NOT_IMPLEMENTED": "GameType not implemented"
 }

@@ -13,7 +13,7 @@ export class SettingsModalComponent implements OnInit, OnDestroy {
   currentLanguage: string;
   @Output() closeModal = new EventEmitter<void>();
   @ViewChild('settingsModal') modal: IonModal;
-  volume: number = 50;
+  volume: number = 0;
 
   constructor(private languageService: LanguageService,
               public themeService: ThemeService,

@@ -80,9 +80,14 @@ ion-button.return-button {
   --color: var(--btn-stop-spectating-color);
 }
 
-.return-button{
+ion-button.return-button, ion-button.replay-button{
   width: fit-content;
   margin: 0 auto;
+}
+
+ion-button.replay-button {
+  --background: var(--ion-replay-color);
+  --color: var(--btn-stop-spectating-color);
 }
 
 

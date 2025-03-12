@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {Observable} from "rxjs";
-import {BaseGame} from "../../models/games.gameplaydata.model";
+import {RPSGame} from "../../models/games.gameplaydata.model";
 
 @Injectable({
   providedIn: 'root'
@@ -30,7 +30,7 @@ export class RpsService {
         throw new Error('Game document does not exist.');
       }
 
-      const gameData = gameDocSnapshot.data() as BaseGame;
+      const gameData = gameDocSnapshot.data() as RPSGame;
 
       let finalTimestamp = newTimestamp;
       if (currentRound > 0) {
