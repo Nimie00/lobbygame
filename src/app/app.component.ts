@@ -43,7 +43,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
 
 
-  // todo: Info ablak megcsinálása, hogy ne változóba legyenek a szövegek, hanem egy megfelelő wiki megoldás legyen, úgy, hogy képeket is tudjunk megjeleníteni Ezeknek a szövegeknek a megírása, és képek gyűjtése
   // todo: Hangok ( profil törlésénél, módosításnál, játék indításánál (visszaszámlálás), játék közben a választásnál és az animáció közben )
   // todo: A kitűzőknek lehetne egy lenyíló menü, vagy modal ahol megjelenik az összes és egyet ki lehetne választani megjelenített kitűzőnek, legyenek mondjuk 50x50 esek és rajzolva legyenek, legyenek természet témájúak
 

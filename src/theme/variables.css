@@ -370,7 +370,7 @@ ion-alert {
 
 :is(ion-content){
   overflow: auto;
-  margin-bottom: 20px;
+  --padding-bottom: 160px;
 }
 
 :is(ion-modal) {
@@ -460,7 +460,3 @@ ion-toggle::part(handle) {
   }
 }
 
-.bottom-spacer {
-  height: 100px;
-  visibility: hidden;
-}

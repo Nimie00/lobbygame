@@ -37,7 +37,6 @@ import {distinctUntilChanged} from "rxjs";
         </app-lobby-password-modal>
       </ng-container>
     </ng-container>
-    <div class="bottom-spacer"></div>
   `,
   styleUrls: ['./global-modal.component.scss']
 })

@@ -21,21 +21,61 @@ export class InformationComponent implements OnInit, OnDestroy {
 
   topics: Topic[] = [
     {
-      title: 'Főoldal',
-      description: 'Ebben az oldalon található a játék főmenüje, ahol be lehet jelentkezni, regisztrálni, és elérhetőek a játékmódok.'
+      title: 'LOGIN_PAGE',
+      description: 'LOGIN_DESCRIPTION'
     },
     {
-      title: 'Játékmechanikák',
-      description: 'Itt találhatók a játékban használt alapvető mechanikák leírása, mint például a kő-papír-olló játékmenet, pontozási rendszer, stb.'
+      title: 'PROFILE_PAGE',
+      description: 'PROFILE_PAGE_DESCRIPTION'
     },
     {
-      title: 'Karakterek és statisztikák',
-      description: 'Ezen az oldalon olvashatók a karakterek tulajdonságai, fejlődési lehetőségei és statisztikái.'
+      title: 'PROFILE_SETTINGS',
+      description: 'PROFILE_SETTINGS_DESCRIPTION'
     },
     {
-      title: 'Beállítások',
-      description: 'Itt lehet testreszabni a játék hangbeállításait, grafikát, valamint egyéb opciókat.'
-    }
+      title: 'PROFILE_STATISTICS',
+      description: 'PROFILE_STATISTICS_DESCRIPTION'
+    },
+    {
+      title: 'CONTACT_PAGE',
+      description: 'CONTACT_PAGE_DESCRIPTION'
+    },
+    {
+      title: 'INFORMATION_PAGE',
+      description: 'INFORMATION_PAGE_DESCRIPTION'
+    },
+    {
+      title: 'LOBBIES_PAGE',
+      description: 'LOBBIES_PAGE_DESCRIPTION'
+    },
+    {
+      title: 'LOBBIES_PAGE_CREATE_LOBBY',
+      description: 'LOBBIES_PAGE_CREATE_LOBBY_DESCRIPTION'
+    },
+    {
+      title: 'LOBBIES_PAGE_PLAYER_MANAGE',
+      description: 'LOBBIES_PAGE_PLAYER_MANAGE_DESCRIPTION'
+    },
+    {
+      title: 'LOBBIES_PAGE_LOBBY',
+      description: 'LOBBIES_PAGE_LOBBY_DESCRIPTION'
+    },
+    {
+      title: 'GAME_PAGE',
+      description: 'GAME_PAGE_DESCRIPTION'
+    },
+    {
+      title: 'RPS_PAGE',
+      description: 'RPS_PAGE_DESCRIPTION'
+    },
+    {
+      title: 'SPECTATE_PAGE',
+      description: 'SPECTATE_PAGE_DESCRIPTION'
+    },
+    {
+      title: 'SETTINGS_MENU',
+      description: 'SETTINGS_MENU_DESCRIPTION'
+    },
 
   ];
 

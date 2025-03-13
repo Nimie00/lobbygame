@@ -20,15 +20,15 @@
             *ngFor="let topic of filteredTopics"
             (click)="selectTopic(topic)"
             [class.selected]="selectedTopic === topic">
-            {{ topic.title }}
+            {{ topic.title | language }}
           </ion-item>
         </ion-list>
       </ion-col>
 
       <ion-col size="12" size-md="9">
         <div *ngIf="selectedTopic; else noSelection">
-          <h2>{{ selectedTopic.title }}</h2>
-          <p>{{ selectedTopic.description }}</p>
+          <h2>{{ selectedTopic.title | language }}</h2>
+          <p>{{ selectedTopic.description | language }}</p>
         </div>
         <ng-template #noSelection>
           <p>{{"CHOOSE_A_THEME" | language}}</p>
@@ -37,5 +37,3 @@
     </ion-row>
   </ion-grid>
 </ion-content>
-
-<div class="bottom-spacer"></div>
