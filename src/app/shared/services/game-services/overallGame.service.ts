@@ -2,11 +2,9 @@ import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {Observable, shareReplay} from "rxjs";
 import {map} from "rxjs/operators";
-import {RPSGame} from "../../models/games.gameplaydata.model";
+import {RPSGame} from "../../models/games/games.rps.gameplaydata.model";
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class overallGameService {
   constructor(
     private firestore: AngularFirestore,

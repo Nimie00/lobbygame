@@ -1,9 +1,7 @@
 import {Injectable} from '@angular/core';
 import {BehaviorSubject, Observable, Subject} from 'rxjs';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ModalService {
   private modalSubject = new BehaviorSubject<{type: string, data?: any} | null>(null);
   public modal$ = this.modalSubject.asObservable();

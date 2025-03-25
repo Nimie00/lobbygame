@@ -36,6 +36,10 @@ import {getAuth, provideAuth} from "@angular/fire/auth";
 import {LobbyPasswordModalComponent} from "./pages/lobbies/lobby/password-modal/lobby-password-modal.component";
 import {InformationComponent} from "./pages/Information/information.component";
 import {FirebaseDatePipe} from "./shared/pipes/firebaseDate";
+import {CardComponent} from "./pages/games/card/card.component";
+import {PlayerHandComponent} from "./pages/games/card/playerCards/player-cards.component";
+import {DiscardDeckComponent} from "./pages/games/card/discardDeck/discard-deck.component";
+import {DrawDeckComponent} from "./pages/games/card/drawDeck/draw-deck.component";
 
 export function initializeLanguage(languageService: LanguageService) {
   return () => languageService.init();
@@ -72,8 +76,14 @@ export const routes: Routes = [
   },
 
   {
-    path: 'game/:lobbyId',
+    path: 'game/rps/:lobbyId',
     component: RpsComponent,
+    canActivate: [AuthGuard]
+  },
+
+  {
+    path: 'game/card/:lobbyId',
+    component: CardComponent,
     canActivate: [AuthGuard]
   },
 
@@ -130,6 +140,10 @@ export const routes: Routes = [
     GlobalModalComponent,
     InformationComponent,
     FirebaseDatePipe,
+    CardComponent,
+    PlayerHandComponent,
+    DiscardDeckComponent,
+    DrawDeckComponent,
   ],
   imports: [
     BrowserModule,
@@ -157,13 +171,14 @@ export const routes: Routes = [
   ],
   bootstrap: [AppComponent],
   providers: [
-    LanguageService,
     {
       provide: APP_INITIALIZER,
       useFactory: initializeLanguage,
       deps: [LanguageService],
       multi: true
-    }]
+    },]
+
+
 })
 export class AppModule {
 }

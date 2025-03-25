@@ -2,9 +2,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {BehaviorSubject, catchError, finalize, tap} from 'rxjs';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class LanguageService {
   private translations: any = {};
   private translationLoadPromises: { [lang: string]: Promise<void> } = {};

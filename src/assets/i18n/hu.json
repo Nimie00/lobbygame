@@ -63,7 +63,7 @@
   "HOUSE": "Gazdálkodj okosan",
   "PIRAMID": "Mágikus piramis",
   "RPS": "Kő-papír-olló",
-  "CARDGAME": "Uno",
+  "CARD": "Uno",
   "TESTING_GAME": "Teszt játéknév",
   "ID": "Azonosító",
   "INVITE_LINK": "Meghívó linkje",
@@ -99,7 +99,7 @@
   "JUMP_TO_FIRST_EVENT": "Ugrás az első eseményhez",
   "JUMP_TO_NEXT_EVENT": "Ugrás a következő eseményhez",
   "JUMP_TO_REAL_TIME": "Valós idő mutatása",
-  "GAME_STARTING_SOON": "A játék hamarosan kezdődik...",
+  "GAME_STARTING_SOON": "A játékod elindult. Viszzaszámlálás:",
   "UNKNOWN_PLAYER": "Ismeretlen játékos",
   "EDIT_PROFILE": "Profile módosítása",
   "MODIFY_YOUR_PROFILE": "Módosítsd a profilodat",
@@ -225,5 +225,6 @@
   "SPECTATE_PAGE_DESCRIPTION": "Ezen az oldalon megtekintheted a játékokat. Itt található a játék idővonala, ahol a játék eseményei jelennek meg. A visszajátszás során minden játékhoz külön lehetőség áll rendelkezésre. Az idővonal alatt olyan gombok találhatók, amelyekkel manipulálhatod az idővonalat. Az első gombbal elindíthatod az idővonalon egy mutató mozgását; ha ez elér egy eseményt, átadja azt a visszajátszásnak, és ha az esemény még nem látható akkor megjeleníti azt és megmutatja, hogy ki volt és mit cselekedett. A következő gomb a mutató megállítására szolgál, majd a következő gomb visszaugrik a játék kezdetéhez (a játék létrehozásának időpontjához). Egy további gomb az első esemény elé ugrik (ha van ilyen), majd a következő gomb a valós időhöz ugrik – ha vannak addig események, azokat feldolgozza, ha pedig a játék már véget ért, a befejező menühöz visz. Végül egy gomb a következő elem elé ugrik, és ha így átugrasz egy elemet, az feldolgozásra kerül. Fontos megjegyezni, hogy mindig egy adott elem elé ugrik egy meghatározott időeltolással.",
   "GAME_PAGE_DESCRIPTION": "Ezen az oldalon található a játék oldala, ahol a váróban kiválasztott játék jelenik meg. Egy játék megnyitásakor egy 3 másodperces visszaszámlálás indul el, amíg a játék előkészül.",
   "RPS_PAGE_DESCRIPTION": "Ezen az oldalon valósul meg a kő-papír-olló játék. A játék körökre osztva zajlik, és addig tart, amíg valamelyik játékos meg nem nyeri a játékot. Egy játékos akkor nyer, ha a nyert köreinek száma eléri a váróban megadott körök számának felét plusz egyet. Erről a felhasználó a nevéhez tartozó számlálóból vagy a részletezett köradatokból tájékozódhat. Egy kört úgy játszanak le, hogy mindkét játékos kiválasztja a számára megfelelőt a középen megjelenő képek közül (Kő papír vagy olló), miután mindkét fél választott akkor az összehasonlító ablak jelenik meg a két felhasználó előtt, miközben egy rövid animáció fut le. Ha az egyik választása legyőzi a másikét, ő nyeri a kört; ha döntetlen az eredmény, a kört senki sem nyeri meg, és döntetlenként lesz feljegyezve, majd a játék folytatódik.",
-  "SETTINGS_MENU_DESCRIPTION": "Ebben a menüben módosíthatod az oldal átfogó beállításait, például válthatsz a magyar és angol nyelv között, állíthatod az oldal témáját (sötét vagy világos), illetve módosíthatod a hangeffektek hangerejét."
+  "SETTINGS_MENU_DESCRIPTION": "Ebben a menüben módosíthatod az oldal átfogó beállításait, például válthatsz a magyar és angol nyelv között, állíthatod az oldal témáját (sötét vagy világos), illetve módosíthatod a hangeffektek hangerejét.",
+  "UNKNOWN_CARD": "Ismeretlen kártya"
 }

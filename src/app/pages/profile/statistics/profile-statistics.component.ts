@@ -2,7 +2,7 @@ import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {SubscriptionTrackerService} from "../../../shared/services/subscriptionTracker.service";
 import {User} from "../../../shared/models/user.model";
 import {LanguageService} from "../../../shared/services/language.service";
-import {RPSGame} from "../../../shared/models/games.gameplaydata.model";
+import {RPSGame} from "../../../shared/models/games/games.rps.gameplaydata.model";
 import {overallGameService} from "../../../shared/services/game-services/overallGame.service";
 import {firstValueFrom} from "rxjs";
 import {Router} from "@angular/router";
@@ -151,7 +151,7 @@ export class ProfileStatisticsComponent implements OnInit, OnDestroy {
   }
 
   async goToGamePage() {
-    await this.router.navigate(['/game/' + this.selectedGame.lobbyId]);
+    await this.router.navigate(['/game/'+ this.selectedGame.gameType.toLowerCase() + this.selectedGame.lobbyId]);
   }
 
   async goToWatchingReplay() {

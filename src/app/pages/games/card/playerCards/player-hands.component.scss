@@ -1,0 +1,820 @@
+.game-container {
+  display: flex;
+  flex-direction: row;
+  background: #896873;
+  height: 50vh;
+  width: 100%;
+  text-align: center;
+  font-size: 2rem;
+}
+
+.game-grid {
+  background: #811532;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.game-row {
+  width: 100%;
+  height: 100%;
+}
+
+.player-area {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.2rem;
+  flex: 2;
+  background-color: var(--player1-color);
+  flex-direction: column;
+}
+
+.center-area {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.2rem;
+  flex: 1;
+  background-color: var(--custom-card-bg);
+
+
+  .cooldown-text {
+    display: block;
+    font-size: calc(1.5rem + 0.5vw);
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: normal;
+    word-wrap: break-word;
+    max-height: calc(2 * 1.2em);
+    margin: 20px;
+    top: 20px;
+  }
+
+  .choices-section {
+    display: flex;
+    flex-direction: row;
+    background-color: mediumorchid;
+    justify-content: center;
+
+    .choice-item {
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      img {
+        object-fit: contain;
+        transition: all 0.3s ease;
+      }
+
+      &.selected {
+        animation: winnerGlow 1s infinite alternate;
+      }
+
+      &.fade-out {
+        opacity: 0;
+        transform: translateY(-100%);
+        transition: opacity 2s ease, transform 2s ease;
+      }
+
+      &:hover {
+        animation: shake 0.2s ease-in-out infinite;
+      }
+    }
+  }
+}
+
+.opponent-area {
+  padding: 0.2rem;
+  flex: 2;
+  background-color: var(--player2-color);
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  display: flex;
+  overflow: hidden;
+}
+
+
+.result-overlay {
+  position: absolute;
+  top:0;
+  left:0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  z-index: 40;
+  background-color: var(--custom-card-bg);
+
+  .result-text-wrapper {
+    z-index: 3000;
+
+    .result-text {
+      font-size: 2.5rem;
+      padding: 15px 30px;
+      border-radius: 10px;
+      text-align: center;
+
+      &.won {
+        background: rgba(0, 255, 136, 0.7);
+        border: 2px solid #00ff88;
+      }
+
+      &.lost {
+        background: rgba(255, 68, 68, 0.7);
+        border: 2px solid #ff4444;
+      }
+
+      &.draw {
+        background: rgba(42, 33, 10, 0.67);
+        border: 2px solid #423310;
+      }
+    }
+  }
+
+
+  .animation-container {
+    position: relative;
+    width: 100%;
+    height: 20vh;
+    background-color: var(--animation-bg-color);
+  }
+
+  .choice {
+    position: absolute;
+    top: 50%;
+    z-index: 6500;
+    max-width: 200px;
+    max-height: 200px;
+    transition: opacity 0.3s ease-out;
+
+    &.player-choice {
+      left: 20%;
+      transform: translate(-50%, -50%);
+    }
+
+    &.opponent-choice {
+      right: 20%;
+      transform: translate(50%, -50%);
+    }
+
+  }
+
+  img {
+    width: 200px;
+    height: 200px;
+    transition: all 0.3s ease;
+
+    &.winner {
+      filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.8));
+      animation: winnerGlow 1s infinite alternate;
+    }
+
+    &.loser {
+      opacity: 0;
+      transform: scale(0);
+    }
+
+    &.draw {
+      opacity: 1;
+      transform: scale(1.5);
+    }
+  }
+}
+
+.bottom-element {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.loser-sprite-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .loser-sprite {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    object-fit: none;
+    object-position: 0 0;
+    display: block;
+    pointer-events: none;
+    z-index: 10000;
+    image-rendering: crisp-edges;
+    will-change: transform, opacity;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+  }
+
+  opacity: 1;
+  transform: translate(0, 0) scale(1);
+
+  &:active {
+    opacity: 0;
+    transform: translate(var(--translate-x), var(--translate-y)) scale(0);
+  }
+}
+
+
+.loser-sprite.animate {
+  visibility: visible;
+  transform: scale(1.5);
+  opacity: 1;
+}
+
+.cycling-choices {
+  justify-content: center;
+  align-items: center;
+
+  .choice-image {
+    position: absolute;
+    max-width: 80%;
+    height: auto;
+    transition: all 1s ease;
+
+    &.silhouette {
+      filter: brightness(0);
+      opacity: 0.7;
+      transition: filter 1s ease;
+    }
+  }
+}
+
+.choice-container {
+  position: relative;
+  display: inline-block;
+}
+
+img.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  text-align: center;
+  border-radius: 8px;
+}
+
+
+.waiting-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.2rem;
+
+
+  .dot {
+    width: 12px;
+    height: 12px;
+    background-color: #333;
+    border-radius: 50%;
+    animation: bounce 1s infinite;
+
+    &:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    &:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+  }
+}
+
+.score-indicator {
+  text-align: center;
+  gap: 6px;
+
+  .current {
+    color: #2dd36f;
+  }
+
+  .separator {
+    color: #92949c;
+  }
+
+  .required {
+    color: #92949c;
+  }
+
+  .circle-container {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    .circle {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid black;
+      background: transparent;
+      transition: background-color 0.3s ease;
+
+      &.filled {
+        background-color: green;
+        border-color: green;
+      }
+    }
+  }
+}
+
+.end-buttons {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0;
+
+  ion-button {
+    margin: 0 8px;
+  }
+}
+
+ion-button.return-button {
+  --background: var(--ion-return-color);
+  --color: var(--btn-stop-spectating-color);
+}
+
+ion-button.replay-button {
+  --background: var(--ion-replay-color);
+  --color: var(--btn-stop-spectating-color);
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+@keyframes shake {
+  0% {
+    transform: rotateZ(0deg);
+  }
+  25% {
+    transform: rotateZ(5deg);
+  }
+  85% {
+    transform: rotateZ(-5deg);
+  }
+  100% {
+    transform: rotateZ(0deg);
+  }
+}
+
+@keyframes winnerGlow {
+  from {
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+  }
+  to {
+    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.8));
+  }
+}
+
+
+@keyframes player1Glow {
+  from {
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+  }
+  to {
+    filter: drop-shadow(0 0 20px var(--player1-color));
+  }
+}
+
+@keyframes player2Glow {
+  from {
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+  }
+  to {
+    filter: drop-shadow(0 0 20px var(--player2-color));
+  }
+}
+
+.player1-background {
+  background-color: var(--player1-color);
+}
+
+.player2-background {
+  background-color: var(--player2-color);
+}
+
+.player1-color {
+  color: var(--player1-color);
+  --color: var(--player1-color);
+}
+
+.player2-color {
+  color: var(player2-color);
+  --color: var(--player2-color);
+}
+
+.round-square-container {
+  display: inline-block;
+  position: relative;
+  margin: 2px;
+  cursor: pointer;
+}
+
+.round-square {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
+}
+
+.round-square-container:hover .round-square {
+  transform: scaleY(3);
+}
+
+.round-square-container.win .round-square {
+  background-color: forestgreen;
+}
+
+.round-square-container.lose .round-square {
+  background-color: red;
+}
+
+.round-square-container.draw .round-square {
+  background-color: darkslategray;
+}
+
+
+.win {
+  color: green;
+}
+
+.lose {
+  color: red;
+}
+
+.draw {
+  color: gray;
+}
+
+.tooltip {
+  display: none;
+  position: absolute;
+  background-color: var(--ion-card-background);
+  color: var(--ion-text-color);
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 20;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 10px;
+  overflow: auto;
+}
+
+.tooltip-content {
+  overflow: auto;
+  max-height: 100%;
+}
+
+@media screen and (max-width: 768px) {
+  ion-label {
+    font-size: 0.8rem;
+  }
+  .tooltip {
+    max-width: 300px;
+    max-height: 300px;
+    white-space: normal;
+    overflow: auto;
+  }
+
+  .result-text {
+    font-size: 0.8rem;
+  }
+
+  img {
+    width: 70px;
+    height: 70px;
+  }
+
+
+  .tooltip-content {
+    overflow: auto;
+    max-width: 300px;
+    max-height: 300px;
+  }
+  .waiting-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.2rem;
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      background-color: #333;
+      border-radius: 50%;
+      animation: bounce 1s infinite;
+
+      &:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+
+      &:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+    }
+  }
+  .choice {
+    position: absolute;
+    top: 50%;
+    z-index: 6500;
+    max-width: 70px;
+    max-height: 70px;
+    transition: opacity 0.3s ease-out;
+
+    &.player-choice {
+      left: 20%;
+      transform: translate(-50%, -50%);
+    }
+
+    &.opponent-choice {
+      right: 20%;
+      transform: translate(50%, -50%);
+    }
+
+  }
+}
+
+.round-square-container:hover .tooltip {
+  display: block;
+}
+
+.end-card {
+  width: 50%;
+  background-color: var(--ion-card-background);
+  color: var(--ion-text-color);
+}
+
+
+
+
+.hand-scroll {
+  height: 100px;
+}
+.hand {
+  display: flex;
+  align-items: center;
+}
+.card {
+  width: 40px;
+  height: 80px;
+  margin-right: 4px;
+  position: relative;
+}
+.card img {
+  width: 100%;
+  height: auto;
+}
+.card-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  font-size: 10px;
+  color: white;
+  text-shadow: 1px 1px 2px black;
+}
+.more-cards {
+  font-size: 16px;
+  padding: 0 8px;
+}
+
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  height: 100vh;
+  gap: 10px;
+  padding: 10px;
+}
+
+.cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.center-decks {
+  display: flex;
+  gap: 20px;
+  height: 100%;
+}
+
+.deck {
+  position: relative;
+  width: 100px;
+}
+
+.card {
+  width: 100%;
+  height: 120px;
+  border: 2px solid #333;
+  border-radius: 8px;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+}
+
+
+.draw-deck .card:nth-child(1) { top: 0; }
+.draw-deck .card:nth-child(2) { top: 5px; }
+.draw-deck .card:nth-child(3) { top: 10px; }
+
+.discard-deck .card:nth-child(1) { top: 0; z-index: 3; }
+.discard-deck .card:nth-child(2) { top: 5px; z-index: 2; }
+.discard-deck .card:nth-child(3) { top: 10px; z-index: 1; }
+
+.player-container {
+  padding: 10px;
+  width: 100%;
+  height: 100%;
+}
+
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+// decks.component.scss
+.deck {
+  position: relative;
+  width: 100px;
+  height: 130px;
+
+  .card {
+    width: 100%;
+    height: 120px;
+    border: 2px solid #333;
+    border-radius: 8px;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+
+    &.back {
+      background: repeating-linear-gradient(
+          45deg,
+          #ff0000,
+          #ff0000 10px,
+          #ffffff 10px,
+          #ffffff 20px
+      );
+    }
+  }
+}
+
+.draw-deck .card {
+  left: 0;
+}
+
+.discard-deck .card {
+  right: 0;
+}
+
+.game-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.deck {
+  position: relative;
+  height: 150px;
+  cursor: pointer;
+
+  .card {
+    position: absolute;
+    width: 100px;
+    height: 140px;
+    border: 1px solid #000;
+    border-radius: 8px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+}
+
+.player-hand {
+  border: 2px solid #ccc;
+  padding: 10px;
+  border-radius: 8px;
+
+  &.current-player {
+    border-color: #ffd700;
+    background: #fff9e6;
+  }
+
+  .cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+
+    .card {
+      width: 60px;
+      height: 84px;
+      border: 1px solid #000;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      background: white;
+
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      }
+    }
+  }
+
+  .extra-cards {
+    color: #666;
+    align-self: center;
+    margin-left: 10px;
+  }
+}
+
+
+/* Styles */
+.cards-container {
+  position: relative;
+}
+
+.cards {
+  display: flex;
+  gap: 2px;
+  position: relative;
+}
+
+.card-wrapper {
+  transition: transform 0.2s ease, z-index 0.2s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.card-wrapper.selected {
+  transform: translateY(-50%);
+  z-index: 10;
+}
+
+.error-message {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  color: red;
+  padding: 5px;
+  background: white;
+  border: 1px solid red;
+  border-radius: 4px;
+  margin-top: 5px;
+  font-size: 0.9em;
+}
+
+.yourcard{
+
+}
+
+.notyourcard{
+  cursor: auto;
+}
+
+
+.plus{
+  animation: winnerGlow 1s infinite alternate;
+}

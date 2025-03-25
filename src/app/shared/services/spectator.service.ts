@@ -2,9 +2,7 @@ import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {firstValueFrom, Observable} from "rxjs";
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class SpectatorService {
   constructor(
     private firestore: AngularFirestore,

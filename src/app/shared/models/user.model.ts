@@ -3,6 +3,7 @@ export interface User {
   inLobby: string;
   inGame: string;
   inSpectate: string;
+  playingGame: string;
   lastLoginAt: Date;
   registeredAt: Date;
   picture:string;
@@ -12,7 +13,4 @@ export interface User {
   xp:number;
   level: number;
   badges: string[];
-
 }
-
-

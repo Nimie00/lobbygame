@@ -10,7 +10,6 @@ import {LanguageService} from "../../../shared/services/language.service";
 import {AlertService} from "../../../shared/services/alert.service";
 import * as bcrypt from 'bcryptjs';
 
-
 @Component({
   selector: 'app-create-lobby-modal',
   templateUrl: './create-lobby-modal.component.html',
@@ -35,8 +34,8 @@ export class CreateLobbyModalComponent implements OnInit, OnDestroy {
   enablePlayerNumbers: boolean = false;
   minPlayers: number = 2;
   maxPlayers: number = 2;
-  minGAMENumber = 2;
-  maxGAMENumber = 2;
+  minGAMENumber: number = 2;
+  maxGAMENumber: number = 8;
   isButtonDisabled: boolean = false;
   cooldownTime: number = 500;
   lobbyId: string;
@@ -200,6 +199,9 @@ export class CreateLobbyModalComponent implements OnInit, OnDestroy {
     }
     this.minGAMENumber = this.selectedGame.minPlayers;
     this.maxGAMENumber = this.selectedGame.maxPlayers;
+    console.log("this.maxGAMENumber: ", this.maxGAMENumber)
+    console.log("this.minPlayers: ", this.minPlayers)
+
     let minNumber= Math.max(this.minPlayers, this.minGAMENumber, 2);
     let maxNumber= Math.min(this.maxPlayers, this.maxGAMENumber, 8);
 
@@ -271,6 +273,8 @@ export class CreateLobbyModalComponent implements OnInit, OnDestroy {
     }
     await this.modal.dismiss();
   }
+
+
 
   private async hashPassword(password: string) {
     const salt = bcrypt.genSaltSync(10);

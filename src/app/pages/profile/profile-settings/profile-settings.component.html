@@ -1,9 +1,7 @@
-<ion-card>
-  <ion-card-header>
+
     <ion-title>{{ "EDIT_PROFILE" | language }}</ion-title>
-  </ion-card-header>
-  <ion-card-content>
-    <form #profileForm="ngForm" *ngIf="!user.inLobby">
+
+    <form #profileForm="ngForm" *ngIf="!user.inLobby && !user.inSpectate && !user.inGame">
       <div class="selection-groups">
         <div class="edit-group" [class.disabled]="isDeleteSelected">
           <ion-chip
@@ -55,7 +53,7 @@
             <div class="label-wrapper">
               <ion-label position="stacked">{{ "NEW_USERNAME" | language }}</ion-label>
             </div>
-            <ion-input [(ngModel)]="form.username" name="username" required></ion-input>
+            <ion-input [(ngModel)]="form.username" name="username" required maxlength="60"></ion-input>
           </ion-item>
         </div>
 
@@ -64,7 +62,7 @@
             <div class="label-wrapper">
               <ion-label position="stacked">{{ "NEW_PASSWORD" | language }}</ion-label>
             </div>
-            <ion-input [(ngModel)]="form.password" name="newPassword" type="password" required></ion-input>
+            <ion-input [(ngModel)]="form.password" name="newPassword" type="password" required maxlength="60"></ion-input>
           </ion-item>
         </div>
 
@@ -73,7 +71,7 @@
             <div class="label-wrapper">
               <ion-label position="stacked" class="required-star">{{ "CONFIRM_PASSWORD" | language }}</ion-label>
             </div>
-            <ion-input [(ngModel)]="confirmPassword" name="confirmPassword" type="password" required></ion-input>
+            <ion-input [(ngModel)]="confirmPassword" name="confirmPassword" type="password" required maxlength="60"></ion-input>
           </ion-item>
         </div>
 
@@ -85,21 +83,21 @@
           <div class="label-wrapper">
             <ion-label position="stacked" class="required-star">{{ "USERNAME" | language }}</ion-label>
           </div>
-          <ion-input [(ngModel)]="deleteData.username" name="deleteUsername" required></ion-input>
+          <ion-input [(ngModel)]="deleteData.username" name="deleteUsername" required maxlength="60"></ion-input>
         </ion-item>
 
         <ion-item>
           <div class="label-wrapper">
             <ion-label position="stacked" class="required-star">{{ "EMAIL" | language }}</ion-label>
           </div>
-          <ion-input [(ngModel)]="deleteData.email" name="deleteEmail" type="email" required></ion-input>
+          <ion-input [(ngModel)]="deleteData.email" name="deleteEmail" type="email" required maxlength="60"></ion-input>
         </ion-item>
 
         <ion-item>
           <div class="label-wrapper">
             <ion-label position="stacked" class="required-star">{{ "PASSWORD" | language }}</ion-label>
           </div>
-          <ion-input [(ngModel)]="deleteData.password" name="deletePassword" type="password" required></ion-input>
+          <ion-input [(ngModel)]="deleteData.password" name="deletePassword" type="password" required maxlength="60"></ion-input>
         </ion-item>
       </div>
 
@@ -117,6 +115,4 @@
         </div>
       </div>
     </form>
-    <ion-label>{{ "CANT_CHANGE_WHILE_IN_LOBBY" | language }}</ion-label>
-  </ion-card-content>
-</ion-card>
+    <ion-label *ngIf="user.inLobby || user.inSpectate || user.inGame">{{ "CANT_CHANGE_WHILE_IN_LOBBY" | language }}</ion-label>

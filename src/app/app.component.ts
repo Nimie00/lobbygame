@@ -4,7 +4,7 @@ import {Router} from '@angular/router';
 import {SubscriptionTrackerService} from "./shared/services/subscriptionTracker.service";
 import {User} from "./shared/models/user.model";
 import {Lobby} from "./shared/models/lobby.model";
-import {Observable, pairwise, Subject, Subscription, tap} from "rxjs";
+import {distinctUntilChanged, Observable, Subject, Subscription, tap} from "rxjs";
 import {LanguageService} from "./shared/services/language.service";
 import {ModalService} from "./shared/services/modal.service";
 import {ThemeService} from "./shared/services/theme.service";
@@ -59,22 +59,27 @@ export class AppComponent implements OnInit, OnDestroy {
       tap(user => {
         this.isLoggedIn = !!user;
         this.user = user;
-        if (!user) {
+        if (!user || !user.inLobby) {
           this.countdownTriggered = false;
         }
       }),
-      filter(user => !!user && user.inLobby != null && !this.countdownTriggered),
-      pairwise(),
-      filter(([prev, curr]) => prev.inGame === null && (curr.inGame !== null || curr.inSpectate !== null))
-    ).subscribe(([_, curr]) => {
-      this.countdownTriggered = true;
-      this.gameStartService.handleCountdown(
-        () => this.gameStartService.stopWatchingLobby(),
-        curr.inLobby,
-        curr.inGame !== null
-      ).then(() => {
-        console.log("Countdown elindult");
-      });
+      filter(user => !!user && user.inLobby != null),
+      distinctUntilChanged((prev, curr) =>
+        prev.inGame === curr.inGame && prev.inSpectate === curr.inSpectate
+      ),
+      filter(user => user.inGame !== null || user.inSpectate !== null)
+    ).subscribe(user => {
+      if ( !this.router.url.includes('/game/') && !this.countdownTriggered && !this.router.url.includes('/spectate/') ) {
+        this.countdownTriggered = true;
+        this.gameStartService.handleCountdown(
+          () => this.gameStartService.stopWatchingLobby(),
+          user.playingGame,
+          user.inLobby,
+          user.inGame !== null
+        ).then(() => {
+          console.log("Countdown elindult");
+        });
+      }
     });
 
     this.tracker.add(this.CATEGORY, "getAuthState", this.userSubscription);

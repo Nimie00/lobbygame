@@ -4,9 +4,7 @@ import {Router} from "@angular/router";
 import {SubscriptionTrackerService} from "../subscriptionTracker.service";
 import {LanguageService} from "../language.service";
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class GameStartService {
   private CATEGORY = "gameStart";
 
@@ -22,7 +20,7 @@ export class GameStartService {
     this.subscriptionTracker.unsubscribeCategory(this.CATEGORY);
   }
 
-  handleCountdown(_onComplete: () => void, lobbyId: string, isPlayer: boolean): Promise<void> {
+  handleCountdown(_onComplete: () => void, gameType: string, lobbyId: string, isPlayer: boolean): Promise<void> {
     return new Promise((resolve) => {
       let countdown = 3;
       const countdownInterval = setInterval(() => {
@@ -32,7 +30,7 @@ export class GameStartService {
         } else {
           clearInterval(countdownInterval);
           resolve();
-          isPlayer ? this.openGameWindow(lobbyId): this.openSpectatorWindow(lobbyId);
+          isPlayer ? this.openGameWindow(gameType ,lobbyId): this.openSpectatorWindow(lobbyId);
         }
       }, 1000);
     });
@@ -70,18 +68,18 @@ export class GameStartService {
     }, 1000);
   }
 
-  openGameWindow(lobbyId: string) {
-    this.router.navigate(['/game/' + lobbyId]).then(() => {
+  openGameWindow(gameType: string,lobbyId: string) {
+    this.router.navigate([`game/${gameType.toLowerCase()}/${lobbyId}`]).then(() => {
     });
   }
 
   openSpectatorWindow(lobbyId: string) {
-    this.router.navigate(['/spectate/' + lobbyId]).then(() => {
+    this.router.navigate([`spectate/${lobbyId}`]).then(() => {
     });
   }
 
   openSpectatorReplayWindow(lobbyId: string) {
-    this.router.navigate(['/spectate/' + lobbyId + '/replay']).then(() => {
+    this.router.navigate([`spectate/${lobbyId}/replay`]).then(() => {
     });
   }
 

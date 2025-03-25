@@ -1,9 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Subscription} from 'rxjs';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class SubscriptionTrackerService {
   private subscriptionMap: { [key: string]: Subscription[] } = {};
 

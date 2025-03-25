@@ -460,3 +460,69 @@ ion-toggle::part(handle) {
   }
 }
 
+
+.color-picker-alert {
+  --width: 320px;
+  --max-width: 90vw;
+
+  .alert-button-group {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 10px;
+  }
+
+  .color-button {
+    margin: 5px;
+    width: 80px;
+    height: 100px;
+    position: relative;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+
+    &::before {
+      content: attr(text);
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      font-size: 14px;
+      color: #333;
+    }
+
+    &.red {
+      background-color: #b91110;
+      --background: #b91110;
+      --background-hover: #d33;
+    }
+
+    &.blue {
+      background-color: #3ca1dd;
+      --background: #3ca1dd;
+      --background-hover: #5cb;
+    }
+
+    &.green {
+      background-color: #6abe30;
+      --background: #6abe30;
+      --background-hover: #8cd950;
+    }
+
+    &.yellow {
+      background-color: #fffc00;
+      --background: #fffc00;
+      --background-hover: #fffd33;
+    }
+
+    .button-inner {
+      flex-direction: column;
+      justify-content: center;
+      height: 100%;
+    }
+
+  :is(span) {
+      display: none;
+    }
+  }
+}

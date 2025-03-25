@@ -63,7 +63,7 @@
   "HOUSE": "House game",
   "PIRAMID": "Magical pyramid",
   "RPS": "Rock-paper-scissors",
-  "CARDGAME": "Uno",
+  "CARD": "Uno",
   "TESTING_GAME": "Test GameName",
   "ID": "ID",
   "INVITE_LINK": "Invite link",
@@ -99,7 +99,7 @@
   "JUMP_TO_FIRST_EVENT": "Jump to first event",
   "JUMP_TO_NEXT_EVENT": "Jump to next event",
   "JUMP_TO_REAL_TIME": "Show Real Time",
-  "GAME_STARTING_SOON": "The game is starting soon...",
+  "GAME_STARTING_SOON": "Your game started. Redirecting in:",
   "UNKNOWN_PLAYER": "Unknown player",
   "EDIT_PROFILE": "Edit Profile",
   "MODIFY_YOUR_PROFILE": "Modify your profile",
@@ -225,6 +225,6 @@
   "SPECTATE_PAGE_DESCRIPTION": "On this page you can watch games. Here you will find a timeline of the game, which displays the events as they occur. During playback, each game has its own replay option. Below the timeline are buttons that allow you to control the timeline. The first button starts a moving pointer along the timeline; if it reaches an event, it passes it to the replay, and if the event is not yet visible, it displays it and shows who did what. The next button stops the pointer, and another button jumps back to the beginning of the game (to the game’s start time). An additional button jumps to the first event (if one exists), followed by a button that jumps to real-time – processing any events until that moment, or if the game has ended, taking you to the final menu. Finally, a button jumps to the next element, and if you skip an element, it is processed. Note that the pointer always jumps to a specific element with a defined time offset.",
   "GAME_PAGE_DESCRIPTION": "This page displays the game, which is the one selected in the lobby. When a game is opened, a 3-second countdown starts while the game is being prepared.",
   "RPS_PAGE_DESCRIPTION": "This page hosts the Rock-Paper-Scissors game. The game is divided into rounds and continues until one player wins. A player wins a round when the number of rounds they have won reaches more than half of the total rounds specified in the lobby plus one. The user can check this either from the counter next to their name or from detailed round statistics. A round is played by both players selecting an option from the images displayed in the center (Rock, Paper, or Scissors). Once both have made their choice, a comparison window appears in front of the two users while a short animation plays. If one choice defeats the other, that player wins the round; if the result is a draw, the round is recorded as a tie, and the game continues.",
-  "SETTINGS_MENU_DESCRIPTION": "In this menu you can change the overall settings of the application, such as switching between Hungarian and English, selecting the theme (dark or light), and adjusting the sound effects volume."
-
+  "SETTINGS_MENU_DESCRIPTION": "In this menu you can change the overall settings of the application, such as switching between Hungarian and English, selecting the theme (dark or light), and adjusting the sound effects volume.",
+  "UNKNOWN_CARD": "Unknown card"
 }

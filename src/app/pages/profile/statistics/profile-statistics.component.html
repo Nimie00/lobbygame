@@ -1,7 +1,5 @@
-<ion-card>
-  <ion-card-header>
+
     <ion-title>{{ "STATS_PROFILE" | language }}</ion-title>
-  </ion-card-header>
 
   <ng-container *ngIf="displayedGames.length > 0">
     <ion-segment [(ngModel)]="selectedSegment" (ionChange)="onSegmentChange()">
@@ -25,73 +23,74 @@
     <ion-card *ngIf="selectedSegment === 'overall'">
       <ion-card-header>
         <ion-card-title>{{ "OVERALL_STATISTICS" | language }}</ion-card-title>
+        <hr>
       </ion-card-header>
       <ion-card-content>
         <ion-grid>
           <ion-row>
-            <ion-col>
-              <ion-card class="stat-card">
-                <ion-card-header>
+            <ion-col size="12" size-md="6">
+              <div class="stat-card">
+                <div class="stat-card-header">
                   {{ "TOTAL_GAMES" | language }}
-                </ion-card-header>
-                <ion-card-content>
+                </div>
+                <div class="stat-card-content">
                   {{ overallStats.totalGames }}
-                </ion-card-content>
-              </ion-card>
+                </div>
+              </div>
             </ion-col>
-            <ion-col>
-              <ion-card class="stat-card">
-                <ion-card-header>
+            <ion-col size="12" size-md="6">
+              <div class="stat-card">
+                <div class="stat-card-header">
                   {{ "WIN_RATE" | language }}
-                </ion-card-header>
-                <ion-card-content>
+                </div>
+                <div class="stat-card-content">
                   {{ overallStats.winRate.toFixed(2) }}%
-                </ion-card-content>
-              </ion-card>
+                </div>
+              </div>
             </ion-col>
           </ion-row>
           <ion-row>
-            <ion-col>
-              <ion-card class="stat-card">
-                <ion-card-header>
+            <ion-col size="12" size-md="6">
+              <div class="stat-card">
+                <div class="stat-card-header">
                   {{ "TOTAL_WINS" | language }}
-                </ion-card-header>
-                <ion-card-content>
+                </div>
+                <div class="stat-card-content">
                   {{ overallStats.totalWins }}
-                </ion-card-content>
-              </ion-card>
+                </div>
+              </div>
             </ion-col>
-            <ion-col>
-              <ion-card class="stat-card">
-                <ion-card-header>
+            <ion-col size="12" size-md="6">
+              <div class="stat-card">
+                <div class="stat-card-header">
                   {{ "TOTAL_LOSSES" | language }}
-                </ion-card-header>
-                <ion-card-content>
+                </div>
+                <div class="stat-card-content">
                   {{ overallStats.totalLosses }}
-                </ion-card-content>
-              </ion-card>
+                </div>
+              </div>
             </ion-col>
           </ion-row>
           <ion-row>
-            <ion-col>
-              <ion-card class="stat-card">
-                <ion-card-header>
+            <ion-col size="12" size-md="6">
+              <div class="stat-card">
+                <div class="stat-card-header">
                   {{ "TOTAL_ROUNDS" | language }}
-                </ion-card-header>
-                <ion-card-content>
+                </div>
+                <div class="stat-card-content">
                   {{ overallStats.totalRounds }}
-                </ion-card-content>
-              </ion-card>
+                </div>
+              </div>
             </ion-col>
-            <ion-col>
-              <ion-card class="stat-card">
-                <ion-card-header>
+            <ion-col size="12" size-md="6">
+              <div class="stat-card">
+                <div class="stat-card-header">
                   {{ "AVG_GAME_DURATION" | language }}
-                </ion-card-header>
-                <ion-card-content>
+                </div>
+                <div class="stat-card-content">
                   {{ overallStats.avgDuration | date:'mm:ss' }}
-                </ion-card-content>
-              </ion-card>
+                </div>
+              </div>
             </ion-col>
           </ion-row>
         </ion-grid>
@@ -103,79 +102,80 @@
         <ion-card-title>{{ selectedGame?.lobbyName }}</ion-card-title>
         <ion-card-subtitle>
           {{ selectedGame?.startedAt | date:'medium' }}
+          <hr>
         </ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
         <ion-grid>
           <ion-row>
-            <ion-col>
-              <ion-card class="stat-card">
-                <ion-card-header>
+            <ion-col size="12" size-md="6">
+              <div class="stat-card">
+                <div class="stat-card-header">
                   {{ "GAME_RESULT" | language }}
-                </ion-card-header>
-                <ion-card-content>
+                </div>
+                <div class="stat-card-content">
                   {{ gameStats.result }}
-                </ion-card-content>
-              </ion-card>
+                </div>
+              </div>
             </ion-col>
-            <ion-col>
-              <ion-card class="stat-card">
-                <ion-card-header>
+            <ion-col size="12" size-md="6">
+              <div class="stat-card">
+                <div class="stat-card-header">
                   {{ "GAME_DURATION" | language }}
-                </ion-card-header>
-                <ion-card-content>
+                </div>
+                <div class="stat-card-content">
                   {{ gameStats.duration | date:'mm:ss' }}
-                </ion-card-content>
-              </ion-card>
+                </div>
+              </div>
             </ion-col>
           </ion-row>
           <ion-row>
-            <ion-col>
-              <ion-card class="stat-card">
-                <ion-card-header>
+            <ion-col size="12" size-md="6">
+              <div class="stat-card">
+                <div class="stat-card-header">
                   {{ "WON_ROUNDS" | language }}
-                </ion-card-header>
-                <ion-card-content>
+                </div>
+                <div class="stat-card-content">
                   {{ gameStats.roundsWon }}
-                </ion-card-content>
-              </ion-card>
+                </div>
+              </div>
             </ion-col>
-            <ion-col>
-              <ion-card class="stat-card">
-                <ion-card-header>
+            <ion-col size="12" size-md="6">
+              <div class="stat-card">
+                <div class="stat-card-header">
                   {{ "LOST_ROUNDS" | language }}
-                </ion-card-header>
-                <ion-card-content>
+                </div>
+                <div class="stat-card-content">
                   {{ gameStats.roundsLost }}
-                </ion-card-content>
-              </ion-card>
+                </div>
+              </div>
             </ion-col>
           </ion-row>
           <ion-row>
-            <ion-col>
-              <ion-card class="stat-card">
-                <ion-card-header>
+            <ion-col size="12" size-md="6">
+              <div class="stat-card">
+                <div class="stat-card-header">
                   {{ "DRAWN_ROUNDS" | language }}
-                </ion-card-header>
-                <ion-card-content>
+                </div>
+                <div class="stat-card-content">
                   {{ gameStats.roundsDrawn }}
-                </ion-card-content>
-              </ion-card>
+                </div>
+              </div>
             </ion-col>
-            <ion-col>
-              <ion-card class="stat-card">
-                <ion-card-header>
+            <ion-col size="12" size-md="6">
+              <div class="stat-card">
+                <div class="stat-card-header">
                   {{ "BUTTONS" | language }}
-                </ion-card-header>
-                <ion-card-content>
+                </div>
+                <div class="stat-card-content buttons-container">
                   <ion-button expand="block" class="return-button" (click)="goToGamePage()">
                     {{ 'BACK_TO_GAME' | language }}
                   </ion-button>
                   <ion-button expand="block" class="replay-button" (click)="goToWatchingReplay()">
                     {{ 'BACK_TO_REPLAY' | language }}
                   </ion-button>
-                </ion-card-content>
-              </ion-card>
+                </div>
+              </div>
             </ion-col>
           </ion-row>
         </ion-grid>
@@ -189,4 +189,3 @@
       <ion-label>{{ "PLAY_GAME_FOR_STATS" | language }}!</ion-label>
     </div>
   </ng-container>
-</ion-card>

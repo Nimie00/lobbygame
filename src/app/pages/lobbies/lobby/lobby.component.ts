@@ -86,7 +86,7 @@ export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
         this.actions.push({
           label: 'OPEN_GAME',
           class: 'btn-open-game',
-          command: () => this.gameStartService.openGameWindow(this.lobby.id),
+          command: () => this.gameStartService.openGameWindow(this.lobby.gameType, this.lobby.id),
           condition: this.lobby.status === 'started',
         });
         this.actions.push({
@@ -150,7 +150,7 @@ export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
         this.actions.push({
           label: 'OPEN_GAME',
           class: 'btn-open-game',
-          command: () => this.gameStartService.openGameWindow(this.lobby.id),
+          command: () => this.gameStartService.openGameWindow(this.lobby.gameType,this.lobby.id),
           condition: this.lobby.status === 'started' && !this.isUserSpectatingLobby() && this.isUserInLobby(),
         });
 
@@ -183,7 +183,7 @@ export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
         this.actions.push({
           label: 'OPEN_GAME',
           class: 'btn-open-game',
-          command: () => this.gameStartService.openGameWindow(this.lobby.id),
+          command: () => this.gameStartService.openGameWindow(this.lobby.gameType,this.lobby.id),
           condition: this.lobby.status === 'started' && this.isUserInLobby(),
         });
         this.actions.push({
@@ -200,7 +200,7 @@ export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
           label: 'START_REPLAY',
           class: 'btn-start-spectating',
           command: () => this.joinAsSpectator(this.lobby.id, true),
-          condition: !this.isUserSpectatingLobby() && this.lobby.allowSpectators === true && !this.currentUser.inLobby,
+          condition: !this.isUserSpectatingLobby() && this.lobby.allowSpectators === true && !this.currentUser.inLobby && !this.currentUser.inSpectate,
         });
         this.actions.push({
           label: 'STOP_SPECTATING',
@@ -335,7 +335,8 @@ export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
           return;
         }
 
-        if (this.usersLobby.gameType!== "RPS") {
+        console.log("this.usersLobby.gameType: ", this.usersLobby.gameType);
+        if (!(this.usersLobby.gameType=== "RPS" || this.usersLobby.gameType=== "CARD")) {
           await this.alertService.showAlert(
             `${this.languageService.translate("ERROR")}`,
             `${this.languageService.translate("GAMETYPE_NOT_IMPLEMENTED")}.`
@@ -344,8 +345,7 @@ export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
         }
 
         this.usersLobby.status = "starting";
-        this.lobbyService.lobbyCooldown(this.lobby.id);
-        await this.gameStartService.handleCountdown(await this.lobbyService.startGame(this.usersLobby), lobbyId, false);
+        await this.gameStartService.handleCountdown(await this.lobbyService.startGame(this.usersLobby), this.lobby.gameType, this.lobby.id, false);
       }
     }
   }

@@ -30,9 +30,10 @@
       </a>
     </li>
 
+
     <li *ngIf="isLoggedIn && user.inGame"
         [ngClass]="{'active': isGameActive(), 'pulse-animation': !isGameActive()}">
-      <a [routerLink]="['/game', user.inGame]" (click)="closeSettings()">
+      <a [routerLink]="['/game',user.playingGame.toLowerCase(), user.inGame]" (click)="closeSettings()">
         <ion-icon name="extension-puzzle" class="nav-icon"></ion-icon>
         <span class="nav-text">{{ "GAME_PAGE" | language }}</span>
       </a>

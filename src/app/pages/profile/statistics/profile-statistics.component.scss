@@ -1,31 +1,6 @@
-ion-toolbar {
-  padding: 8px;
-  background-color: var(--ion-card-background);
-}
-
 ion-card-header {
   padding: 8px;
-  font-size: 0.9rem;
-  background-color: var(--ion-card-background);
-}
-
-.stat-card {
-  height: 100%;
-  text-align: center;
-
-  ion-card-header {
-    padding: 8px;
-    font-size: 0.9rem;
-
-  }
-
-  ion-card-content {
-    padding: 8px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    justify-content: center;
-    margin: 0 auto;
-  }
+  font-size: 1.2rem;
 }
 
 .pagination-controls {
@@ -48,11 +23,6 @@ ion-segment-button {
   flex: 1 1 auto;
   text-align: center;
   margin: 0.25rem 0;
-}
-
-ion-card {
-  margin: 16px;
-  background-color: var(--ion-card-background);
 }
 
 
@@ -91,3 +61,52 @@ ion-button.replay-button {
 }
 
 
+.stat-card {
+
+  &-header {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: var(--ion-text-color);
+  }
+
+  &-content {
+    font-size: 1rem;
+    color: var(--ion-text-color);
+  }
+}
+
+ion-card-title, ion-card-subtitle{
+  margin: 0 auto;
+  align-items: center;
+  text-align: center;
+}
+
+ion-title{
+  margin: 0 auto;
+  padding: 50px;
+  align-items: center;
+  text-align: center;
+  text-decoration: underline;
+}
+
+ion-card {
+  margin: 0 auto;
+  align-items: center;
+  max-width: 50%;
+  background-color: var(--ion-card-background);
+}
+
+.buttons-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+
+@media (max-width: 600px) {
+  ion-card {
+    max-width: 100%;
+    font-size: 0.7rem;
+  }
+}

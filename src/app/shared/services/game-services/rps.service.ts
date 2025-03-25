@@ -1,11 +1,9 @@
 import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {Observable} from "rxjs";
-import {RPSGame} from "../../models/games.gameplaydata.model";
+import {RPSGame} from "../../models/games/games.rps.gameplaydata.model";
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class RpsService {
   constructor(
     private firestore: AngularFirestore,
@@ -63,5 +61,4 @@ export class RpsService {
         return false;
       });
   }
-
 }

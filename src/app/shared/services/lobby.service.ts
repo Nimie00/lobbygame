@@ -4,25 +4,24 @@ import {firstValueFrom, Observable, shareReplay} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {Lobby} from '../models/lobby.model';
 import {User} from '../models/user.model';
-import {RPSGame} from "../models/games.gameplaydata.model";
+import {RPSGame} from "../models/games/games.rps.gameplaydata.model";
 import {Game} from "../models/game.model";
 import {arrayUnion, arrayRemove, writeBatch, collection, doc} from '@angular/fire/firestore';
 import {AlertService} from "./alert.service";
 import {LanguageService} from "./language.service";
+import {CardService} from "./game-services/card.service";
 
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class LobbyService {
   private lobbiesCache$: { [key: string]: Observable<{ userLobby: Lobby | null, otherLobbies: Lobby[] }> } = {};
   private readonly gamesCacheKey = 'gamesCache';
 
-
-  constructor(private firestore: AngularFirestore,
-              private alertService: AlertService,
-              private languageService: LanguageService,) {
-  }
+  constructor(
+    private firestore: AngularFirestore,
+    private alertService: AlertService,
+    private cardService: CardService,
+    private languageService: LanguageService){}
 
 
   getLobbies(userId: string, live: boolean): Observable<{ userLobby: Lobby | null, otherLobbies: Lobby[] }> {
@@ -88,7 +87,6 @@ export class LobbyService {
       );
       return;
     }
-
 
     const batch = this.firestore.firestore.batch();
 
@@ -162,6 +160,7 @@ export class LobbyService {
             inLobby: null,
             inSpectate: null,
             inGame: null,
+            playingGame: null,
           });
         }
       }
@@ -261,6 +260,7 @@ export class LobbyService {
         inLobby: null,
         inSpectate: null,
         inGame: null,
+        playingGame: null,
       });
       transaction.update(lobbyRef, {
         players: newPlayers,
@@ -279,6 +279,7 @@ export class LobbyService {
       inLobby: null,
       inSpectate: null,
       inGame: null,
+      playingGame: null,
     });
     const lobbyRef = this.firestore.collection('lobbies').doc(lobbyId).ref;
     batch.update(lobbyRef, {
@@ -298,7 +299,6 @@ export class LobbyService {
     });
   }
 
-
   async startGame(lobby: Lobby): Promise<any> {
     const now = new Date();
     const baseData: RPSGame = {
@@ -313,6 +313,7 @@ export class LobbyService {
       playerNames: lobby.playerNames,
       spectatorNames: lobby.spectatorNames,
       winner: null,
+      hasBots: lobby.hasBots,
       maxRounds: lobby.maxRounds,
       bestOfRounds: lobby.maxRounds,
       rounds: {},
@@ -323,10 +324,14 @@ export class LobbyService {
       gameType: lobby.gameType,
     };
 
-    let gameData: RPSGame;
+
+    let gameData: {};
     switch (lobby.gameType) {
       case 'RPS':
         gameData = baseData;
+        break;
+      case 'CARD':
+        gameData = this.cardService.createCARDGame(lobby, baseData);
         break;
       default:
         await this.alertService.showAlert(
@@ -345,16 +350,23 @@ export class LobbyService {
           throw new Error('A gameplay dokumentum már létezik ezzel a lobby ID-vel.');
         }
 
-        transaction.update(lobbyRef.ref, {status: 'started'});
         transaction.set(gameRef.ref, gameData);
+        transaction.update(lobbyRef.ref, {status: 'started'});
 
-        for (const [userId, field] of [...lobby.players.map(id => [id, 'inGame']), ...lobby.spectators.map(id => [id, 'inSpectate'])]) {
+        for (const [userId, field] of [
+          ...lobby.players.map(id => [id, 'inGame']),
+          ...lobby.spectators.map(id => [id, 'inSpectate'])
+        ]) {
           if (!userId.includes('#')) {
             const userRef = this.firestore.doc(`users/${userId}`);
-            transaction.update(userRef.ref, {[field]: lobby.id});
+            transaction.update(userRef.ref, {
+              [field]: lobby.id,
+              playingGame: lobby.gameType
+            });
           }
         }
       });
+
       return gameRef;
     } catch (error) {
       console.error('Hiba történt a gameplay dokumentum létrehozásakor:', error);
@@ -380,13 +392,19 @@ export class LobbyService {
   }
 
   async getGameTypes(): Promise<Game[]> {
-    const cachedGames = localStorage.getItem(this.gamesCacheKey);
-    if (cachedGames) {
+    const cachedData = localStorage.getItem(this.gamesCacheKey);
+    if (cachedData) {
       try {
-//        console.log(JSON.stringify(JSON.parse(cachedGames)));
-        return JSON.parse(cachedGames) as Game[];
+        const parsedData = JSON.parse(cachedData) as { timestamp: number; games: Game[] };
+        const oneDayInMilliseconds = 24 * 60 * 60 * 1000;
+        const currentTime = Date.now();
+
+        if ((currentTime - parsedData.timestamp) < oneDayInMilliseconds) {
+          return parsedData.games;
+        } else {
+          localStorage.removeItem(this.gamesCacheKey);
+        }
       } catch (error) {
-        console.error('Hiba a cache feldolgozása során:', error);
         localStorage.removeItem(this.gamesCacheKey);
       }
     }
@@ -397,104 +415,16 @@ export class LobbyService {
 
     const games = gamesSnapshot.docs.map(doc => {
       const data = doc.data() as Record<string, any>;
-      return {id: doc.id, ...data} as Game;
+      return { id: doc.id, ...data } as Game;
     });
 
-    localStorage.setItem(this.gamesCacheKey, JSON.stringify(games));
+    const dataToCache = {
+      timestamp: Date.now(),
+      games: games
+    };
+    localStorage.setItem(this.gamesCacheKey, JSON.stringify(dataToCache));
 
     return games;
-  }
-
-  async endLobby(
-    lobbyId: string,
-    winner: string,
-    endReason: string,
-    game: RPSGame
-  ): Promise<void> {
-    const lobbyRef = this.firestore.doc('lobbies/' + lobbyId);
-    const lobbySnap = await firstValueFrom(lobbyRef.get());
-
-    if (!lobbySnap.exists) {
-      throw new Error('Lobby not found');
-    }
-
-    const lobbyData = lobbySnap.data() as Lobby;
-    const players = lobbyData?.players || [];
-    const spectators = lobbyData?.spectators || [];
-
-    const playersXP: Record<string, number> = {};
-
-    players.forEach(playerId => {
-      let wins = 0;
-      let losses = 0;
-      let ties = 0;
-
-      Object.values(game.rounds).forEach(round => {
-        if (round.winner === playerId) {
-          wins++;
-        } else if (round.winner === null) {
-          ties++;
-        } else {
-          losses++;
-        }
-      });
-
-      playersXP[playerId] = Math.floor(wins * 30 + ties * 10 + losses * 5);
-    });
-
-    const totalXP = players.reduce((sum, playerId) => sum + (playersXP[playerId] || 0), 0);
-    const averageXP = players.length > 0 ? totalXP / players.length : 0;
-
-    spectators.forEach(spectatorId => {
-      playersXP[spectatorId] = Math.floor(averageXP / 3);
-    });
-
-    const batch = this.firestore.firestore.batch();
-
-    const calculateLevel = (xp: number): { level: number; xpForNextLevel: number } => {
-      let level = 1;
-      let xpForNextLevel = Math.floor((level ** 1.1262) * 100);
-
-      while (xp >= xpForNextLevel) {
-        level++;
-        xpForNextLevel = Math.floor((level ** 1.1262) * 100);
-      }
-
-      return {level: level - 1, xpForNextLevel};
-    };
-
-    for (const userId of [...players, ...spectators]) {
-      if (!userId.includes('#')) {
-        const userRef = this.firestore.doc('users/' + userId);
-
-        const userSnap = await firstValueFrom(userRef.valueChanges()) as User;
-        const currentXP = (userSnap?.xp || 0) as number;
-
-        const newXP = currentXP + (playersXP[userId] || 0);
-        const {level, xpForNextLevel} = calculateLevel(newXP);
-
-        batch.update(userRef.ref, {
-          inLobby: null,
-          inGame: null,
-          xp: newXP,
-          level,
-          xpForNextLevel
-        });
-      }
-    }
-
-    const gameplayRef = this.firestore.doc('gameplay/' + lobbyId).ref;
-    batch.update(gameplayRef, {
-      status: 'ended',
-      winner: winner,
-      endReason: endReason,
-      endedAt: new Date(),
-      gameEnded: true
-    });
-
-    batch.update(lobbyRef.ref, {status: 'ended'});
-
-    return await batch.commit();
   }
 
   async updateLobby(lobbyId: string, lobbyData: Partial<Lobby>): Promise<void> {
@@ -598,8 +528,6 @@ export class LobbyService {
       ownerName: userName,
     });
     await batch.commit();
-
-    console.log('Player Promoted');
   }
 
 
@@ -642,13 +570,6 @@ export class LobbyService {
       playerNames[index] = `player_${randomNum}`;
       transaction.update(lobbyRef, {playerNames});
     });
-  }
-
-  lobbyCooldown(lobbyId: string) {
-    this.firestore.collection('lobbies').doc(lobbyId).update({
-      status: 'starting'
-    }).then();
-
   }
 
   async kickAI(lobbyId: string, AIId: string, AIName: string) {
@@ -705,3 +626,5 @@ export class LobbyService {
     }
   }
 }
+
+

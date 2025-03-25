@@ -1,4 +1,6 @@
-export interface RPSGame {
+import {Card} from "./card.model";
+
+export interface CARDGame {
   lobbyName: string;
   status: string;
   startedAt: Date | null;
@@ -28,4 +30,11 @@ export interface RPSGame {
   };
   winner: string | null;
   endReason: string | null;
+  hands: { [playerId: string]: Card[] };
+  deck: Card[];
+  discardPile: Card[];
+  currentPlayer: string,
+  direction: number,
+  placements: string[],
+  hasBots: boolean;
 }

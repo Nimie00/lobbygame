@@ -1,14 +1,13 @@
 import {Component, EventEmitter, OnDestroy, OnInit, Renderer2} from '@angular/core';
 import {RpsService} from "../../../shared/services/game-services/rps.service";
 import {ActivatedRoute, Router} from "@angular/router";
-import {LobbyService} from "../../../shared/services/lobby.service";
 import {SubscriptionTrackerService} from "../../../shared/services/subscriptionTracker.service";
 import {AngularFirestore} from "@angular/fire/compat/firestore";
 import {AuthService} from "../../../shared/services/auth.service";
 import {debounceTime, filter} from "rxjs/operators";
 import {LanguageService} from "../../../shared/services/language.service";
 
-import {RPSGame} from "../../../shared/models/games.gameplaydata.model";
+import {RPSGame} from "../../../shared/models/games/games.rps.gameplaydata.model";
 import {ProcessedRound} from "../../../shared/models/ProcessedRound";
 import {RoundData} from "../../../shared/models/RoundData";
 import {User} from "../../../shared/models/user.model";
@@ -24,6 +23,7 @@ import {
   moveToCenterOpponent,
   spriteAnimation
 } from './rps.component-animations';
+import {EndGameService} from "../../../shared/services/game-services/endGameService";
 
 type RoundEntry = [string, RoundData];
 
@@ -88,10 +88,8 @@ export class RpsComponent implements OnInit, OnDestroy {
   protected requiredWinsArray: number[];
   private aiChoiceExecuted: boolean = false;
   private aiChoiceTimer: any = null;
-  private aiChoiceFallbackTimer: any = null;
   private cyclingSubscription: Subscription;
   private cycleStartTime: number;
-  private lastUserChoiceTime: any;
   private playMusic: boolean;
   private playOnce: boolean = true;
   private winnerTimeout: any;
@@ -118,7 +116,6 @@ export class RpsComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private rpsService: RpsService,
-    private lobbyService: LobbyService,
     private tracker: SubscriptionTrackerService,
     private authService: AuthService,
     private firestore: AngularFirestore,
@@ -126,6 +123,7 @@ export class RpsComponent implements OnInit, OnDestroy {
     protected languageService: LanguageService,
     private renderer: Renderer2,
     private audioService: AudioService,
+    private endGameService: EndGameService,
   ) {
     this.lobbyId = this.route.snapshot.paramMap.get('lobbyId') || '';
   }
@@ -183,53 +181,24 @@ export class RpsComponent implements OnInit, OnDestroy {
 
             if (this.game && this.isPlayer) {
               if (this.aiChoiceTimer) {
-                clearInterval(this.aiChoiceTimer);
+                clearTimeout(this.aiChoiceTimer);
                 this.aiChoiceTimer = null;
               }
-              if (this.aiChoiceFallbackTimer) {
-                clearTimeout(this.aiChoiceFallbackTimer);
-                this.aiChoiceFallbackTimer = null;
-              }
-
               this.aiChoiceExecuted = false;
 
               if (this.otherPlayerId.includes('#') && this.game.winner == null && !this.aiChoiceExecuted) {
-                const randomIndex = Math.floor(Math.random() * 3);
-                const chosenChoice = this.choices[randomIndex];
-                const baseDelay = Math.floor(Math.random() * (5000 - 2000 + 1)) + 2000;
+                const baseDelay = Math.floor(Math.random() * (5000 - 2000 + 1)) + 3000;
 
-                const userJustMadeChoice = this.lastUserChoiceTime && (Date.now() - this.lastUserChoiceTime < 1000);
-
-                const extraDelay = userJustMadeChoice ? Math.floor(Math.random() * 2000) + 1000 : 0;
-
-                const totalDelay = baseDelay + extraDelay;
-                const targetTime = Date.now() + totalDelay;
-
-                this.aiChoiceTimer = setInterval(() => {
-                  if (Date.now() >= targetTime) {
-                    if (!this.aiChoiceExecuted && !this.opponentChoice) {
+                this.aiChoiceTimer = setTimeout(() => {
+                  if (!this.aiChoiceExecuted && !this.opponentChoice) {
+                    if (this.otherPlayerId.includes('#') && this.game.winner == null && !this.aiChoiceExecuted) {
+                      const randomIndex = Math.floor(Math.random() * 3);
+                      const chosenChoice = this.choices[randomIndex];
                       this.makeAIChoice(chosenChoice, this.otherPlayerId);
                       this.aiChoiceExecuted = true;
-                      clearInterval(this.aiChoiceTimer);
-                      this.aiChoiceTimer = null;
-                      if (this.aiChoiceFallbackTimer) {
-                        clearTimeout(this.aiChoiceFallbackTimer);
-                        this.aiChoiceFallbackTimer = null;
-                      }
                     }
                   }
-                }, 100);
-
-                this.aiChoiceFallbackTimer = setTimeout(() => {
-                  if (!this.aiChoiceExecuted && !this.opponentChoice) {
-                    this.makeAIChoice(chosenChoice, this.otherPlayerId);
-                    this.aiChoiceExecuted = true;
-                    clearInterval(this.aiChoiceTimer);
-                    this.aiChoiceTimer = null;
-                  }
-                  clearTimeout(this.aiChoiceFallbackTimer);
-                  this.aiChoiceFallbackTimer = null;
-                }, totalDelay + 100);
+                }, baseDelay);
               }
 
               this.currentRound = this.game.currentRound;
@@ -361,7 +330,6 @@ export class RpsComponent implements OnInit, OnDestroy {
   makeChoice(choice: string) {
     if (!this.playerChoice && this.currentUser) {
       this.playerChoice = choice;
-      this.userMadeChoice();
       this.rpsService.makeChoice(this.lobbyId, choice, this.currentUser.id, this.currentRound);
     }
   }
@@ -448,8 +416,11 @@ export class RpsComponent implements OnInit, OnDestroy {
     };
 
     if (potentialWinner) {
+      update.status = "ended"
+      update.endedAt = new Date();
       update.winner = potentialWinner;
       update.endReason = 'Someone Won';
+      update.gameEnded = true;
     } else if (isFinalRound) {
       const isDraw = Object.values(remainingWinsDict).every(
         (wins, _, arr) => wins === arr[0]
@@ -508,7 +479,7 @@ export class RpsComponent implements OnInit, OnDestroy {
 
   private async endGame() {
     try {
-      await this.lobbyService.endLobby(this.lobbyId, this.winner, this.endReason, this.game);
+      await this.endGameService.endLobby(this.lobbyId, this.winner, this.endReason, this.game);
       this.gameEnded = true;
     } catch (error) {
       console.error('Error ending the game:', error);
@@ -715,10 +686,6 @@ export class RpsComponent implements OnInit, OnDestroy {
       return this.languageService.translate('DRAW');
     }
 
-  }
-
-  userMadeChoice() {
-    this.lastUserChoiceTime = Date.now();
   }
 }
 

@@ -6,9 +6,7 @@ import {switchMap, map} from 'rxjs/operators';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
   user$: Observable<any>;
   private isLoggedIn = false;

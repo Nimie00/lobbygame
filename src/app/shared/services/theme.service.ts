@@ -1,9 +1,7 @@
 // theme.service.ts
 import { Injectable } from '@angular/core';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ThemeService {
   private readonly THEME_KEY = 'darkTheme';
   private isDark = false;
