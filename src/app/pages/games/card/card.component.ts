@@ -12,8 +12,6 @@ import {CardService} from "../../../shared/services/game-services/card.service";
 import {CardPlayer} from "../../../shared/models/games/cardPlayer";
 import {Card} from "../../../shared/models/games/card.model";
 import {AlertService} from "../../../shared/services/alert.service";
-import {play} from "ionicons/icons";
-
 
 
 @Component({
@@ -93,16 +91,15 @@ export class CardComponent implements OnInit, OnDestroy {
           debounceTime(1)
         )
         .subscribe({
-          next: (game: CARDGame) => {
+          next: async (game: CARDGame) => {
             this.game = game;
             this.placements = game.placements;
             this.gameEnded = (game.players.length - (game.placements?.length || 0)) <= 1;
             this.initializeGame();
-            if(this.game.hasBots && this.game.currentPlayer.includes('#')) {
-              if(this.currentUser.id === this.game.ownerId){
-                this.handleBotActions(this.game.currentPlayer);
+            if (this.game.hasBots && this.game.currentPlayer.includes('#') && !this.gameEnded) {
+              if (this.currentUser.id === this.game.ownerId) {
+                await this.handleBotActions(this.game.currentPlayer);
               }
-              console.log('Van bot');
             }
           },
           error: err => console.error('Game state error: ', err)
@@ -325,10 +322,7 @@ export class CardComponent implements OnInit, OnDestroy {
       if('plus4' === card.symbol){
         return true
       } else {
-        if(card.symbol ==='plus2' && topCard.color === card.color){
-          return true
-        }
-        return false;
+        return card.symbol === 'plus2' && topCard.color === card.color;
       }
     }
 
