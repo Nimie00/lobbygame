@@ -7,6 +7,10 @@ import {SubscriptionTrackerService} from "../../shared/services/subscriptionTrac
 import {LanguageService} from "../../shared/services/language.service";
 import {Replay} from "../../shared/models/replay";
 import {AudioService} from "../../shared/services/audio.service";
+import {take} from "rxjs";
+import {User} from "../../shared/models/user.model";
+import {AuthService} from "../../shared/services/auth.service";
+import {CardPlayer} from "../../shared/models/games/cardPlayer";
 
 @Component({
   selector: 'app-spectate',
@@ -45,19 +49,35 @@ export class SpectateComponent implements OnInit, AfterViewInit, OnDestroy {
   protected skipAnimations: boolean = false;
   protected playingAnimations: boolean = false;
   protected beforeFirstEvent: boolean = true;
+  protected currentUser: User;
+  protected cardPlayers: CardPlayer[];
+  private preprocessedItems: Array<{timestamp: number; data: any, processed: boolean}> = [];
+  private nextEventIndex = 0;
+  private translationCache = new Map<string, string>();
+  private liveUpdateQueue: any[] = [];
+  private lastItemCount = 0;
+  private realtimeMode: boolean;
 
 
   constructor(private route: ActivatedRoute,
               private spectatorService: SpectatorService,
               private tracker: SubscriptionTrackerService,
               private languageService: LanguageService,
-              private audioService: AudioService,) {
+              private audioService: AudioService,
+              private authService: AuthService,) {
   }
 
 
   async ngOnInit() {
     this.lobbyId = this.route.snapshot.paramMap.get('lobbyId') || '';
     this.isReplayMode = this.route.snapshot.url.map(segment => segment.path).join('/').includes('replay');
+
+    this.authService.getUserData().pipe(
+      take(1)
+    ).subscribe(user => {
+      this.currentUser = user;
+    });
+
 
     if (this.isReplayMode) {
       try {
@@ -105,79 +125,219 @@ export class SpectateComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    if (!this.currentTime) {
-      this.currentTime = realtime ? new Date(Date.now() - 1000) : new Date(this.startDate);
+    if(!this.timeline){
+      this.initializeTimeline();
     }
 
-    const sortedItems = [...this.items.get()].sort((a, b) => a.start.getTime() - b.start.getTime());
 
-    this.timer = setInterval(() => {
-      if (this.barId == null) {
-        this.currentTime = realtime ? new Date(Date.now() - 1000) : new Date(this.startDate);
-      } else {
+    if (this.preprocessedItems.length === 0) {
+      this.preprocessItems();
+    }
 
-        const nextEvent = sortedItems.find(event => event.start > this.currentTime);
-        if (nextEvent) {
-          const timeDifference = nextEvent.start.getTime() - this.currentTime.getTime();
-          if (timeDifference <= 25) {
-            this.currentTime = new Date(this.currentTime.getTime() + timeDifference);
-          } else {
-            this.currentTime = new Date(this.currentTime.getTime() + 25);
-          }
+    this.timer = setInterval(() => this.processTimelineFrame(realtime && this.game.status!=='ended'), 25);
+  }
+
+  private preprocessItems(force = false) {
+    const currentItems = this.items.get();
+
+    if (this.realtimeMode || force || currentItems.length !== this.lastItemCount) {
+      this.preprocessedItems = currentItems
+        .map(item => this.createPreprocessedItem(item))
+        .sort((a, b) => a.timestamp - b.timestamp);
+
+      this.lastItemCount = currentItems.length;
+      this.nextEventIndex = 0;
+    }
+  }
+
+  private createPreprocessedItem(item: any) {
+    return {
+      timestamp: new Date(item.start).getTime(),
+      processed: false,
+      data: {
+        ...item,
+        translatedContent: this.cacheTranslation(item.actualContent),
+        actualClassName: item.actualClassName
+      }
+    };
+  }
+
+
+
+  private processTimelineFrame(realtime: boolean) {
+    this.realtimeMode = realtime && this.game.status!=='ended'; // Frissítjük az állapotot
+
+    if (this.realtimeMode) {
+      this.handleLiveUpdates();
+      this.preprocessItems(true); // Kényszerítjük az újraellenőrzést
+    }
+    if (this.barId == null) {
+      this.handleRealtimeUpdate(realtime);
+    } else {
+      this.advanceSimulatedTime();
+    }
+
+    this.updateTimelineState();
+    this.processPastEvents();
+    this.processCurrentEvents();
+  }
+
+  private handleRealtimeUpdate(realtime: boolean) {
+    const now = Date.now();
+    this.currentTime.setTime(realtime ? now - 1000 : this.currentTime.getTime() + 25);
+  }
+
+  private advanceSimulatedTime() {
+    const currentTimestamp = this.currentTime.getTime();
+    const nextEvent = this.findNextEvent(currentTimestamp);
+
+    if (nextEvent) {
+      const timeDiff = nextEvent.timestamp - currentTimestamp;
+      this.currentTime.setTime(currentTimestamp + Math.min(timeDiff, 25));
+    } else {
+      this.currentTime.setTime(currentTimestamp + 25);
+    }
+  }
+
+  private handleLiveUpdates() {
+      if (!this.realtimeMode) return;
+
+      // 1. Új elemek keresése
+      const newItems = this.items.get()
+        .filter(item => !this.preprocessedItems.some(pi => pi.data.id === item.id));
+
+      // 2. Új elemek hozzáadása a queue-hoz
+      if (newItems.length > 0) {
+        this.liveUpdateQueue.push(...newItems.map(item => this.createPreprocessedItem(item)));
+      }
+
+      // 3. Rendezés és egyesítés optimális módon
+      if (this.liveUpdateQueue.length > 0) {
+        this.preprocessedItems = this.mergeSortedArrays(
+          this.preprocessedItems,
+          this.liveUpdateQueue.sort((a, b) => a.timestamp - b.timestamp)
+        );
+        this.liveUpdateQueue = [];
+      }
+    }
+
+  private mergeSortedArrays(mainArray: any[], newItems: any[]) {
+      let mainIndex = 0;
+      let newIndex = 0;
+      const result = [];
+
+      while (mainIndex < mainArray.length && newIndex < newItems.length) {
+        if (mainArray[mainIndex].timestamp < newItems[newIndex].timestamp) {
+          result.push(mainArray[mainIndex++]);
         } else {
-          this.currentTime = new Date(this.currentTime.getTime() + 25);
+          result.push(newItems[newIndex++]);
         }
       }
 
-      if (this.currentTime > this.maxEndTime) {
-        this.maxEndTime = new Date(this.currentTime.getTime() + 1000);
-        this.timeline.setOptions({max: this.maxEndTime});
+      return result.concat(
+        mainArray.slice(mainIndex),
+        newItems.slice(newIndex)
+      );
+    }
+
+
+  private findNextEvent(currentTimestamp: number) {
+    while (this.nextEventIndex < this.preprocessedItems.length) {
+      const event = this.preprocessedItems[this.nextEventIndex];
+      if (event.timestamp > currentTimestamp) {
+        return event;
       }
+      this.nextEventIndex++;
+    }
+    return null;
+  }
 
-      this.setBarTime(this.currentTime);
+  private updateTimelineState() {
+    const currentTimestamp = this.currentTime.getTime();
 
-      this.items.get().forEach((item: any) => {
-        const eventTime = new Date(item.start).getTime();
-        const current = this.currentTime.getTime();
+    if (currentTimestamp > this.maxEndTime.getTime() - 1000) {
+      this.maxEndTime.setTime(currentTimestamp + 1000);
+      this.timeline.setOptions({max: this.maxEndTime});
+    }
 
+    this.setBarTime(this.currentTime);
+  }
 
-        if (eventTime <= current) {
-          item.className = item.actualClassName;
+  private processPastEvents() {
+    const currentTimestamp = this.currentTime.getTime();
 
-          const parts = item.actualContent.split(':');
-          if (parts.length >= 2) {
-            const key = parts[0].trim();
-            const valueToTranslate = parts[1].trim();
-            const translatedText = this.languageService.translate(valueToTranslate);
-            item.content = `${key}: ${translatedText}`;
-          }
+    for (let i = 0; i < this.preprocessedItems.length; i++) {
+      const item = this.preprocessedItems[i];
 
-          this.items.update(item);
-        }
-      });
+      if (item.timestamp > currentTimestamp) break;
 
-      const eventsAtCurrentTime = this.items.get({
-        filter: (item) => {
-          const itemTime = new Date(item.start).getTime();
-          const diff = Math.abs(itemTime - this.currentTime.getTime());
-          return diff <= 25;
-        },
-      });
+      if (!item.processed) {
+        item.processed = true;
+        item.data.classNameUpdated = true;
 
-      eventsAtCurrentTime.forEach((event: any) => {
-        if (!this.processedEvents.has(String(new Date(event.start).getTime()))) {
-          const [username, choice] = (event.actualContent || event.content).split(': ');
-          const updatedChoices = {...this.playerChoices};
-          updatedChoices[username.trim()] = choice.trim();
-          this.playerChoices = updatedChoices;
-          this.processedEvents.add(String(new Date(event.start).getTime()));
-        }
-      });
-      if(this.processedEvents.size > 0){
-        this.beforeFirstEvent = false;
+        this.items.update({
+          ...item.data,
+          className: item.data.actualClassName,
+          content: item.data.translatedContent
+        });
       }
-    }, 25);
+    }
+  }
+  private processCurrentEvents() {
+    const currentTimestamp = this.currentTime.getTime();
+    const timeWindow = 25;
 
+    const startIdx = this.findEventIndex(currentTimestamp - timeWindow);
+    const endIdx = this.findEventIndex(currentTimestamp + timeWindow);
+
+    for (let i = startIdx; i <= endIdx; i++) {
+      const event = this.preprocessedItems[i];
+      if (this.preprocessedItems[i] && Math.abs(event.timestamp - currentTimestamp) <= timeWindow) {
+        this.handleEventTrigger(event);
+      }
+    }
+  }
+
+  private findEventIndex(targetTimestamp: number) {
+    let low = 0, high = this.preprocessedItems.length - 1;
+
+    while (low <= high) {
+      const mid = (low + high) >>> 1;
+      const midVal = this.preprocessedItems[mid].timestamp;
+
+      if (midVal < targetTimestamp) {
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
+    }
+    return low;
+  }
+
+  private handleEventTrigger(event: typeof this.preprocessedItems[0]) {
+    if (!this.processedEvents.has(String(event.timestamp))) {
+      const [username, choice] = event.data.actualContent.split(': ');
+      this.playerChoices = {
+        ...this.playerChoices,
+        [username.trim()]: choice.trim()
+      };
+
+      this.processedEvents.add(String(event.timestamp));
+      this.beforeFirstEvent = false;
+    }
+  }
+
+  private cacheTranslation(content: string) {
+    if (!content) return '';
+
+    const [key, value] = content.split(':').map(p => p.trim());
+    const normalizedValue = value.replace(/_/g, ' ');
+
+    if (!this.translationCache.has(normalizedValue)) {
+      this.translationCache.set(normalizedValue, this.languageService.translate(normalizedValue));
+    }
+
+    return `${key}: ${this.translationCache.get(normalizedValue)}`;
   }
 
   protected stopTimeline() {
@@ -192,14 +352,17 @@ export class SpectateComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     this.playerChoices = {};
+    this.playingAnimations = false;
+    this.processedEvents.clear();
     this.lastEvent = false;
+    this.beforeFirstEvent = true;
+
     if (this.items.get().length > 0) {
-      this.processedEvents.clear();
       const sortedEvents = [...this.items.get()].sort((a, b) => a.start.getTime() - b.start.getTime());
+
       this.currentTime = new Date(new Date(sortedEvents[0].start.getTime() - 1000).getTime() - 1000);
       this.setBarTime(this.currentTime)
       this.stopTimeline();
-      this.beforeFirstEvent = true;
     } else {
       console.warn("Nincs event")
     }
@@ -213,10 +376,11 @@ export class SpectateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.playingAnimations = false;
     this.processedEvents.clear();
     this.lastEvent = false;
+    this.beforeFirstEvent = true;
+
     this.currentTime = new Date(this.startDate.getTime());
     this.setBarTime(this.currentTime)
     this.stopTimeline();
-    this.beforeFirstEvent = true;
 
   }
 
@@ -263,7 +427,6 @@ export class SpectateComponent implements OnInit, AfterViewInit, OnDestroy {
         console.error('Hibás eseményformátum:', prevEvent.actualContent, error);
       }
     }
-
 
     let newTime: Date;
     if (prevEvent) {
@@ -329,6 +492,15 @@ export class SpectateComponent implements OnInit, AfterViewInit, OnDestroy {
   private processGameState(gameState: Replay): void {
     this.game = gameState;
     if (gameState && gameState.rounds) {
+
+
+      if(this.game.gameType === "CARD"){
+        this.cardPlayers = this.game.players.map((id: string | number, index: string | number) => ({
+          id:id,
+          name: this.game!.playerNames[index],
+          cards: this.game!.hands[id] || []
+        }));
+      }
       this.startDate = this.calculateStartDate(gameState);
       this.endDate = this.calculateEndDate(gameState);
       this.showCurrentTime = gameState.winner == null;
@@ -409,6 +581,9 @@ export class SpectateComponent implements OnInit, AfterViewInit, OnDestroy {
       : new Date(Date.now() + (30 * 60 * 1000));
     this.minStartTime = new Date(this.startDate.getTime() - (30 * 60 * 1000));
 
+    this.processedEvents.clear();
+    this.nextEventIndex = 0;
+
     const options = {
       start: new Date(this.startDate.getTime() - 1500),
       end: new Date(this.endDate.getTime() + 1500),
@@ -424,6 +599,8 @@ export class SpectateComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.timeline = new Timeline(this.container, this.items, options);
     this.timeline.redraw();
+
+
 
 
     if (this.showCurrentTime) {

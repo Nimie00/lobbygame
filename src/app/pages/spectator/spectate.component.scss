@@ -1,12 +1,13 @@
 .timeline-container {
   display: flex;
+  position: relative;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: fit-content;
   background-color: var(--ion-background-color);
   margin: 0 auto;
   padding: 10px;
+  height: 20vh;
 }
 
 #visualization {
@@ -18,6 +19,20 @@
   overflow-y: auto;
 }
 
+.Game{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 80%;
+
+}
+.sixtypercent{
+  height: 60vh;
+}
+
+app-card-spectate{
+  height: 70vh;
+}
 
 
 ion-button{

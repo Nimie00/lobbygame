@@ -28,6 +28,8 @@
   --ion-create-color: rgba(245, 167, 152, 0.9);
   --ion-return-color: rgba(178, 252, 58, 0.9);
 
+  --custom-card-dark-bg: rgba(45, 45, 45, 0.9);
+
   --player1-color: rgba(0, 114, 178, 0.71);
   --player2-color: rgba(230, 159, 0, 0.56);
   --player3-color: rgba(0, 158, 115, 0.9);

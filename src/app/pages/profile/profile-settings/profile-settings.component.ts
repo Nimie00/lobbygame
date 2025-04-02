@@ -6,7 +6,6 @@ import {HttpClient} from "@angular/common/http";
 import {LanguageService} from "../../../shared/services/language.service";
 import {Router} from "@angular/router";
 import {AlertService} from "../../../shared/services/alert.service";
-import {AudioService} from "../../../shared/services/audio.service";
 
 @Component({
   selector: 'app-profile-settings',
@@ -47,7 +46,6 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
               private languageService: LanguageService,
               private router: Router,
               private alertService: AlertService,
-              private audioService: AudioService,
   ) {
   }
 

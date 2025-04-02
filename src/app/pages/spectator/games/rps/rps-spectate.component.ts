@@ -136,6 +136,7 @@ export class RpsSpectateComponent implements OnInit, OnDestroy, OnChanges {
 
   async ngOnChanges(changes: SimpleChanges) {
     if (changes['playerChoices'] && changes['playerChoices'].currentValue) {
+      console.log("changes['playerChoices'].currentValue:", changes['playerChoices'].currentValue);
       if (changes['playerChoices'] && Object.keys(changes['playerChoices'].currentValue).length === 0) {
         this.allChanges = -1;
         this.roundChanges = -1;

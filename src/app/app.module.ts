@@ -40,6 +40,7 @@ import {CardComponent} from "./pages/games/card/card.component";
 import {PlayerHandComponent} from "./pages/games/card/playerCards/player-cards.component";
 import {DiscardDeckComponent} from "./pages/games/card/discardDeck/discard-deck.component";
 import {DrawDeckComponent} from "./pages/games/card/drawDeck/draw-deck.component";
+import {CardSpectateComponent} from "./pages/spectator/games/card/card-spectate.component";
 
 export function initializeLanguage(languageService: LanguageService) {
   return () => languageService.init();
@@ -144,6 +145,7 @@ export const routes: Routes = [
     PlayerHandComponent,
     DiscardDeckComponent,
     DrawDeckComponent,
+    CardSpectateComponent,
   ],
   imports: [
     BrowserModule,

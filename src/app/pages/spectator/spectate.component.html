@@ -1,6 +1,7 @@
 <ion-content>
-  <ion-card>
-    <ng-container *ngIf="game">
+  <ion-card class="Game">
+
+    <ng-container *ngIf="game && game.gameType === 'RPS'">
       <app-rps-spectate
         [playerChoices]="playerChoices"
         [game]="game"
@@ -9,9 +10,21 @@
       </app-rps-spectate>
     </ng-container>
 
+    <ng-container class="sixtypercent" *ngIf="game && game.gameType === 'CARD'">
+      <app-card-spectate
+        [currentUser]="currentUser"
+        [game]="game"
+        [playerChoices]="playerChoices"
+        [skipAnimations]="skipAnimations"
+        (playingAnimations)="playingAnimation($event)">
+      </app-card-spectate>
+    </ng-container>
+
     <ng-container *ngIf="!game">
       <h1>{{ "GAME_DOESNT_EXIST" | language }}</h1>
     </ng-container>
+
+  </ion-card>
 
     <div class="timeline-container">
       <div #visualization id="visualization"></div>
@@ -71,5 +84,4 @@
 
     </div>
     <ion-toolbar></ion-toolbar>
-  </ion-card>
 </ion-content>

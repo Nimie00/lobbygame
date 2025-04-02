@@ -187,7 +187,7 @@ export class CreateLobbyModalComponent implements OnInit, OnDestroy {
   }
 
   private async proceedWithLobbyCreation() {
-    if (this.selectedGame == null || this.lobbyName == null || this.maxRounds == null) {
+    if (this.selectedGame == null || this.lobbyName == null) {
       return false;
     }
 
@@ -230,7 +230,7 @@ export class CreateLobbyModalComponent implements OnInit, OnDestroy {
       ownerName: this.currentUser.username,
       ownerId: this.currentUser.id,
       status: this.status,
-      maxRounds: this.maxRounds,
+      maxRounds: this.maxRounds || 1,
       gameType: this.selectedGame.name,
       minPlayers: minNumber,
       maxPlayers: maxNumber,

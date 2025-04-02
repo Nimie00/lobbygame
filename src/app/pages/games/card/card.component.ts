@@ -1,4 +1,14 @@
-import {Component, OnDestroy, OnInit, Renderer2} from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  OnInit, QueryList,
+  Renderer2,
+  ViewChild, ViewChildren
+} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {SubscriptionTrackerService} from "../../../shared/services/subscriptionTracker.service";
 import {AuthService} from "../../../shared/services/auth.service";
@@ -21,14 +31,10 @@ import {AlertService} from "../../../shared/services/alert.service";
   animations: []
 })
 
-//TODO: Ha már csak 1 játékos van aki még nem nyert akkor legyen vége a játéknak és legyen egy végső képernyő.
-//TODO: Az AI játékos megvalósítása
-//TODO: Befejező képernyő megvalósítása (itt lehetne az, hogy az emberek ablakaiban megjelenik a helyezésük)
-
-//TODO: AI SZÍN VÁLASZTÁS
+//TODO: Csak olyan plus2 kártyát rakhatsz, aminek a színe megegyezik a plus4 színével! lehet plus4-re kiválasztani +2-t ha nem ugyanaz a szín.
 
 
-export class CardComponent implements OnInit, OnDestroy {
+export class CardComponent implements OnInit, OnDestroy, AfterViewInit {
   private CATEGORY: string = "card-game"
   game: CARDGame;
   currentUser: User;
@@ -44,6 +50,9 @@ export class CardComponent implements OnInit, OnDestroy {
   cardSubscription: Subscription;
   placements: string[];
   protected gameEnded: boolean;
+  isMobile = false;
+  @ViewChild('gridContainer') gridContainer!: ElementRef;
+  @ViewChildren('cell') cells!: QueryList<ElementRef>;
 
 
   readonly POSITIONS = {
@@ -66,14 +75,21 @@ export class CardComponent implements OnInit, OnDestroy {
     private renderer: Renderer2,
     private tracker: SubscriptionTrackerService,
     private authService: AuthService,
-
+    private cdRef: ChangeDetectorRef,
     private audioService: AudioService,
     protected languageService: LanguageService,
     private AlertService: AlertService,
 
   ) {
+    this.checkMobile();
+    window.addEventListener('resize', () => {
+      this.checkMobile();
+      this.cdRef.detectChanges();
+    });
     this.lobbyId = this.route.snapshot.paramMap.get('lobbyId') || '';
   }
+
+
 
 
   async ngOnInit() {
@@ -106,15 +122,54 @@ export class CardComponent implements OnInit, OnDestroy {
         });
       this.tracker.add(this.CATEGORY, "getGameAndUserSub", this.cardSubscription);
     });
+
   }
 
   ngOnDestroy(): void {
     this.tracker.unsubscribeCategory(this.CATEGORY);
     this.audioService.stopAllSounds()
+    window.removeEventListener('resize', this.checkMobile);
+
+  }
+
+  ngAfterViewInit() {
+    this.cells.forEach((cell, index) => {
+      const position = this.displayedPositions[index];
+      const color = this.getPlayerColor(position);
+      cell.nativeElement.style.setProperty('--player-color', color);
+    });
+  }
+
+  getPlayerColor(position: number): string {
+    const player = this.getPlayerByCell(position);
+    if (!player) return '';
+
+    const playerIndex = this.players.findIndex(p => p.id === player.id);
+    return getComputedStyle(document.documentElement)
+      .getPropertyValue(`--player${playerIndex + 1}-color`).trim() || '';
+  }
+
+
+  get displayedPositions(): number[] {
+    const activePositions = this.POSITIONS[this.players.length] || [];
+    return this.isMobile ? [5, ...activePositions] : [1,2,3,4,5,6,7,8,9];
+  }
+
+  getGridRow(position: number): string {
+    const row = Math.ceil(position / 3);
+    return `${row} / ${row + 1}`;
+  }
+
+  getGridColumn(position: number): string {
+    const col = (position - 1) % 3 + 1;
+    return `${col} / ${col + 1}`;
+  }
+
+  private checkMobile(): void {
+    this.isMobile = window.innerWidth <= 768; // Standard mobil breakpoint
   }
 
   private initializeGame() {
-    if (!this.game) return;
 
     this.players = this.game.players.map((id, index) => ({
       id:id,
@@ -132,12 +187,20 @@ export class CardComponent implements OnInit, OnDestroy {
     return this.players[this.currentPlayerIndex];
   }
 
+  @HostListener('window:resize')
+  onResize() {
+    if(this.isMobile) {
+      const container = this.gridContainer.nativeElement;
+      const viewportHeight = window.innerHeight;
+      container.style.height = `${viewportHeight - 100}px`;
+    }
+  }
+
   async onDrawCard(id: string) {
     if (this.isCurrentPlayer && this.drawPile.length > 0) {
       const card = this.drawPile.shift();
       if (card) {
         this.currentPlayer.cards.push(card);
-        this.updateGameState();
         this.nextPlayer();
         try {
           await this.cardService.drawCard(this.lobbyId, id);
@@ -162,7 +225,6 @@ export class CardComponent implements OnInit, OnDestroy {
       }
       if (this.isValidPlay(playedCard)) {
         this.discardPile.unshift(playedCard);
-        this.updateGameState();
         this.nextPlayer();
 
         if(playerId.includes('#')) {
@@ -183,10 +245,6 @@ export class CardComponent implements OnInit, OnDestroy {
     }
   }
 
-  private updateGameState() {
-
-  }
-
   private nextPlayer() {
     this.currentPlayerIndex = (this.currentPlayerIndex + this.direction + this.players.length) % this.players.length;
   }
@@ -196,13 +254,15 @@ export class CardComponent implements OnInit, OnDestroy {
       player.id === this.game.currentPlayer;
   }
 
-  shouldShowPlayer(cell: number): boolean {
-    const positions = this.POSITIONS[this.players.length];
-    return positions ? positions.includes(cell) : false;
-  }
-
   isCellActive(cell: number): boolean {
     return cell === 5 || this.shouldShowPlayer(cell);
+  }
+
+
+  shouldShowPlayer(position: number): boolean {
+    const positions = this.POSITIONS[this.players.length];
+    const player: CardPlayer = this.players[positions.indexOf(position)];
+    return position !== 5 && !!player;
   }
 
   getPlayerByCell(cell: number): CardPlayer | undefined {
@@ -211,6 +271,7 @@ export class CardComponent implements OnInit, OnDestroy {
     const index = positions.indexOf(cell);
     return index >= 0 ? this.players[index] : undefined;
   }
+
   private showError(message) {
     console.error(message);
   }
@@ -388,3 +449,4 @@ export class CardComponent implements OnInit, OnDestroy {
   }
 
 }
+

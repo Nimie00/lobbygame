@@ -37,4 +37,5 @@ export interface CARDGame {
   direction: number,
   placements: string[],
   hasBots: boolean;
+  deckHistory: string[];
 }

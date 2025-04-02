@@ -345,7 +345,7 @@ export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
         }
 
         this.usersLobby.status = "starting";
-        await this.gameStartService.handleCountdown(await this.lobbyService.startGame(this.usersLobby), this.lobby.gameType, this.lobby.id, false);
+        await this.gameStartService.handleCountdown(await this.lobbyService.startGame(this.usersLobby), this.lobby.gameType, lobbyId, false);
       }
     }
   }

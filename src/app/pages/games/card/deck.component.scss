@@ -1,164 +1,43 @@
-.hand {
-  display: flex;
-  align-items: center;
-}
-.card {
-  width: 40px;
-  height: 80px;
-  margin-right: 4px;
+.deck-container, .discard-container {
   position: relative;
-}
-.card img {
-  width: 100%;
-  height: auto;
-}
-.card-label {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  font-size: 10px;
-  color: white;
-  text-shadow: 1px 1px 2px black;
-}
-.more-cards {
-  font-size: 16px;
-  padding: 0 8px;
+  margin: 0 1rem;
+  text-align: center;
+
+  .deck-label {
+    margin: 0.5rem 0;
+    font-weight: bold;
+    color: var(--ion-text-color);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+  }
 }
 
-.grid-container {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-  height: 100vh;
-  gap: 10px;
-  padding: 10px;
-}
 
-.cell {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-}
-
-.center-decks {
-  display: flex;
-  gap: 20px;
-  height: 100%;
-}
-
-.deck {
+.deck-wrapper {
   position: relative;
-  width: 100px;
-}
+  height: 220px;
+  width: 120px;
+  perspective: 1000px;
 
-.card {
-  width: 100%;
-  height: 120px;
-  border: 2px solid #333;
-  border-radius: 8px;
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: white;
-}
-
-
-.draw-deck .card:nth-child(1) { top: 0; }
-.draw-deck .card:nth-child(2) { top: 5px; }
-.draw-deck .card:nth-child(3) { top: 10px; }
-
-.discard-deck .card:nth-child(1) { top: 0; z-index: 3; }
-.discard-deck .card:nth-child(2) { top: 5px; z-index: 2; }
-.discard-deck .card:nth-child(3) { top: 10px; z-index: 1; }
-
-.player-container {
-  padding: 10px;
-  width: 100%;
-  height: 100%;
-}
-
-.draw-deck .card {
-  left: 0;
-}
-
-.discard-deck .card {
-  right: 0;
-}
-
-.game-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  padding: 20px;
-}
-
-.deck {
-  position: relative;
-  height: 150px;
-  cursor: pointer;
-
-  .card {
+  .stack-layer {
     position: absolute;
-    width: 100px;
-    height: 140px;
-    border: 1px solid #000;
-    border-radius: 8px;
-    background: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-  }
-}
+    top: 0;
+    left: 0;
+    transition: all 0.3s ease;
+    transform-origin: bottom center;
 
-.player-hand {
-  border: 2px solid #ccc;
-  padding: 10px;
-  border-radius: 8px;
-
-  &.current-player {
-    border-color: #ffd700;
-    background: #fff9e6;
-  }
-
-
-  .cards {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-
-    .card {
-      width: 60px;
-      height: 84px;
-      border: 1px solid #000;
-      border-radius: 5px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      background: white;
-
-      &:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      }
+    .deck-card {
+      width: 100px;
+      height: 200px;
+      filter: brightness(0.95);
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
     }
-  }
 
-  .extra-cards {
-    color: #666;
-    align-self: center;
-    margin-left: 10px;
+    &.layer-1 { transform: translate(2px, -2px) rotate(0.5deg); }
+    &.layer-2 { transform: translate(4px, -4px) rotate(1deg); }
+    &.layer-3 { transform: translate(6px, -6px) rotate(1.5deg); }
+    &.layer-4 { transform: translate(8px, -8px) rotate(2deg); }
+    &.layer-5 { transform: translate(10px, -10px) rotate(2.5deg); }
   }
-}
-
-.deck {
-  position: relative;
-  min-height: 120px;
-  cursor: default;
 
   &.clickable {
     cursor: pointer;
@@ -166,37 +45,189 @@
       filter: brightness(1.1);
     }
   }
+
+  .deck-interactive {
+    position: relative;
+    z-index: 10;
+
+    .count-badge {
+      position: absolute;
+      top: -15px;
+      right: -15px;
+      background: #e74c3c;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-size: 1rem;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+      content: attr(data-count);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 30px;
+    }
+
+    .empty-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #e74c3c;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px white;
+    }
+  }
 }
 
-.card {
-  position: absolute;
-  left: 0;
-  width: 40px;
-  height: 80px;
-  border-radius: 5px;
-  border: 1px solid #333;
+.discard-wrapper {
+  position: relative;
+  height: 220px;
+  width: 120px;
+  perspective: 1000px;
 
-  &.back {
-    background: navy;
+  .discard-layer {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform-origin: left bottom;
+    transition: transform 0.3s ease;
+    @for $i from 1 through 5 {
+      &:nth-child(#{$i}) {
+        z-index: 6 - $i;
+        filter: brightness(1 - ($i * 0.1));
+      }
+    }
+
+
+    .discard-card {
+      border-radius: 8px;
+      transform-origin: bottom center;
+      width: 100px;
+      height: 200px;
+      filter: brightness(0.95);
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+      border: 1px solid rgba(0,0,0,0.1);
+    }
   }
 
-  &.front {
-    background: white;
+  .discard-top {
+    position: relative;
+    z-index: 10;
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: translateY(-5px) scale(1.02);
+      z-index: 20;
+    }
+
+    .active-card {
+      box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+    }
+  }
+
+  .discard-card {
+    width: 100px;
+    height: 200px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  }
+
+  .count-badge {
+    position: absolute;
+    bottom: -15px;
+    right: -15px;
+    background: #3498db;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 1rem;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+    content: attr(data-count);
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
+    min-width: 30px;
+  }
 
-    .card-color {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      margin-bottom: 10px;
-    }
+  .empty-discard {
+    width: 100px;
+    height: 200px;
+    border: 2px dashed #95a5a6;
+    border-radius: 8px;
+    position: relative;
+    z-index: 5;
 
-    .card-symbol {
-      font-size: 24px;
-      font-weight: bold;
+    .empty-icon {
+      font-size: 2rem;
+      opacity: 0.6;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
     }
   }
+}
+
+
+@media screen and (max-width: 768px) {
+  body{
+    font-size: 0.8rem;
+  }
+
+  .deck-wrapper{
+    height: 110px;
+    width: 60px;
+
+    .stack-layer{
+      width: 50px;
+      height: 100px;
+
+       .deck-card{
+        width: 50px;
+        height: 100px;
+        filter: brightness(0.95);
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+      }
+    }
+    .count-badge {
+      top: -5px;
+      right: -5px;
+      padding: 4px 6px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      min-width: 10px;
+    }
+  }
+
+  .discard-wrapper {
+    position: relative;
+    height: 110px;
+    width: 60px;
+    perspective: 500px;
+
+    .discard-card{
+      width: 50px;
+      height: 100px;
+    }
+
+    .discard-layer{
+      width: 50px;
+      height: 100px;
+
+     .discard-card{
+      width: 50px;
+      height: 100px;
+      }
+    }
+
+    .count-badge {
+      bottom: -5px;
+      right: -5px;
+      padding: 4px 6px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      min-width: 10px;
+    }
+  }
+
 }

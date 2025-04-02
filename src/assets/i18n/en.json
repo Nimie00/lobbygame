@@ -226,5 +226,9 @@
   "GAME_PAGE_DESCRIPTION": "This page displays the game, which is the one selected in the lobby. When a game is opened, a 3-second countdown starts while the game is being prepared.",
   "RPS_PAGE_DESCRIPTION": "This page hosts the Rock-Paper-Scissors game. The game is divided into rounds and continues until one player wins. A player wins a round when the number of rounds they have won reaches more than half of the total rounds specified in the lobby plus one. The user can check this either from the counter next to their name or from detailed round statistics. A round is played by both players selecting an option from the images displayed in the center (Rock, Paper, or Scissors). Once both have made their choice, a comparison window appears in front of the two users while a short animation plays. If one choice defeats the other, that player wins the round; if the result is a draw, the round is recorded as a tie, and the game continues.",
   "SETTINGS_MENU_DESCRIPTION": "In this menu you can change the overall settings of the application, such as switching between Hungarian and English, selecting the theme (dark or light), and adjusting the sound effects volume.",
-  "UNKNOWN_CARD": "Unknown card"
+  "UNKNOWN_CARD": "Unknown card",
+  "EMPTY_DECK": "Empty",
+  "DRAW_PILE": "Draw pile",
+  "DISCARD_PILE": "Played cards",
+  "NUMBER_OF_CARDS": "Number of cards"
 }

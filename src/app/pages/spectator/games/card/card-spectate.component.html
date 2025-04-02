@@ -1,0 +1,59 @@
+<ng-container *ngIf="game && !gameEnded && currentUser">
+  <div class="grid-container" #gridContainer>
+    <div *ngFor="let position of displayedPositions"
+         class="cell"
+         [class.filled]="isCellActive(position)"
+         [style.--player-color]="getPlayerColor(position)"
+         [class.active]="position !== 5 && isCurrentPlayer(getPlayerByCell(position))"
+         [class.center-cell]="position === 5"
+         [style.grid-row]="getGridRow(position)"
+         [style.grid-column]="getGridColumn(position)">
+
+       <ng-container *ngIf="position === 5">
+         <div class="decks-container">
+           <div class="deck-with-indicator">
+             <app-draw-deck
+               [stackSize]="game?.deck?.length || 0"
+               [currentPlayerId]="game?.currentPlayer"
+               [currentUserId]="currentUser?.id"
+               [gameEnded]="gameEnded">
+             </app-draw-deck>
+
+             <div *ngIf="game?.gameModifiers?.pendingDraws" class="pending-draws-container">
+               <div class="pending-draws">
+                 <span class="draw-count">+{{game.gameModifiers.pendingDraws}} </span>
+                 <ion-icon name="tablet-portrait"></ion-icon>
+               </div>
+             </div>
+           </div>
+           <app-discard-deck
+             [topCard]="game?.discardPile[0]"
+             [stackSize]="game?.discardPile.length"
+             [discardPile]="game?.discardPile">
+           </app-discard-deck>
+         </div>
+       </ng-container>
+
+       <app-player-hand *ngIf="position !== 5 && getPlayerByCell(position) as player"
+                        [currentUser]="currentUser"
+                        [discardPileTopCard] = "discardPile[0]"
+                        [player]="getPlayerByCell(position)"
+                        [PlusDraws] = "pendingDraws > 0"
+                        [isCurrent]="isCurrentPlayer(getPlayerByCell(position))"
+                        [gameEnded]="gameEnded"
+                        [placements]="placements"
+                        class="full-height">
+
+       </app-player-hand>
+     </div>
+   </div>
+</ng-container>
+
+
+
+<ng-container *ngIf="!game">
+  <h1>Nincs game :(</h1>
+</ng-container>
+
+
+

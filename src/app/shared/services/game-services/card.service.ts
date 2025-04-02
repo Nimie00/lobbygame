@@ -1,4 +1,4 @@
-import {forwardRef, Inject, Injectable} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {Observable} from "rxjs";
 import {Card} from "../../models/games/card.model";
@@ -12,14 +12,13 @@ export class CardService {
 
   constructor(
     private firestore: AngularFirestore,
-
     private endGameService: EndGameService,
   ){}
 
 
 
 
-  async drawCard(lobbyId: string, userId: string): Promise<void> {
+  async drawCard(lobbyId: string, userId: string): Promise<Card[]> {
     const gameRef = this.firestore.collection<CARDGame>('gameplay').doc(lobbyId).ref;
 
     return this.firestore.firestore.runTransaction(async (transaction) => {
@@ -39,6 +38,7 @@ export class CardService {
       const drawCount = pending > 0 ? pending : 1;
       let deck = gameData.deck;
       let discardPile = gameData.discardPile;
+      let deckCodes: string;
 
       if (deck.length <= drawCount && discardPile.length > 1) {
         const topDiscard = discardPile[0];
@@ -52,6 +52,8 @@ export class CardService {
 
         deck = this.shuffleDeck([...deck, ...normalizedToShuffle]);
 
+        deckCodes = this.logDeckState(deck);
+
         discardPile = [topDiscard];
       }
 
@@ -59,28 +61,28 @@ export class CardService {
         throw new Error(`Nincs elég kártya (szükséges: ${drawCount}, elérhető: ${deck.length})`);
       }
 
-      // Kártyák kivétele
+
       const drawnCards = deck.slice(0, drawCount);
       const newDeck = deck.slice(drawCount);
 
-      // Kör adatok előkészítése
+
       const currentRound = gameData.currentRound || 0;
       const choicePath = `rounds.${currentRound}.choices.${userId}`;
-      const drawnChoices = drawnCards.map(card => `drawn:${card.color}_${card.symbol}`);
+      const drawnChoices = drawnCards.map(card => `drawn-${card.color}_${card.symbol}`);
 
-      // Játékos kezének frissítése
+
       const updatedHands = {
         ...gameData.hands,
         [userId]: [...gameData.hands[userId], ...drawnCards]
       };
 
-      // Modifier frissítés
+
       const newModifiers = { ...gameData.gameModifiers };
       if (pending > 0) {
         newModifiers.pendingDraws = 0;
       }
 
-      // Következő játékos
+
       const nextPlayer = this.calculateNextPlayer(
         gameData.players,
         gameData.currentPlayer,
@@ -89,7 +91,7 @@ export class CardService {
         gameData.placements || [],
       );
 
-      // Tranzakció frissítése
+
       transaction.update(gameRef, {
         deck: newDeck,
         discardPile: discardPile,
@@ -100,9 +102,18 @@ export class CardService {
           choice: drawnChoices,
           timestamp: new Date()
         },
-        currentRound: currentRound + 1
+        currentRound: currentRound + 1,
+        deckHistory: deckCodes
+          ? [...gameData.deckHistory, deckCodes]
+          : [...gameData.deckHistory]
       });
+
+      return drawnCards;
     });
+  }
+
+  private logDeckState(deck: Card[]) {
+    return deck.map(c => this.cardToCode(c)).join(',');
   }
 
   async playCard(lobbyId: string, userId: string, cardIndex: number, selectedColor?: string): Promise<void> {
@@ -112,7 +123,6 @@ export class CardService {
       const gameDoc = await transaction.get(gameRef);
       const gameData = gameDoc.data() as CARDGame;
 
-      // 1. Alap validációk
       if (!gameData || gameData.currentPlayer !== userId) {
         throw new Error('Nem te következel vagy nem létezik a játék!');
       }
@@ -122,9 +132,8 @@ export class CardService {
       }
 
       const playedCard = gameData.hands[userId][cardIndex];
-      console.log("playedCard:", playedCard);
       const pendingDraws = gameData.gameModifiers?.pendingDraws || 0;
-// 2. Színvalidáció speciális kártyáknál
+
       if (['change', 'plus4'].includes(playedCard.symbol)) {
         if (!selectedColor || !['red', 'blue', 'green', 'yellow'].includes(selectedColor)) {
           throw new Error('Érvénytelen szín kiválasztása');
@@ -135,7 +144,7 @@ export class CardService {
       }
 
 
-      // 3. Játékszabály validációk
+
       if (pendingDraws > 0) {
         const topCard = gameData.discardPile[0];
         if (topCard &&
@@ -163,7 +172,7 @@ export class CardService {
         }
       }
 
-      // 4. Kártya módosítás
+
       const modifiedCard = {
         ...playedCard,
         color: ['change', 'plus4'].includes(playedCard.symbol)
@@ -171,17 +180,16 @@ export class CardService {
           : playedCard.color
       };
 
-      // 5. Frissítések
       const updatedHands = {
         ...gameData.hands,
         [userId]: gameData.hands[userId].filter((_, i) => i !== cardIndex)
       };
 
-      // 6. Speciális hatások kezelése
+
       const { nextPlayer, newDirection, additionalModifiers } =
         this.handleCardEffects(modifiedCard, gameData, gameData.placements || []);
 
-      // 7. Győzelem ellenőrzés
+
       let newPlacements = [...gameData.placements];
       if (updatedHands[userId].length === 0) {
         newPlacements = [...newPlacements, userId];
@@ -190,7 +198,7 @@ export class CardService {
       const currentRound = gameData.currentRound || 0;
       const choicePath = `rounds.${currentRound}.choices.${userId}`;
       const choice = playedCard
-        ? `played:${modifiedCard.color}_${modifiedCard.symbol}`
+        ? `played-${modifiedCard.color}_${modifiedCard.symbol}`
         : 'drawCard';
 
       const choiceData = {
@@ -203,7 +211,6 @@ export class CardService {
 
 
 
-      // 8. Tranzakció frissítése
       const updateData: Partial<CARDGame> = {
         ...choiceData,
         currentRound: currentRound + 1,
@@ -215,7 +222,7 @@ export class CardService {
           ...gameData.gameModifiers,
           ...additionalModifiers
         },
-        placements: newPlacements
+        placements: newPlacements,
       };
 
 
@@ -247,7 +254,7 @@ export class CardService {
         gameModifiers: {
           ...gameData.gameModifiers,
           ...updateData.gameModifiers
-        }
+        },
       };
 
       await this.endGameService.endLobby(newGameData.lobbyId ,newGameData.winner, newGameData.endReason, newGameData);
@@ -360,6 +367,7 @@ export class CardService {
     let initialHandSize = lobby.gameModifiers.handSize ? lobby.gameModifiers.handSize : 7;
     const fullDeck = this.createUnoDeck();
     let shuffledDeck = this.shuffleDeck(fullDeck);
+    let cardHistroy =  this.logDeckState(shuffledDeck);
 
     const hands: { [playerId: string]: Card[] } = {};
     for (const playerId of lobby.players) {
@@ -383,8 +391,9 @@ export class CardService {
       deck: Card[],
       discardPile: Card[],
       currentPlayer: string,
-      direction:number,
-      placements: [],
+      direction: number,
+      placements: string[],
+      deckHistory: string[],
     } = {
       ...baseData,
       hands: hands,
@@ -393,7 +402,22 @@ export class CardService {
       currentPlayer: lobby.players[0],
       direction: 1, // 1: óramutató járásával megegyező irány, -1: ellentétes irány
       placements: [],
+      deckHistory: [cardHistroy],
     };
     return CardData;
+  }
+
+  private cardToCode(card: Card): string {
+    const colorCode = card.color[0].toUpperCase();
+    let symbolCode = card.symbol.toUpperCase();
+
+    if (card.color === 'black') {
+      return symbolCode === 'PLUS4' ? 'WP' : 'WC';
+    }
+    symbolCode = symbolCode === "PLUS2" ? 'K' : symbolCode;
+    symbolCode = symbolCode === "REVERSE" ? 'R' : symbolCode;
+    symbolCode = symbolCode === "SKIP" ? 'S' : symbolCode;
+
+    return colorCode + symbolCode;
   }
 }

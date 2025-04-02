@@ -33,7 +33,7 @@
           </ion-item>
 
 
-          <ion-item>
+          <ion-item *ngIf="!selectedGame || selectedGame.name === 'RPS' ">
             <div class="label-wrapper">
               <ion-label position="stacked" class="required-star">{{ "MAX_ROUNDS" | language }}</ion-label>
             </div>
