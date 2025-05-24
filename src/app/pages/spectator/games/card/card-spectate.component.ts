@@ -15,11 +15,12 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {SubscriptionTrackerService} from "../../../../shared/services/subscriptionTracker.service";
 import {LanguageService} from "../../../../shared/services/language.service";
 import {AudioService} from "../../../../shared/services/audio.service";
-import {User} from "../../../../shared/models/user.model";
+import {User} from "../../../../shared/models/user";
 import {CardPlayer} from "../../../../shared/models/games/cardPlayer";
 import {take} from "rxjs";
 import {AuthService} from "../../../../shared/services/auth.service";
 import {Card} from "../../../../shared/models/games/card.model";
+import { PlayerAnimation } from 'src/app/shared/models/playerAnimation';
 
 @Component({
   selector: 'app-card-spectate',
@@ -50,8 +51,11 @@ export class CardSpectateComponent implements OnInit, OnDestroy, OnChanges, Afte
   @Input() currentUser: User;
   @Input() skipAnimations!: boolean;
   @Input() playerChoices: { [username: string]: string } = {};
+  animations: { [playerId: string]: PlayerAnimation } = {};
+  topCard = null;
 
   isMobile = false;
+
   @ViewChild('gridContainer') gridContainer!: ElementRef;
   @ViewChildren('cell') cells!: QueryList<ElementRef>;
 
@@ -89,8 +93,6 @@ export class CardSpectateComponent implements OnInit, OnDestroy, OnChanges, Afte
 
     this.lobbyId = this.route.snapshot.paramMap.get('lobbyId') || '';
   }
-
-  //TODO: A +4-EK ÉS change-ek színe legyen fekete, ha nincs lerakva
 
 
   ngOnInit() {
@@ -195,15 +197,10 @@ export class CardSpectateComponent implements OnInit, OnDestroy, OnChanges, Afte
       if (changes['playerChoices']?.currentValue != null && Object.keys(changes['playerChoices'].currentValue).length !== 0) {
 
 
-
-
         this.currentPlayer2  = this.players.filter(player => player.id === this.nextPlayerId)[0];
         this.playerChoices2 = changes['playerChoices'].currentValue;
         this.skipCount = 1;
         const action = this.playerChoices2[this.currentPlayer2.name];
-
-
-
 
           // 1. KIJÁTSZOTT LAP KEZELÉSE
           if ((action as string).trim().startsWith('played-')) {
@@ -238,9 +235,6 @@ export class CardSpectateComponent implements OnInit, OnDestroy, OnChanges, Afte
             }
 
 
-            //todo: fekete kártyák feketék legyenek a kezében
-
-
             const cardIndex = this.currentPlayer2.cards.findIndex((c: { symbol: string; color: string; }) => {
               if (c.symbol === 'change' || c.symbol === 'plus4') {
                 return c.symbol === targetCard.symbol;
@@ -252,15 +246,21 @@ export class CardSpectateComponent implements OnInit, OnDestroy, OnChanges, Afte
               const [playedCard] = this.currentPlayer2.cards.splice(cardIndex, 1);
               this.discardPile.unshift(playedCard);
 
-            } else {
-              console.log("Nem találtuk meg a keresett kártyát a kezében");
-              console.log("Keresett kártya: ", targetCard);
-              console.log("currentPlayer:", this.currentPlayer2);
+              let playerId = this.currentPlayer2.id;
+
+              if (!this.animations[playerId]) {
+                this.animations[playerId] = {};
+              }
+
+              this.animations[playerId].playedCard = playedCard;
+
+              setTimeout(() => {
+                delete this.animations[playerId].playedCard;
+              }, 800);
+
+
             }
           }
-
-          //TODO: Jump to first event-el nem jól resetelődnek a kártyák
-
 
           // 2. LAPOK HÚZÁSA
           else if (typeof action === 'string' && action.trim().startsWith('drawn-')) {
@@ -293,6 +293,20 @@ export class CardSpectateComponent implements OnInit, OnDestroy, OnChanges, Afte
               this.discardPile = [this.discardPile[0]]
 
             }
+
+            let drawnId = this.currentPlayer2.id;
+
+            if (!this.animations[drawnId]) {
+              this.animations[drawnId] = {};
+            }
+
+            this.animations[drawnId].drawCount = drawnCards.length;
+
+            setTimeout(() => {
+              delete this.animations[drawnId].drawCount;
+            }, 800);
+
+
             this.drawPile.splice(0, drawnCount);
             this.pendingDraws = null;
           }
@@ -317,7 +331,6 @@ export class CardSpectateComponent implements OnInit, OnDestroy, OnChanges, Afte
       }
 
       if(changes['playerChoices']?.currentValue != null && Object.keys(changes['playerChoices'].currentValue).length === 0){
-        console.log("Reset");
         this.initgame();
       }
     }

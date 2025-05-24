@@ -9,46 +9,50 @@
          [style.grid-row]="getGridRow(position)"
          [style.grid-column]="getGridColumn(position)">
 
-       <ng-container *ngIf="position === 5">
-         <div class="decks-container">
-           <div class="deck-with-indicator">
-             <app-draw-deck
-               [stackSize]="game?.deck?.length || 0"
-               [currentPlayerId]="game?.currentPlayer"
-               [currentUserId]="currentUser?.id"
-               [gameEnded]="gameEnded">
-             </app-draw-deck>
+      <ng-container *ngIf="position === 5">
+        <div class="decks-container">
+          <div class="deck-with-indicator">
+            <app-draw-deck
+              class="spectate"
+              [stackSize]="drawPile.length || 0"
+              [currentPlayerId]="game?.currentPlayer"
+              [currentUserId]="currentUser?.id"
+              [gameEnded]="gameEnded"
+              [spectate]="true">
+            </app-draw-deck>
 
-             <div *ngIf="game?.gameModifiers?.pendingDraws" class="pending-draws-container">
-               <div class="pending-draws">
-                 <span class="draw-count">+{{game.gameModifiers.pendingDraws}} </span>
-                 <ion-icon name="tablet-portrait"></ion-icon>
-               </div>
-             </div>
-           </div>
-           <app-discard-deck
-             [topCard]="game?.discardPile[0]"
-             [stackSize]="game?.discardPile.length"
-             [discardPile]="game?.discardPile">
-           </app-discard-deck>
-         </div>
-       </ng-container>
+            <div *ngIf="game?.gameModifiers?.pendingDraws" class="pending-draws-container">
+              <div class="pending-draws">
+                <span class="draw-count">+{{ game.gameModifiers.pendingDraws }} </span>
+                <ion-icon name="tablet-portrait"></ion-icon>
+              </div>
+            </div>
+          </div>
+          <app-discard-deck class="spectate"
+                            [topCard]="discardPile[0]"
+                            [stackSize]="discardPile.length"
+                            [discardPile]="discardPile"
+                            [spectate]="true">
 
-       <app-player-hand *ngIf="position !== 5 && getPlayerByCell(position) as player"
-                        [currentUser]="currentUser"
-                        [discardPileTopCard] = "discardPile[0]"
-                        [player]="getPlayerByCell(position)"
-                        [PlusDraws] = "pendingDraws > 0"
-                        [isCurrent]="isCurrentPlayer(getPlayerByCell(position))"
-                        [gameEnded]="gameEnded"
-                        [placements]="placements"
-                        class="full-height">
+          </app-discard-deck>
+        </div>
+      </ng-container>
 
-       </app-player-hand>
-     </div>
-   </div>
+      <app-player-hand *ngIf="position !== 5 && getPlayerByCell(position) as player"
+                       [currentUser]="currentUser"
+                       [discardPileTopCard]="discardPile[0]"
+                       [player]="getPlayerByCell(position)"
+                       [PlusDraws]="pendingDraws > 0"
+                       [isCurrent]="isCurrentPlayer(getPlayerByCell(position))"
+                       [animations]="animations"
+                       [gameEnded]="gameEnded"
+                       [placements]="placements"
+                       class="full-height spectate">
+
+      </app-player-hand>
+    </div>
+  </div>
 </ng-container>
-
 
 
 <ng-container *ngIf="!game">

@@ -8,7 +8,7 @@ import {
   ViewChild
 } from '@angular/core';
 import {Lobby} from "../../../shared/models/lobby.model";
-import {User} from "../../../shared/models/user.model";
+import {User} from "../../../shared/models/user";
 import {LobbyService} from "../../../shared/services/lobby.service";
 import {CreateLobbyModalComponent} from "../create-lobby-modal/create-lobby-modal.component";
 import {
@@ -335,7 +335,6 @@ export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
           return;
         }
 
-        console.log("this.usersLobby.gameType: ", this.usersLobby.gameType);
         if (!(this.usersLobby.gameType=== "RPS" || this.usersLobby.gameType=== "CARD")) {
           await this.alertService.showAlert(
             `${this.languageService.translate("ERROR")}`,
@@ -354,7 +353,6 @@ export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
   destroyLobby(lobbyId: string) {
     this.joinedLobby = null;
     this.lobbyService.destroyLobby(lobbyId).then(() => {
-      console.log('Lobby destroyed');
     });
   }
 
@@ -384,7 +382,6 @@ export class LobbyComponent implements OnInit, OnDestroy, OnChanges {
 
   leaveLobby(lobbyId: string) {
     this.joinedLobby = null;
-    console.log("Leave");
     this.lobbyService.leaveLobby(lobbyId, this.currentUser).then(() => {
       this.gameStartService.stopWatchingLobby();
     });

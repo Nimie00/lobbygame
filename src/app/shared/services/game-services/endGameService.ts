@@ -83,10 +83,7 @@ export class EndGameService {
 
         transaction.update(lobbyRef, { status: 'ended' });
       });
-
-      console.log('Transaction successfully committed');
     } catch (error) {
-      console.error('Transaction failed:', error);
       throw error;
     }
   }

@@ -1,11 +1,14 @@
-import { Component, Input } from '@angular/core';
-import { Card } from '../../../../shared/models/games/card.model'; // Feltételezve, hogy van Card interfész
+import {Component, Input} from '@angular/core';
+import {Card} from '../../../../shared/models/games/card.model'; // Feltételezve, hogy van Card interfész
 
 @Component({
   selector: 'app-discard-deck',
   template: `
-    <div class="discard-container">
+    <div class="discard-container"
+         [class.spectate]="spectate">
+      <ion-label class="deck-label">{{ "DISCARD_PILE" | language }}</ion-label>
       <div class="discard-wrapper">
+
         <div *ngFor="let card of getStackCards(); let i = index"
              class="discard-layer"
              [style.z-index]="i+1"
@@ -19,14 +22,13 @@ import { Card } from '../../../../shared/models/games/card.model'; // Feltétele
           <img [src]="'assets/cards/'+topCard.color+'_'+topCard.symbol+'.png'"
                class="discard-card active-card"
                alt="{{topCard.color+'_'+topCard.symbol}}"/>
-          <div class="count-badge">{{stackSize}}</div>
+          <div class="count-badge">{{ stackSize }}</div>
         </div>
 
         <div *ngIf="!topCard" class="empty-discard">
           <div class="empty-icon">🗑️</div>
         </div>
       </div>
-      <ion-label class="deck-label">{{"DISCARD_PILE" | language}}</ion-label>
     </div>
   `,
   styleUrls: ['../deck.component.scss']
@@ -35,6 +37,7 @@ export class DiscardDeckComponent {
   @Input() topCard: Card;
   @Input() stackSize?: number = 0;
   @Input() discardPile: any[] = [];
+  @Input() spectate!: boolean;
 
   getStackCards() {
     if (!this.discardPile || this.discardPile.length <= 1) return [];

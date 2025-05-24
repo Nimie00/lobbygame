@@ -62,7 +62,6 @@ ion-button.replay-button {
 
 
 .stat-card {
-
   &-header {
     font-size: 1.1rem;
     font-weight: bold;
@@ -74,6 +73,19 @@ ion-button.replay-button {
     font-size: 1rem;
     color: var(--ion-text-color);
   }
+}
+
+.button-card-header{
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: bold;
+  padding-top: 20px;
+  color: var(--ion-text-color);
+  width: 100%;
+  margin: auto;
+
 }
 
 ion-card-title, ion-card-subtitle{
@@ -101,6 +113,8 @@ ion-card {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  width: 100%;
+  margin: auto;
 }
 
 

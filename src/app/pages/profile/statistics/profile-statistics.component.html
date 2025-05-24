@@ -88,7 +88,7 @@
                   {{ "AVG_GAME_DURATION" | language }}
                 </div>
                 <div class="stat-card-content">
-                  {{ overallStats.avgDuration | date:'mm:ss' }}
+                  {{ overallStats.avgDuration | date:'hh:mm:ss' }}
                 </div>
               </div>
             </ion-col>
@@ -111,24 +111,26 @@
             <ion-col size="12" size-md="6">
               <div class="stat-card">
                 <div class="stat-card-header">
-                  {{ "GAME_RESULT" | language }}
+                  {{ "GAME_TYPE" | language }}
                 </div>
                 <div class="stat-card-content">
-                  {{ gameStats.result }}
+                  {{ selectedGame.gameType | language }}
                 </div>
               </div>
             </ion-col>
             <ion-col size="12" size-md="6">
               <div class="stat-card">
                 <div class="stat-card-header">
-                  {{ "GAME_DURATION" | language }}
+                  {{ "GAME_RESULT" | language }}
                 </div>
                 <div class="stat-card-content">
-                  {{ gameStats.duration | date:'mm:ss' }}
+                  {{ gameStats.result | language }}
                 </div>
               </div>
             </ion-col>
+
           </ion-row>
+          <ng-container  *ngIf="selectedGame.gameType==='RPS'" >
           <ion-row>
             <ion-col size="12" size-md="6">
               <div class="stat-card">
@@ -165,9 +167,93 @@
             <ion-col size="12" size-md="6">
               <div class="stat-card">
                 <div class="stat-card-header">
+                  {{ "GAME_DURATION" | language }}
+                </div>
+                <div class="stat-card-content">
+                  {{ gameStats.duration | date:'hh:mm:ss' }}
+                </div>
+              </div>
+            </ion-col>
+          </ion-row>
+          </ng-container>
+
+          <ng-container  *ngIf="selectedGame.gameType==='CARD'" >
+            <ion-row>
+              <ion-col size="12" size-md="6">
+                <div class="stat-card">
+                  <div class="stat-card-header">
+                    {{ "PLUS4CARDS_PLAYED" | language }}
+                  </div>
+                  <div class="stat-card-content">
+                    {{ gameStats.totalPlus4s }}
+                  </div>
+                </div>
+              </ion-col>
+              <ion-col size="12" size-md="6">
+                <div class="stat-card">
+                  <div class="stat-card-header">
+                    {{ "TOTAL_DRAWN" | language }}
+                  </div>
+                  <div class="stat-card-content">
+                    {{ gameStats.totalDrawn }}
+                  </div>
+                </div>
+              </ion-col>
+            </ion-row>
+
+            <ion-row>
+              <ion-col size="12" size-md="6">
+                <div class="stat-card">
+                  <div class="stat-card-header">
+                    {{ "MOST_CARDS_PULLED" | language }}
+                  </div>
+                  <div class="stat-card-content">
+                    {{ gameStats.maxDrawnInRound }}
+                  </div>
+                </div>
+              </ion-col>
+              <ion-col size="12" size-md="6">
+                <div class="stat-card">
+                  <div class="stat-card-header">
+                    {{ "NUMBER_OF_CARDS_PLAYED" | language }}
+                  </div>
+                  <div class="stat-card-content">
+                    {{ gameStats.totalPlayed }}
+                  </div>
+                </div>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col size="12" size-md="6">
+                <div class="stat-card">
+                  <div class="stat-card-header">
+                    {{ "YOUR_POSITION" | language }}
+                  </div>
+                  <div class="stat-card-content">
+                    {{ gameStats.placement }}.
+                  </div>
+                </div>
+              </ion-col>
+              <ion-col size="12" size-md="6">
+                <div class="stat-card">
+                  <div class="stat-card-header">
+                    {{ "GAME_DURATION" | language }}
+                  </div>
+                  <div class="stat-card-content">
+                    {{ gameStats.duration | date:'hh:mm:ss'}}
+                  </div>
+                </div>
+              </ion-col>
+            </ion-row>
+          </ng-container>
+
+          <ion-row>
+            <ion-col>
+              <div class="stat-card">
+                <div class="button-card-header">
                   {{ "BUTTONS" | language }}
                 </div>
-                <div class="stat-card-content buttons-container">
+                <div class="buttons-container">
                   <ion-button expand="block" class="return-button" (click)="goToGamePage()">
                     {{ 'BACK_TO_GAME' | language }}
                   </ion-button>

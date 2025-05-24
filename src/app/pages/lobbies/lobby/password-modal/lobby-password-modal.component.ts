@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, EventEmitter, Input, OnDestroy, Output, ViewChild} from "@angular/core";
 import {IonModal} from "@ionic/angular";
-import {User} from "../../../../shared/models/user.model";
+import {User} from "../../../../shared/models/user";
 import {Lobby} from "../../../../shared/models/lobby.model";
 import {LanguageService} from "../../../../shared/services/language.service";
 import {ModalService} from "../../../../shared/services/modal.service";

@@ -70,7 +70,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
 
     if (this.regUsername.includes('#')) {
-      console.log('#');
       await this.alertService.showAlert(
         `${this.languageService.translate("ERROR")}`,
         `${this.languageService.translate("BAD_USERNAME")}.`);
@@ -117,13 +116,11 @@ export class LoginComponent implements OnInit, OnDestroy {
         await this.alertService.showAlert(
           `${this.languageService.translate("SUCCESS")}`,
           `${this.languageService.translate("REMINDER_EMIL_SENT")}.`);
-        console.log('Jelszó emlékeztető email elküldve');
       })
       .catch(async error => {
         await this.alertService.showAlert(
           `${this.languageService.translate("ERROR")}`,
           `${this.languageService.translate("RESET_PASSWORD_ERROR")}.`);
-        console.error('Hiba a jelszó visszaállításánál:', error);
       });
   }
 }

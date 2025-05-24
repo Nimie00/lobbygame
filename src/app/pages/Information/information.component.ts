@@ -2,11 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {LanguageService} from "../../shared/services/language.service";
 import {ThemeService} from "../../shared/services/theme.service";
 import {AudioService} from "../../shared/services/audio.service";
-
-interface Topic {
-  title: string;
-  description: string;
-}
+import {Topic} from "../../shared/models/topic";
 
 @Component({
   selector: 'app-information',

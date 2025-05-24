@@ -4,7 +4,11 @@ export interface Lobby {
   ownerName: string;
   ownerId: string;
   players: string[];
+  playerNames: string[];
   spectators: string[];
+  spectatorNames: string[];
+  bannedPlayers: string[];
+  bannedPlayerNames: string[];
   status: string;
   maxRounds: number;
   minPlayers: number;
@@ -16,9 +20,5 @@ export interface Lobby {
   password?:string;
   private:boolean;
   allowSpectators: boolean;
-  playerNames: string[];
-  spectatorNames: string[];
-  bannedPlayers: string[];
-  bannedPlayerNames: string[];
 
 }

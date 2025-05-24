@@ -3,7 +3,7 @@ import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {firstValueFrom, Observable, shareReplay} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {Lobby} from '../models/lobby.model';
-import {User} from '../models/user.model';
+import {User} from '../models/user';
 import {RPSGame} from "../models/games/games.rps.gameplaydata.model";
 import {Game} from "../models/game.model";
 import {arrayUnion, arrayRemove, writeBatch, collection, doc} from '@angular/fire/firestore';
@@ -433,9 +433,7 @@ export class LobbyService {
         ...lobbyData,
         id: lobbyId  // Megőrizzük az eredeti ID-t
       })
-      .then(() => {
-        console.log(`Lobby ${lobbyId} successfully updated`);
-      })
+      .then()
       .catch(error => {
         console.error('Error updating lobby:', error);
         throw error;

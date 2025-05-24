@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
 import {IonModal} from '@ionic/angular';
 import {LobbyService} from "../../../shared/services/lobby.service";
-import {User} from "../../../shared/models/user.model";
+import {User} from "../../../shared/models/user";
 import {SubscriptionTrackerService} from "../../../shared/services/subscriptionTracker.service";
 import {distinctUntilChanged, Subscription} from "rxjs";
 import {LanguageService} from "../../../shared/services/language.service";
@@ -113,11 +113,7 @@ export class LobbyPlayersManagingModalComponent implements OnInit, OnDestroy {
   }
 
   copyToClipboard(text: string): void {
-    navigator.clipboard.writeText(text).then(() => {
-      console.log('Text copied to clipboard:', text);
-    }).catch(err => {
-      console.error('Failed to copy text:', err);
-    });
+    navigator.clipboard.writeText(text)
   }
 
   addBot() {

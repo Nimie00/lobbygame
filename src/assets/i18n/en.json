@@ -183,7 +183,7 @@
   "INVALID_NUMBER_OF_USERS_LITTLE": "There are too few players in the lobby to start the game",
   "INVALID_NUMBER_OF_USERS_LOT": "There are too many players in the lobby to start the game",
   "NO_TIME_BAR": "No time bar on the timeline",
-  "ADD_BOT": "Add AI player",
+  "ADD_BOT": "Add computer controlled player",
   "CANT_CHANGE_WHILE_IN_LOBBY": "Cannot modify the profile while in a lobby / game or when spectating a game",
   "BACK_TO_LOBBY": "Return to lobbies",
   "BACK_TO_REPLAY": "Watch replay of the game",
@@ -230,5 +230,17 @@
   "EMPTY_DECK": "Empty",
   "DRAW_PILE": "Draw pile",
   "DISCARD_PILE": "Played cards",
-  "NUMBER_OF_CARDS": "Number of cards"
+  "NUMBER_OF_CARDS": "Number of cards",
+  "PLACEMENT": "Placement",
+  "GAME_ENDED": "The game ended",
+  "YOUR_POSITION": "Your position in the game",
+  "PLUS4CARDS_PLAYED": "Plus 4 cards played during the game",
+  "ROUNDS_PLAYED": "Rounds played (each decision by a player counts as a different round)",
+  "MOST_CARDS_PULLED": "Most cards drawn at the same time",
+  "TOTAL_DRAWN": "Number of cards drawn by you",
+  "NUMBER_OF_CARDS_PLAYED": "Number of cards played by you",
+  "GAME_TYPE": "Game type",
+  "HOUR": "hour",
+  "MINUTE": "minute",
+  "SECOND": "second"
 }

@@ -17,13 +17,16 @@ export class overallGameService {
 
     if (!this.gameplayCache$[cacheKey]) {
       this.gameplayCache$[cacheKey] = this.firestore
-        .collection<RPSGame>('gameplay', ref => ref.where('status', '==', 'ended').where('players', 'array-contains', playerId)
-        )
-        .snapshotChanges()
+        .collection<RPSGame>('gameplay', ref =>
+          ref
+            .where('status', '==', 'ended')
+            .where('players', 'array-contains', playerId)
+            .orderBy('startedAt', 'desc')
+        ).snapshotChanges()
         .pipe(
           map(actions => {
             return actions.map(a => {
-              const data = a.payload.doc.data() as RPSGame;
+              const data = a.payload.doc.data();
               const id = a.payload.doc.id;
 
               // Konvertáljuk a timestamp mezőket Date típusúvá

@@ -230,5 +230,18 @@
   "EMPTY_DECK": "Elfogyott",
   "DRAW_PILE": "Húzó pakli",
   "DISCARD_PILE": "Kijátszott kártyák",
-  "NUMBER_OF_CARDS": "Kártyák száma"
+  "NUMBER_OF_CARDS": "Kártyák száma",
+  "PLACEMENT": "Helyezés",
+  "GAME_ENDED": "A játék véget ért",
+  "YOUR_POSITION": "A helyezésed a játékban",
+  "PLUS4CARDS_PLAYED": "Plusz 4-es kártyák kijátsztva a játék folyamán",
+  "ROUNDS_PLAYED": "Körök száma (egy játékos választása egy körnek számít)",
+  "MOST_CARDS_PULLED": "Legtöbb húzott lap egyszerre",
+  "TOTAL_DRAWN": "Az általad felhúzott kártyák száma",
+  "NUMBER_OF_CARDS_PLAYED": "Az általad kijátszott kártyák száma",
+  "GAME_TYPE": "Játék típusa",
+  "HOUR": "óra",
+  "HOURS": "óra",
+  "MINUTE": "perc",
+  "SECOND": "másodperc"
 }

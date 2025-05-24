@@ -103,13 +103,7 @@ export class LanguageService {
       if (!this.translationReloadAttempted[currentLang] && false) {
         this.translationReloadAttempted[currentLang] = true;
         this.clearCache();
-        this.loadTranslations(currentLang)
-          .then(() => {
-            console.log(`Tried to reload translations for ${currentLang}`);
-          })
-          .catch(err => {
-            console.error(`Error reloading translations for ${currentLang}:`, err);
-          });
+        this.loadTranslations(currentLang);
       }
       // Ha nincs fordítás, visszaadjuk a kulcsot
       return key;

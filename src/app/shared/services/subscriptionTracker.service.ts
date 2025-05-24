@@ -18,9 +18,6 @@ export class SubscriptionTrackerService {
 
     if (!isDuplicate) {
       this.subscriptionMap[category].push(subscription);
-      // console.log(`${category} active:`, this.getActiveCount(category), this.getAllActiveSubscriptions());
-    } else {
-     //  console.log(`Subscription already exists in ${category}`);
     }
   }
 
@@ -42,7 +39,6 @@ export class SubscriptionTrackerService {
       if (subIndex !== -1) {
         this.subscriptionMap[category][subIndex].unsubscribe();
         this.subscriptionMap[category].splice(subIndex, 1);
-       // console.log(`Unsubscribed ${category}/${name}. Active:`, this.getAllActiveSubscriptions());
       }
     }
   }
@@ -50,18 +46,14 @@ export class SubscriptionTrackerService {
   // Egy kategória összes subscription-jének leiratkozása
   unsubscribeCategory(category: string): void {
     if (this.subscriptionMap[category]) {
-     // console.log(this.subscriptionMap[category]);
       this.subscriptionMap[category].forEach(sub => sub.unsubscribe());
       this.subscriptionMap[category] = [];
-    //  console.log(`Unsubscribed category ${category}. Active:`, this.getAllActiveSubscriptions());
     }
   }
 
   // Minden subscription leiratkozása
   unsubscribeAll(): void {
-   //  console.log("Unsubing from all")
     Object.keys(this.subscriptionMap).forEach(category => {
-    //   console.log("Category: " + category)
       this.unsubscribeCategory(category);
     });
   }

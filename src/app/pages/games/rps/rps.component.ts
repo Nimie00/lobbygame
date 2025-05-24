@@ -10,7 +10,7 @@ import {LanguageService} from "../../../shared/services/language.service";
 import {RPSGame} from "../../../shared/models/games/games.rps.gameplaydata.model";
 import {ProcessedRound} from "../../../shared/models/ProcessedRound";
 import {RoundData} from "../../../shared/models/RoundData";
-import {User} from "../../../shared/models/user.model";
+import {User} from "../../../shared/models/user";
 import {distinctUntilChanged, interval, Subscription, take} from "rxjs";
 import {AudioService} from "../../../shared/services/audio.service";
 import {
@@ -581,7 +581,7 @@ export class RpsComponent implements OnInit, OnDestroy {
     }
   }
 
-  private evaluateRound(): Promise<void> {
+  private evaluateRound() {
     if (!this.playerChoice || !this.opponentChoice) return;
 
     const matchup = `${this.playerChoice}:${this.opponentChoice}`;

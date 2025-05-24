@@ -5,9 +5,11 @@ import {
   ElementRef,
   HostListener,
   OnDestroy,
-  OnInit, QueryList,
+  OnInit,
+  QueryList,
   Renderer2,
-  ViewChild, ViewChildren
+  ViewChild,
+  ViewChildren
 } from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {SubscriptionTrackerService} from "../../../shared/services/subscriptionTracker.service";
@@ -15,13 +17,14 @@ import {AuthService} from "../../../shared/services/auth.service";
 import {debounceTime, filter} from "rxjs/operators";
 import {LanguageService} from "../../../shared/services/language.service";
 import {CARDGame} from "../../../shared/models/games/games.card.gameplaydata.model";
-import {User} from "../../../shared/models/user.model";
+import {User} from "../../../shared/models/user";
 import {distinctUntilChanged, Subscription, take} from "rxjs";
 import {AudioService} from "../../../shared/services/audio.service";
 import {CardService} from "../../../shared/services/game-services/card.service";
 import {CardPlayer} from "../../../shared/models/games/cardPlayer";
 import {Card} from "../../../shared/models/games/card.model";
 import {AlertService} from "../../../shared/services/alert.service";
+import {PlayerAnimation} from "../../../shared/models/playerAnimation";
 
 
 @Component({
@@ -30,8 +33,6 @@ import {AlertService} from "../../../shared/services/alert.service";
   styleUrls: ['./card.component.scss'],
   animations: []
 })
-
-//TODO: Csak olyan plus2 kártyát rakhatsz, aminek a színe megegyezik a plus4 színével! lehet plus4-re kiválasztani +2-t ha nem ugyanaz a szín.
 
 
 export class CardComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -54,18 +55,22 @@ export class CardComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('gridContainer') gridContainer!: ElementRef;
   @ViewChildren('cell') cells!: QueryList<ElementRef>;
 
+  totalPlus4s = 0;
+  totalRounds = 0;
+  maxDrawnInRound = 0;
+  gameDuration = '';
+
 
   readonly POSITIONS = {
-    2: [2,8],
-    3: [3,4,8],
-    4: [3,4,6,7],
-    5: [2,3,4,6,8],
-    6: [2,3,4,6,7,8],
-    7: [2,3,4,6,7,8,9],
-    8: [1,2,3,4,6,7,8,9]
+    2: [2, 8],
+    3: [3, 4, 8],
+    4: [3, 4, 6, 7],
+    5: [2, 3, 4, 6, 8],
+    6: [2, 3, 4, 6, 7, 8],
+    7: [2, 3, 4, 6, 7, 8, 9],
+    8: [1, 2, 3, 4, 6, 7, 8, 9]
   };
-
-
+  animations: { [playerId: string]: PlayerAnimation } = {};
 
 
   constructor(
@@ -79,7 +84,6 @@ export class CardComponent implements OnInit, OnDestroy, AfterViewInit {
     private audioService: AudioService,
     protected languageService: LanguageService,
     private AlertService: AlertService,
-
   ) {
     this.checkMobile();
     window.addEventListener('resize', () => {
@@ -88,8 +92,6 @@ export class CardComponent implements OnInit, OnDestroy, AfterViewInit {
     });
     this.lobbyId = this.route.snapshot.paramMap.get('lobbyId') || '';
   }
-
-
 
 
   async ngOnInit() {
@@ -116,6 +118,9 @@ export class CardComponent implements OnInit, OnDestroy, AfterViewInit {
               if (this.currentUser.id === this.game.ownerId) {
                 await this.handleBotActions(this.game.currentPlayer);
               }
+            }
+            if (this.gameEnded) {
+              this.calculateStats();
             }
           },
           error: err => console.error('Game state error: ', err)
@@ -152,7 +157,7 @@ export class CardComponent implements OnInit, OnDestroy, AfterViewInit {
 
   get displayedPositions(): number[] {
     const activePositions = this.POSITIONS[this.players.length] || [];
-    return this.isMobile ? [5, ...activePositions] : [1,2,3,4,5,6,7,8,9];
+    return this.isMobile ? [5, ...activePositions] : [1, 2, 3, 4, 5, 6, 7, 8, 9];
   }
 
   getGridRow(position: number): string {
@@ -172,7 +177,7 @@ export class CardComponent implements OnInit, OnDestroy, AfterViewInit {
   private initializeGame() {
 
     this.players = this.game.players.map((id, index) => ({
-      id:id,
+      id: id,
       name: this.game!.playerNames[index],
       cards: this.game!.hands[id] || []
     }));
@@ -189,21 +194,90 @@ export class CardComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @HostListener('window:resize')
   onResize() {
-    if(this.isMobile) {
+    if (this.isMobile) {
       const container = this.gridContainer.nativeElement;
       const viewportHeight = window.innerHeight;
       container.style.height = `${viewportHeight - 100}px`;
     }
   }
 
-  async onDrawCard(id: string) {
+  calculateStats() {
+    const plus4Key = ['played-red_plus4', 'played-yellow_plus4', 'played-blue_plus4', 'played-green_plus4'];
+
+    const roundsArray = Object.values(this.game.rounds);
+    this.totalRounds = roundsArray.length;
+
+    let maxDrawn = 0;
+    let plus4Count = 0;
+
+    for (const round of roundsArray) {
+      const choiceEntries = Object.values(round.choices);
+      const entries = Object.values(round.choices);
+
+      const allChoices = entries.flatMap(e =>
+        Array.isArray(e.choice) ? e.choice : [e.choice]
+      );
+
+      const drawsThisRound = allChoices.filter(c => c.startsWith('drawn-')).length;
+      maxDrawn = Math.max(maxDrawn, drawsThisRound);
+
+
+      plus4Count += choiceEntries
+        .filter(c => plus4Key.includes(c.choice))
+        .length;
+    }
+
+    this.maxDrawnInRound = maxDrawn;
+    this.totalPlus4s = plus4Count;
+
+    const startTs = this.game.startedAt as any
+    const endTs = this.game.endedAt as any
+
+    const startDate = startTs.toDate();
+    const endDate = endTs.toDate();
+
+    let diffMs = endDate.getTime() - startDate.getTime();
+
+    const msYear = 1000 * 60 * 60 * 24 * 365;
+    const years = Math.floor(diffMs / msYear);
+    diffMs -= years * msYear;
+
+    const msDay = 1000 * 60 * 60 * 24;
+    const days = Math.floor(diffMs / msDay);
+    diffMs -= days * msDay;
+
+    const msHour = 1000 * 60 * 60;
+    const hours = Math.floor(diffMs / msHour);
+    diffMs -= hours * msHour;
+
+    const msMin = 1000 * 60;
+    const mins = Math.floor(diffMs / msMin);
+    diffMs -= mins * msMin;
+
+    const secs = Math.floor(diffMs / 1000);
+
+    this.gameDuration =
+      hours + ' : ' +
+      mins + ' : ' +
+      secs;
+  }
+
+  async onDrawCard(playerId: string) {
     if (this.isCurrentPlayer && this.drawPile.length > 0) {
       const card = this.drawPile.shift();
       if (card) {
         this.currentPlayer.cards.push(card);
         this.nextPlayer();
         try {
-          await this.cardService.drawCard(this.lobbyId, id);
+          if (!this.animations[playerId]) {
+            this.animations[playerId] = {};
+          }
+          this.animations[playerId].drawCount = Math.max(this.game.gameModifiers?.pendingDraws, 1);
+          setTimeout(() => {
+            delete this.animations[playerId].drawCount;
+          }, 800);
+
+          await this.cardService.drawCard(this.lobbyId, playerId);
         } catch (error) {
           this.showError(error.message);
         }
@@ -227,12 +301,21 @@ export class CardComponent implements OnInit, OnDestroy, AfterViewInit {
         this.discardPile.unshift(playedCard);
         this.nextPlayer();
 
-        if(playerId.includes('#')) {
+        if (playerId.includes('#')) {
           selectedColor = this.determineBestColor(playerId)
         }
 
         try {
-          console.log("ID:", playerId);
+          if (!this.animations[playerId]) {
+            this.animations[playerId] = {};
+          }
+
+          this.animations[playerId].playedCard = playedCard;
+
+          setTimeout(() => {
+            delete this.animations[playerId].playedCard;
+          }, 800);
+
           await this.cardService.playCard(
             this.lobbyId, playerId, cardIndex, selectedColor);
           selectedColor = null;
@@ -258,7 +341,6 @@ export class CardComponent implements OnInit, OnDestroy, AfterViewInit {
     return cell === 5 || this.shouldShowPlayer(cell);
   }
 
-
   shouldShowPlayer(position: number): boolean {
     const positions = this.POSITIONS[this.players.length];
     const player: CardPlayer = this.players[positions.indexOf(position)];
@@ -280,7 +362,10 @@ export class CardComponent implements OnInit, OnDestroy, AfterViewInit {
     const pending = this.game.gameModifiers?.pendingDraws;
     const topCard = this.discardPile[this.discardPile.length - 1];
     if (pending > 0) {
-      return topCard && ['plus2', 'plus4'].includes(playedCard.symbol);
+      return topCard
+        && (playedCard.symbol === 'plus4'
+          || (topCard.symbol === 'plus4' && playedCard.symbol === 'plus2' && playedCard.color === topCard.color)
+          || (topCard.symbol === 'plus2' && playedCard.symbol === 'plus2'));
     }
 
     return !topCard ||
@@ -289,8 +374,16 @@ export class CardComponent implements OnInit, OnDestroy, AfterViewInit {
       ['change', 'plus4'].includes(playedCard.symbol);
   }
 
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   private async handleBotActions(botId: string) {
-    if(this.game.currentPlayer.includes('#')) {
+    if (this.game.currentPlayer.includes('#')) {
+      const baseDelay = Math.floor(Math.random() * (600 - 16 + 10)) + 1000;
+
+      await this.delay(baseDelay);
+
       let hand: Card[] = this.game.hands[this.game.currentPlayer];
       let maxEffectiveness = -Infinity;
       let selectedCardIndex = -1;
@@ -318,55 +411,50 @@ export class CardComponent implements OnInit, OnDestroy, AfterViewInit {
       if (decidedAction === "play" && selectedCardIndex !== -1) {
         await this.onPlayCard(selectedCardIndex, botId);
       } else {
-       await this.onDrawCard(botId);
+        await this.onDrawCard(botId);
       }
     }
   }
-
 
   private calculateEffectiveness(card: Card, botId: string): number {
     const filteredPlayers: string[] = this.game.players.filter(player => !this.game.placements.includes(player));
     const currentIndex: number = filteredPlayers.indexOf(botId);
     const nextIndex: number = (currentIndex + 1) % filteredPlayers.length;
     const nextPlayer: string = filteredPlayers[nextIndex];
-    const ownHand = this.game.hands[botId];
+    const botsOwnHand: Card[] = this.game.hands[botId];
 
     const pendingDraws = this.game.gameModifiers.pendingDraws || 0;
-    const currentPlayerHand = this.game.hands[this.game.currentPlayer];
-    const nextPlayerHand = this.game.hands[nextPlayer];
+    const currentPlayerHand: Card[] = this.game.hands[this.game.currentPlayer];
+    const nextPlayerHandSize: number = this.game.hands[nextPlayer].length;
     const topCard = this.discardPile[this.discardPile.length - 1];
 
     const isPlayable = this.isCardPlayable(card, topCard, pendingDraws);
-    if (!isPlayable) return -1;
+    if (!isPlayable) return -100;
 
     let effectiveness = 0;
 
     if (pendingDraws > 0) {
-      return this.handlePendingDrawsCase(card, nextPlayerHand.length);
+      return this.handlePendingDrawsCase(card, nextPlayerHandSize);
     }
 
-    switch(card.symbol) {
+    switch (card.symbol) {
       case 'plus2':
-        console.log("plus2");
-        effectiveness = 2.0 + (nextPlayerHand.length * 0.15);
+        effectiveness = 2.0 + (nextPlayerHandSize * 0.15);
         break;
       case 'change':
       case 'plus4': {
-        const chosenColor = this.determineBestColor(botId);
-        effectiveness = 2.0 + (ownHand.filter(c => c.color === chosenColor).length * 0.3);
+        const chosenColor: string = this.determineBestColor(botId);
+        effectiveness = 2.0 + (botsOwnHand.filter(c => c.color === chosenColor).length * 0.3);
         break;
       }
       case 'skip':
-        console.log("skip");
         effectiveness = 1.8 - (currentPlayerHand.length * 0.1);
         break;
       case 'reverse':
-        console.log("reverse");
         effectiveness = 1.5 + (this.game.players.length * 0.1);
         break;
       default:
-        console.log("numberCard");
-        effectiveness = this.handleNumberCard(card, nextPlayerHand.length);
+        effectiveness = this.handleNumberCard(card, nextPlayerHandSize);
     }
 
     if (card.color === 'black') {
@@ -375,26 +463,22 @@ export class CardComponent implements OnInit, OnDestroy, AfterViewInit {
       effectiveness += this.getColorAdvantage(card.color, nextPlayer);
     }
 
-    return Math.round(effectiveness * 100) / 100; // 2 tizedes pontosság
+    return Math.round(effectiveness * 100) / 100;
   }
 
   private isCardPlayable(card: Card, topCard: Card, pendingDraws: number): boolean {
-    if (pendingDraws > 0){
-      if('plus4' === card.symbol){
+    if (pendingDraws > 0) {
+      if ('plus4' === card.symbol) {
         return true
       } else {
         return card.symbol === 'plus2' && topCard.color === card.color;
       }
     }
-
-
-    return card.color === 'black' ||
-      card.color === topCard.color ||
-      card.symbol === topCard.symbol;
+    return card.color === 'black' || (card.color === topCard.color || card.symbol === topCard.symbol);
   }
 
   private handlePendingDrawsCase(card: Card, nextPlayerHandSize: number): number {
-    const baseValue = card.symbol === 'plus4' ? 3.0 : 2.5;
+    const baseValue: number = card.symbol === 'plus4' ? 23 : 30;
     return baseValue + (nextPlayerHandSize * 0.25);
   }
 
@@ -446,6 +530,23 @@ export class CardComponent implements OnInit, OnDestroy, AfterViewInit {
     const colorCount = this.game.hands[playerId]
       .filter(c => c.color === color).length;
     return (5 - colorCount) * 0.1;
+  }
+
+  calculatePlacement() {
+    let number = this.placements.indexOf(this.currentUser.id) + 1;
+    if (number === 0) {
+      number = this.placements.length + 1;
+    }
+    return number;
+  }
+
+
+  async goToLobby() {
+    await this.router.navigate(['/lobbies/']);
+  }
+
+  async goToWatchingReplay() {
+    await this.router.navigate(['/lobbies/' + 'replays:' + this.lobbyId]);
   }
 
 }

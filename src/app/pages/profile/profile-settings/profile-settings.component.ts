@@ -1,7 +1,7 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {AuthService} from '../../../shared/services/auth.service';
 import {SubscriptionTrackerService} from "../../../shared/services/subscriptionTracker.service";
-import {User} from "../../../shared/models/user.model";
+import {User} from "../../../shared/models/user";
 import {HttpClient} from "@angular/common/http";
 import {LanguageService} from "../../../shared/services/language.service";
 import {Router} from "@angular/router";

@@ -1,6 +1,5 @@
 <ion-content>
   <ion-card class="Game">
-
     <ng-container *ngIf="game && game.gameType === 'RPS'">
       <app-rps-spectate
         [playerChoices]="playerChoices"
@@ -25,7 +24,6 @@
     </ng-container>
 
   </ion-card>
-
     <div class="timeline-container">
       <div #visualization id="visualization"></div>
       <div *ngIf="barId === null">
@@ -76,12 +74,8 @@
           </span>
         </ion-button>
 
-        <ion-label *ngIf="!playingAnimations">{{ "SKIP_ANIMATIONS" | language }}</ion-label>
-        <ion-checkbox [(ngModel)]="skipAnimations" *ngIf="!playingAnimations"></ion-checkbox>
+        <ion-label *ngIf="!playingAnimations && game.gameType ==='RPS' ">{{ "SKIP_ANIMATIONS" | language }}</ion-label>
+        <ion-checkbox [(ngModel)]="skipAnimations" *ngIf="!playingAnimations && game.gameType ==='RPS' "></ion-checkbox>
       </div>
     </div>
-    <div>
-
-    </div>
-    <ion-toolbar></ion-toolbar>
 </ion-content>

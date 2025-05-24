@@ -57,13 +57,15 @@ export class CardService {
         discardPile = [topDiscard];
       }
 
+      let realDrawCount = drawCount;
       if (deck.length < drawCount) {
-        throw new Error(`Nincs elég kártya (szükséges: ${drawCount}, elérhető: ${deck.length})`);
+        // throw new Error(`Nincs elég kártya (szükséges: ${drawCount}, elérhető: ${deck.length})`);
+        realDrawCount = deck.length;
       }
 
 
-      const drawnCards = deck.slice(0, drawCount);
-      const newDeck = deck.slice(drawCount);
+      const drawnCards = deck.slice(0, realDrawCount);
+      const newDeck = deck.slice(realDrawCount);
 
 
       const currentRound = gameData.currentRound || 0;
@@ -110,10 +112,6 @@ export class CardService {
 
       return drawnCards;
     });
-  }
-
-  private logDeckState(deck: Card[]) {
-    return deck.map(c => this.cardToCode(c)).join(',');
   }
 
   async playCard(lobbyId: string, userId: string, cardIndex: number, selectedColor?: string): Promise<void> {
@@ -406,6 +404,12 @@ export class CardService {
     };
     return CardData;
   }
+
+
+  private logDeckState(deck: Card[]) {
+    return deck.map(c => this.cardToCode(c)).join(',');
+  }
+
 
   private cardToCode(card: Card): string {
     const colorCode = card.color[0].toUpperCase();

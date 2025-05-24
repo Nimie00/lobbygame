@@ -3,7 +3,7 @@ import {IonModal} from '@ionic/angular';
 import {CreateLobbyData} from '../../../shared/models/create-lobby.interface';
 import {LobbyService} from "../../../shared/services/lobby.service";
 import {Lobby} from "../../../shared/models/lobby.model";
-import {User} from "../../../shared/models/user.model";
+import {User} from "../../../shared/models/user";
 import {SubscriptionTrackerService} from "../../../shared/services/subscriptionTracker.service";
 import {Game} from "../../../shared/models/game.model";
 import {LanguageService} from "../../../shared/services/language.service";
@@ -199,8 +199,6 @@ export class CreateLobbyModalComponent implements OnInit, OnDestroy {
     }
     this.minGAMENumber = this.selectedGame.minPlayers;
     this.maxGAMENumber = this.selectedGame.maxPlayers;
-    console.log("this.maxGAMENumber: ", this.maxGAMENumber)
-    console.log("this.minPlayers: ", this.minPlayers)
 
     let minNumber= Math.max(this.minPlayers, this.minGAMENumber, 2);
     let maxNumber= Math.min(this.maxPlayers, this.maxGAMENumber, 8);
@@ -257,10 +255,8 @@ export class CreateLobbyModalComponent implements OnInit, OnDestroy {
     try {
       if (this.lobbyId) {
         await this.lobbyService.updateLobby(this.lobbyId, lobbyData);
-        console.log('Lobby updated with ID:', this.lobbyId);
       } else {
-        const docRef = await this.lobbyService.createLobby(lobbyData, this.currentUser.id);
-        console.log('Lobby created with ID:', docRef.id);
+        await this.lobbyService.createLobby(lobbyData, this.currentUser.id);
       }
 
       setTimeout(() => {

@@ -2,7 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {AuthService} from './shared/services/auth.service';
 import {Router} from '@angular/router';
 import {SubscriptionTrackerService} from "./shared/services/subscriptionTracker.service";
-import {User} from "./shared/models/user.model";
+import {User} from "./shared/models/user";
 import {Lobby} from "./shared/models/lobby.model";
 import {distinctUntilChanged, Observable, Subject, Subscription, tap} from "rxjs";
 import {LanguageService} from "./shared/services/language.service";
@@ -76,9 +76,7 @@ export class AppComponent implements OnInit, OnDestroy {
           user.playingGame,
           user.inLobby,
           user.inGame !== null
-        ).then(() => {
-          console.log("Countdown elindult");
-        });
+        )
       }
     });
 

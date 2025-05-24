@@ -10,7 +10,7 @@
            [style.grid-row]="getGridRow(position)"
            [style.grid-column]="getGridColumn(position)">
 
-        <ng-container *ngIf="position === 5">
+        <ng-container *ngIf="position === 5 && !gameEnded">
           <div class="decks-container">
             <div class="deck-with-indicator">
               <app-draw-deck
@@ -18,12 +18,13 @@
                 [currentPlayerId]="game?.currentPlayer"
                 [currentUserId]="currentUser?.id"
                 [gameEnded]="gameEnded"
+                [spectate] = "false"
                 (draw)="onDrawCard(currentUser?.id)">
               </app-draw-deck>
 
               <div *ngIf="game?.gameModifiers?.pendingDraws" class="pending-draws-container">
                 <div class="pending-draws">
-                  <span class="draw-count">+{{game.gameModifiers.pendingDraws}} </span>
+                  <span class="draw-count">+{{ game.gameModifiers.pendingDraws }} </span>
                   <ion-icon name="tablet-portrait"></ion-icon>
                 </div>
               </div>
@@ -31,17 +32,72 @@
             <app-discard-deck
               [topCard]="game?.discardPile[0]"
               [stackSize]="game?.discardPile.length"
-              [discardPile]="game?.discardPile">
+              [discardPile]="game?.discardPile"
+              [spectate] = "false">
             </app-discard-deck>
           </div>
         </ng-container>
+
+        <ng-container *ngIf="position === 5 && gameEnded" class="end-screen">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <ion-label>{{ "GAME_ENDED" | language }}</ion-label>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <ion-label>🏆 {{ "YOUR_POSITION" | language }}:</ion-label>
+              </div>
+              <ion-label class="stat-card-content">{{ calculatePlacement() }}.</ion-label>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <ion-label>{{ "PLUS4CARDS_PLAYED" | language }}:</ion-label>
+              </div>
+              <ion-label class="stat-card-content">{{ totalPlus4s }}</ion-label>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <ion-label>{{ "ROUNDS_PLAYED" | language }}:</ion-label>
+              </div>
+              <ion-label class="stat-card-content">{{ totalRounds }}</ion-label>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <ion-label class="stat-card-content">{{ "MOST_CARDS_PULLED" | language }}:</ion-label>
+              </div>
+              <ion-label>{{ maxDrawnInRound }}</ion-label>
+              <br>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <ion-label>{{ "GAME_DURATION" | language }}:</ion-label>
+              </div>
+              <ion-label class="stat-card-content">{{ gameDuration }}</ion-label>
+            </div>
+          </div>
+
+
+          <div class="end-buttons">
+            <ion-button expand="block" class="replay-button" (click)="goToWatchingReplay()">
+              {{ 'BACK_TO_REPLAY' | language }}
+            </ion-button>
+            <ion-button expand="block" class="return-button" (click)="goToLobby()">
+              {{ 'BACK_TO_LOBBY' | language }}
+            </ion-button>
+          </div>
+        </ng-container>
+
 
         <app-player-hand *ngIf="position !== 5 && getPlayerByCell(position) as player"
                          [currentUser]="currentUser"
                          [discardPileTopCard]="game.discardPile[0]"
                          [player]="getPlayerByCell(position)"
                          [PlusDraws]="game.gameModifiers?.pendingDraws"
-                         [isCurrent]="isCurrentPlayer(getPlayerByCell(position))"
+                         [isCurrent]="!game.gameEnded && isCurrentPlayer(getPlayerByCell(position))"
+                         [animations]="animations"
                          (playCard)="onPlayCard($event, getPlayerByCell(position).id)"
                          [gameEnded]="gameEnded"
                          [placements]="placements"
@@ -51,10 +107,6 @@
     </div>
   </ng-container>
 </ion-content>
-
-
-
-
 
 
 <ng-container *ngIf="!game">

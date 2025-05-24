@@ -162,8 +162,6 @@ export const routes: Routes = [
     AngularFirestoreModule,
     CommonModule,
     HttpClientModule,
-    BrowserAnimationsModule,
-
     NgOptimizedImage,
     IonicModule.forRoot(),
     RouterModule.forRoot(routes),

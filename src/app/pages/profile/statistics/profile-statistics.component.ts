@@ -1,11 +1,12 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {SubscriptionTrackerService} from "../../../shared/services/subscriptionTracker.service";
-import {User} from "../../../shared/models/user.model";
+import {User} from "../../../shared/models/user";
 import {LanguageService} from "../../../shared/services/language.service";
 import {RPSGame} from "../../../shared/models/games/games.rps.gameplaydata.model";
 import {overallGameService} from "../../../shared/services/game-services/overallGame.service";
 import {firstValueFrom} from "rxjs";
 import {Router} from "@angular/router";
+import {CARDGame} from "../../../shared/models/games/games.card.gameplaydata.model";
 
 @Component({
   selector: 'app-profile-statistics',
@@ -19,7 +20,7 @@ export class ProfileStatisticsComponent implements OnInit, OnDestroy {
   @Input() user: User;
   selectedSegment = 'overall';
   games: RPSGame[];
-  displayedGames: RPSGame[] = [];
+  displayedGames = [];
   currentPage = 0;
   pageSize = 5;
   totalPages = 0;
@@ -34,13 +35,18 @@ export class ProfileStatisticsComponent implements OnInit, OnDestroy {
     totalDraws: 0,
   };
 
-  gameStats = {
-    totalRounds:0,
-    result:"LOSE",
-    duration:0,
-    roundsWon:0,
-    roundsLost:0,
-    roundsDrawn:0
+  gameStats: {
+    duration: number;
+    result: string;
+    totalDrawn: number;
+    roundsWon: number;
+    roundsDrawn: number;
+    maxDrawnInRound: number;
+    totalPlayed: number;
+    totalRounds: number;
+    totalPlus4s: number;
+    roundsLost: number
+    placement: number,
   };
 
 
@@ -52,8 +58,8 @@ export class ProfileStatisticsComponent implements OnInit, OnDestroy {
   ) {
   }
 
-  get selectedGame(): RPSGame | undefined {
-    return this.games.find(g => g.lobbyId === this.selectedSegment);
+  get selectedGame(): any | undefined {
+    return this.games.find((g: { lobbyId: string; }) => g.lobbyId === this.selectedSegment);
   }
 
 
@@ -69,7 +75,6 @@ export class ProfileStatisticsComponent implements OnInit, OnDestroy {
 
   async calculateOverallStats() {
     this.overallStats.totalGames = this.games.length;
-
 
     this.overallStats.totalWins = this.games.filter(
       (game) => game.winner === this.user.id).length;
@@ -94,7 +99,7 @@ export class ProfileStatisticsComponent implements OnInit, OnDestroy {
     this.overallStats.avgDuration = totalDuration / (this.overallStats.totalGames != 0 ? this.overallStats.totalGames : 1);
   }
 
-  getGameStats(game: RPSGame) {
+  getRPSGameStats(game: RPSGame) {
     const userId = this.user.id;
     const rounds = Object.values(game.rounds);
 
@@ -110,10 +115,65 @@ export class ProfileStatisticsComponent implements OnInit, OnDestroy {
           ? game.endedAt.getTime() - game.startedAt.getTime()
           : 0,
       result: game.winner === userId
-        ? `${this.languageService.translate('VICTORY')}`
+        ? `VICTORY`
         : game.winner !== '#Drew'
-          ? `${this.languageService.translate('LOSE')}`
-          : `${this.languageService.translate('DRAW')}`,
+          ? `LOSE`
+          : `DRAW`,
+      totalPlus4s: null,
+      totalDrawn: null,
+      maxDrawnInRound: null,
+      totalPlayed: null,
+      placement: null,
+    };
+
+  }
+
+  getCARDGameStats(game: CARDGame) {
+    const userId = this.user.id;
+    const rounds = Object.values(game.rounds);
+
+    let totalPlus4s = 0;
+    let maxDrawnInRound = 0;
+    let totalDrawn = 0;
+    let totalPlayed = 0;
+
+    rounds.forEach(round => {
+
+      const allChoices: string[] = Object.values(round.choices)
+        .flatMap(c => Array.isArray(c.choice) ? c.choice : [c.choice]);
+
+      totalPlus4s += allChoices.filter(ch => ch === 'drawn-black_plus4').length;
+
+      const drawsThisRound = allChoices.filter(ch => ch.startsWith('drawn-')).length;
+      totalDrawn += drawsThisRound;
+      maxDrawnInRound = Math.max(maxDrawnInRound, drawsThisRound);
+
+      const playedThisRound = allChoices.filter(ch => ch.startsWith('played-')).length;
+      totalPlayed += playedThisRound;
+    });
+
+    const placement = game.placements.indexOf(userId) !== -1 ? game.placements.indexOf(userId) + 1 :  game.players.length;
+
+    return {
+      totalRounds: rounds.length,
+      totalPlus4s: totalPlus4s,
+      totalDrawn: totalDrawn,
+      maxDrawnInRound: maxDrawnInRound,
+      totalPlayed: totalPlayed,
+      duration:
+        game.startedAt && game.endedAt
+          ? game.endedAt.getTime() - game.startedAt.getTime()
+          : 0,
+      result:
+        game.winner === userId
+          ? 'VICTORY'
+          : game.winner === 'draw'
+            ? 'DRAW'
+            : 'LOSE',
+      roundsWon: 0,
+      roundsLost: 0,
+      roundsDrawn: 0,
+      placement: placement,
     };
   }
 
@@ -140,8 +200,10 @@ export class ProfileStatisticsComponent implements OnInit, OnDestroy {
 
   onSegmentChange() {
     if (this.selectedSegment === "overall") {
+    } else if(this.selectedGame.gameType === "RPS") {
+      this.gameStats = this.getRPSGameStats(this.selectedGame)
     } else {
-      this.gameStats = this.getGameStats(this.selectedGame)
+      this.gameStats = this.getCARDGameStats(this.selectedGame)
     }
   }
 
@@ -151,7 +213,7 @@ export class ProfileStatisticsComponent implements OnInit, OnDestroy {
   }
 
   async goToGamePage() {
-    await this.router.navigate(['/game/'+ this.selectedGame.gameType.toLowerCase() + this.selectedGame.lobbyId]);
+    await this.router.navigate(['/game/'+ this.selectedGame.gameType.toLowerCase() + '/'+ this.selectedGame.lobbyId]);
   }
 
   async goToWatchingReplay() {

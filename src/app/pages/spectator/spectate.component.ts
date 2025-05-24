@@ -8,7 +8,7 @@ import {LanguageService} from "../../shared/services/language.service";
 import {Replay} from "../../shared/models/replay";
 import {AudioService} from "../../shared/services/audio.service";
 import {take} from "rxjs";
-import {User} from "../../shared/models/user.model";
+import {User} from "../../shared/models/user";
 import {AuthService} from "../../shared/services/auth.service";
 import {CardPlayer} from "../../shared/models/games/cardPlayer";
 
@@ -518,8 +518,6 @@ export class SpectateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.timeline.setItems(this.items);
         this.timeline.redraw();
       }
-    } else {
-      console.log("Nincs játék vagy nincsenek benne még körök");
     }
   }
 
@@ -600,12 +598,8 @@ export class SpectateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.timeline = new Timeline(this.container, this.items, options);
     this.timeline.redraw();
 
-
-
-
     if (this.showCurrentTime) {
-      this.jumpToRealTime().then(() => {
-      });
+      this.jumpToRealTime();
     }
   }
 

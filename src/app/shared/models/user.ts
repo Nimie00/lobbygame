@@ -13,4 +13,5 @@ export interface User {
   xp:number;
   level: number;
   badges: string[];
+  xpForNextLevel: number;
 }

@@ -4,7 +4,7 @@ import {LobbyService} from '../../shared/services/lobby.service';
 import {AuthService} from '../../shared/services/auth.service';
 import {Lobby} from '../../shared/models/lobby.model';
 import {map} from "rxjs/operators";
-import {User} from "../../shared/models/user.model";
+import {User} from "../../shared/models/user";
 import {CreateLobbyModalComponent} from "./create-lobby-modal/create-lobby-modal.component";
 import {SubscriptionTrackerService} from "../../shared/services/subscriptionTracker.service";
 import {ModalService} from "../../shared/services/modal.service";
@@ -73,7 +73,6 @@ export class LobbiesComponent implements OnInit, OnDestroy {
 
   async loadAndFilterLobbies(): Promise<void> {
     await this.checkInLiveLobby();
-    console.log(this.listLive);
     await this.loadLobbies(this.userId, this.listLive);
   }
 
@@ -111,7 +110,6 @@ export class LobbiesComponent implements OnInit, OnDestroy {
       const terms = this.searchTerm.split(':');
       if (terms.length === 2) {
         const [key, value] = terms.map(t => t.trim());
-        console.log(key, value);
         if(key === "replays" && value.length > 0 && lobby.id === value) {
           return true;
         }
